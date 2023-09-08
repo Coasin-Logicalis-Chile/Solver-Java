@@ -1,0 +1,5 @@
+{"properties": [{
+  "name": "app.api.settings.cross-origin.urls",
+  "type": "java.lang.String",
+  "description": "A description for 'app.api.settings.cross-origin.urls'"
+}]}
