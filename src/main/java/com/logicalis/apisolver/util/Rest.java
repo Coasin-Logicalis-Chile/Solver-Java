@@ -11,6 +11,8 @@ import com.logicalis.apisolver.view.ScTaskRequest;
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.engine.jdbc.StreamUtils;
 import org.json.simple.JSONObject;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.*;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.scheduling.annotation.Async;
@@ -34,22 +36,25 @@ import java.nio.file.Paths;
 
 public class Rest {
 
-
     Util util = new Util();
     EndPointSN endPointSN = new EndPointSN();
     App app = new App();
 
+    @Autowired
+    @Qualifier("solverRestTemplate")
+    RestTemplate restTemplate;
+
     public RestTemplate restTemplateServiceNow() {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
+        //RestTemplate restTemplate = new RestTemplate();
+        this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
         return restTemplate;
 
     }
 
     public String responseByEndPoint(final String endPoint) {
-        RestTemplate restTemplate = new RestTemplate();
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
-        return restTemplate.getForObject(endPoint, String.class);
+        //RestTemplate restTemplate = new RestTemplate();
+        this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
+        return this.restTemplate.getForObject(endPoint, String.class);
 
     }
 
@@ -67,7 +72,7 @@ public class Rest {
             e.printStackTrace();
         }
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
 
@@ -82,7 +87,7 @@ public class Rest {
 
         try {
             HttpHeaders headers = new HttpHeaders();
-            RestTemplate restTemplate = new RestTemplate();
+            //RestTemplate restTemplate = new RestTemplate();
             String url = urlEndPoint;
             HttpMethod requestMethod = HttpMethod.POST;
             restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
@@ -128,7 +133,7 @@ public class Rest {
 
         try {
             HttpHeaders headers = new HttpHeaders();
-            RestTemplate restTemplate = new RestTemplate();
+            //RestTemplate restTemplate = new RestTemplate();
             String url = urlEndPoint;
             HttpMethod requestMethod = HttpMethod.POST;
             restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
@@ -268,7 +273,6 @@ public class Rest {
 
     public Journal addJournal(final String endPoint, Journal journal) {
 
-
         JournalRequest journalRequest = new JournalRequest();
         String createBy = "";
         if (journal.getCreateBy() != null)
@@ -286,7 +290,7 @@ public class Rest {
             e.printStackTrace();
         }
         HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
         String json = restTemplate.postForObject(uri, httpEntity, String.class);
         journal.setCreatedOn(util.parseJson(json, "result", "sys_created_on"));
@@ -322,7 +326,7 @@ public class Rest {
         json.put("knowledge", incident.getKnowledge());
         json.put("reasonPending", incident.getReasonPending());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
 //        incident.setIntegrationId(util.parseJson(json.toString(), "result", "sys_id"));
@@ -350,7 +354,7 @@ public class Rest {
         json.put("code", sysUser.getCode());
         json.put("integrationId", sysUser.getIntegrationId());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
         String search = "\"result\":";
@@ -377,7 +381,7 @@ public class Rest {
         json.put("short_description", scRequestItem.getShortDescription());
         json.put("state", scRequestItem.getState());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
         return scRequestItem;
@@ -409,7 +413,7 @@ public class Rest {
         json.put("closedBy", util.isNullIntegration(scTask.getClosedBy()));
         json.put("reasonPending", scTask.getReasonPending());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        RestTemplate restTemplate = new RestTemplate();
+        //RestTemplate restTemplate = new RestTemplate();
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(app.SNUser(), app.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
         String tag = "[ScTask]";

@@ -67,6 +67,9 @@ public class ScTaskController {
     private IScCategoryItemService scCategoryItemService;
     @Autowired
     private IConfigurationItemService configurationItemService;
+    @Autowired
+    Rest rest;
+
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -246,7 +249,7 @@ public class ScTaskController {
         long endTime = 0;
         String tag = "[ScTask] ";
         try {
-            Rest rest = new Rest();
+            //Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
