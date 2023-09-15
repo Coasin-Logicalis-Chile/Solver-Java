@@ -34,7 +34,7 @@ import java.nio.file.Paths;
 
 
 public class Rest {
-    private Util util = new Util();
+    public Util util = new Util();
 
     @Autowired
     @Qualifier("solverRestTemplate")
