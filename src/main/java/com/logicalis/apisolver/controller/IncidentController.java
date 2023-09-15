@@ -72,9 +72,10 @@ public class IncidentController {
     private IConfigurationItemService configurationItemService;
     @Autowired
     private ITaskSlaService taskSlaService;
-
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private Rest rest;
 
     Util util = new Util();
     App app = new App();
@@ -331,7 +332,6 @@ public class IncidentController {
         Incident currentIncident = incidentService.findById(id);
         Incident incidentUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         if (currentIncident == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -832,7 +832,6 @@ public class IncidentController {
         long endTime = 0;
         String tag = "[Incident] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -1051,7 +1050,6 @@ public class IncidentController {
         // objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -1276,7 +1274,6 @@ public class IncidentController {
         String tag = "[Incident] ";
 
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

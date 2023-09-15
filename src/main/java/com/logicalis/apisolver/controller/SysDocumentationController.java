@@ -39,9 +39,13 @@ public class SysDocumentationController {
     private ISysDocumentationService sysDocumentationService;
     @Autowired
     private IAPIExecutionStatusService statusService;
+    @Autowired
+    private Rest rest;
+
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
+
     @GetMapping("/sysDocumentations")
     public List<SysDocumentation> index() {
         return sysDocumentationService.findAll();
@@ -188,11 +192,9 @@ public class SysDocumentationController {
         long endTime = 0;
         String tag = "[SysDocumentation] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-
                 String result = rest.responseByEndPoint(endPointSN.SysDocumentation().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(endPointSN.SysDocumentation().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();

@@ -46,6 +46,8 @@ public class CiServiceController {
     private ISysUserService sysUserService;
     @Autowired
     private ISysGroupService sysGroupService;
+    @Autowired
+    private Rest rest;
 
     @GetMapping("/ci_services")
     public List<CiService> index() {
@@ -172,9 +174,7 @@ public class CiServiceController {
         long endTime = 0;
         String tag = "[CiService] ";
 
-
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

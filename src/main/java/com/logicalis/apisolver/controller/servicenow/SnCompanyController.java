@@ -43,6 +43,9 @@ public class SnCompanyController {
     private IAPIExecutionStatusService statusService;
     @Autowired
     private IDomainService domainService;
+    @Autowired
+    private Rest rest;
+
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
 
@@ -58,7 +61,6 @@ public class SnCompanyController {
         try {
             List<Domain> domains = domainService.findAll();
             System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Company());
             endTime = (System.currentTimeMillis() - startTime);

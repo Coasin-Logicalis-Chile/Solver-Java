@@ -41,6 +41,8 @@ public class CmnScheduleController {
     private IAPIExecutionStatusService statusService;
     @Autowired
     private IDomainService domainService;
+    @Autowired
+    private Rest rest;
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -167,7 +169,6 @@ public class CmnScheduleController {
         long endTime = 0;
         String tag = "[CmnSchedule] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.CmnSchedule());
             endTime = (System.currentTimeMillis() - startTime);

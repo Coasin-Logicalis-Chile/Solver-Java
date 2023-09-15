@@ -49,6 +49,9 @@ public class SysUserController {
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private Environment environment;
+    @Autowired
+    private Rest rest;
+
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -179,7 +182,6 @@ public class SysUserController {
         SysUser currentSysUser = new SysUser();
         SysUser sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         if (currentSysUser == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -274,7 +276,6 @@ public class SysUserController {
         SysUser currentSysUser = new SysUser();
         SysUser sysUserCurrent, sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         if (currentSysUser == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserSolver.getId().toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -302,7 +303,6 @@ public class SysUserController {
     @PutMapping("/sysUserCodeUpdate/{id}")
     public ResponseEntity<?> update(@RequestBody SysUserCode sysUserCode, @PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         SysUser sysUserCurrent = null;
         if (id == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));

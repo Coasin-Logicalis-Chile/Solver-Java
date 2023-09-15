@@ -52,6 +52,9 @@ public class SnAttachmentController {
     private IAPIExecutionStatusService statusService;
     @Autowired
     private Environment environment;
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -80,7 +83,6 @@ public class SnAttachmentController {
                     System.out.println(downloadFile.getAbsolutePath());
 
                 } else {
-                    Rest rest = new Rest();
                     RestTemplate restTemplate = rest.restTemplateServiceNow();
                     downloadFile = rest.responseFileByEndPointSO(attachment, restTemplate, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
                     attachment.setDownloadLink(downloadFile.getAbsolutePath());
@@ -142,7 +144,6 @@ public class SnAttachmentController {
                     System.out.println(downloadFile.getAbsolutePath());
 
                 } else {
-                    Rest rest = new Rest();
                     RestTemplate restTemplate = rest.restTemplateServiceNow();
                     downloadFile = rest.responseFileByEndPointSO(attachment, restTemplate, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
                     attachment.setDownloadLink(downloadFile.getAbsolutePath());
@@ -195,7 +196,6 @@ public class SnAttachmentController {
         String tag = "[Attachment] ";
         final InputStreamResource[] attachmentResource = {null};
         try {
-            Rest rest = new Rest();
             RestTemplate restTemplate = rest.restTemplateServiceNow();
             startTime = System.currentTimeMillis();
             Attachment attachment = attachmentService.findById(id);
@@ -258,7 +258,6 @@ public class SnAttachmentController {
         long endTime = 0;
         String tag = "[Attachment] ";
         try {
-            Rest rest = new Rest();
             RestTemplate restTemplate = rest.restTemplate();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Attachment().concat("b4cf1be897c01150061c73400153afee"));
@@ -321,7 +320,6 @@ public class SnAttachmentController {
         long endTime = 0;
         String tag = "[Attachment] ";
         try {
-            Rest rest = new Rest();
             RestTemplate restTemplate = rest.restTemplateServiceNow();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Attachment().concat(integrationId));

@@ -40,6 +40,9 @@ public class SnChoiceController {
     private IDomainService domainService;
     @Autowired
     private IAPIExecutionStatusService statusService;
+    @Autowired
+    private Rest rest;
+
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -57,7 +60,6 @@ public class SnChoiceController {
         try {
             List<Domain> domains = domainService.findAll();
             System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             //for (String sparmOffSet : sparmOffSets) {
@@ -147,7 +149,6 @@ public class SnChoiceController {
         try {
             List<Domain> domains = domainService.findAll();
             System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             ObjectMapper mapper = new ObjectMapper();
@@ -237,7 +238,6 @@ public class SnChoiceController {
         try {
             List<Domain> domains = domainService.findAll();
             System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             String result = "";

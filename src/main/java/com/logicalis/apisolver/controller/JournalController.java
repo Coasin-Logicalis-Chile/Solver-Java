@@ -51,6 +51,8 @@ public class JournalController {
     private ISysUserService sysUserService;
     @Autowired
     private IAPIExecutionStatusService statusService;
+    @Autowired
+    private Rest rest;
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -62,7 +64,6 @@ public class JournalController {
         Journal currentJournal = new Journal();
         Journal journalUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         if (currentJournal == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(journalRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -311,8 +312,6 @@ public class JournalController {
         Map<String, Object> response = new HashMap<>();
         Journal addJournal = new Journal();
         try {
-
-            Rest rest = new Rest();
             Journal journal = new Journal();
             journal.setValue(util.parseJson(json, "journal", "value"));
             journal.setOrigin(util.parseJson(json, "journal", "origin"));
@@ -413,11 +412,9 @@ public class JournalController {
         long endTime = 0;
         String tag = "[Journal] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-
                 String result = rest.responseByEndPoint(endPointSN.Journal().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(endPointSN.Journal().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
@@ -531,7 +528,6 @@ public class JournalController {
         long endTime = 0;
         String tag = "[Journal] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -649,7 +645,6 @@ public class JournalController {
         long endTime = 0;
         String tag = "[Journal] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -771,10 +766,8 @@ public class JournalController {
         long endTime = 0;
         String tag = "[Journal] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
-
 
             String result = rest.responseByEndPoint(endPointSN.JournalByElement().concat(elementId));
             System.out.println(tag.concat("(".concat(endPointSN.JournalByElement().concat(elementId)).concat(")")));

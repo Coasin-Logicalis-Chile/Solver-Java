@@ -38,6 +38,9 @@ public class SnCatalogController {
     private ICatalogService catalogService;
     @Autowired
     private IAPIExecutionStatusService statusService;
+    @Autowired
+    private Rest rest;
+
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -52,7 +55,6 @@ public class SnCatalogController {
         long endTime = 0;
         String tag = "[Catalog] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Catalog());
             endTime = (System.currentTimeMillis() - startTime);

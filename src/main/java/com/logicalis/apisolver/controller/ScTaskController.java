@@ -68,7 +68,7 @@ public class ScTaskController {
     @Autowired
     private IConfigurationItemService configurationItemService;
     @Autowired
-    Rest rest;
+    private Rest rest;
 
     Util util = new Util();
     App app = new App();
@@ -126,7 +126,6 @@ public class ScTaskController {
 
         ScTask currentScTask = scTaskService.findById(id);
         ScTask scTaskUpdated = null;
-        Rest rest = new Rest();
         Map<String, Object> response = new HashMap<>();
 
         if (currentScTask == null) {
@@ -249,7 +248,6 @@ public class ScTaskController {
         long endTime = 0;
         String tag = "[ScTask] ";
         try {
-            //Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -443,7 +441,6 @@ public class ScTaskController {
         long endTime = 0;
         String tag = "[ScTask] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -641,7 +638,6 @@ public class ScTaskController {
         long endTime = 0;
         String tag = "[ScTask] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

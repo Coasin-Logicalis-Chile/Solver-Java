@@ -43,6 +43,8 @@ public class SnDepartmentController {
     private IDomainService domainService;
     @Autowired
     private ICompanyService companyService;
+    @Autowired
+    private Rest rest;
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
 
@@ -62,7 +64,6 @@ public class SnDepartmentController {
             List<Company> companies = companyService.findAll();
             System.out.println(tag.concat("(Get All Companies)"));
 
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Department());
             endTime = (System.currentTimeMillis() - startTime);

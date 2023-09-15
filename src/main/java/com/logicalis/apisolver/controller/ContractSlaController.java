@@ -32,14 +32,14 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class ContractSlaController {
-
     @Autowired
     private IContractSlaService contractSlaService;
-
     @Autowired
     private IAPIExecutionStatusService statusService;
     @Autowired
     private IDomainService domainService;
+    @Autowired
+    private Rest rest;
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -166,7 +166,6 @@ public class ContractSlaController {
         long endTime = 0;
         String tag = "[ContractSla] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.ContractSla());
             endTime = (System.currentTimeMillis() - startTime);
@@ -266,9 +265,7 @@ public class ContractSlaController {
         String[] sparmOffSets = util.offSets50000();
 
         for (String sparmOffSet : sparmOffSets) {
-
             try {
-                Rest rest = new Rest();
                 startTime = System.currentTimeMillis();
                 String result = rest.responseByEndPoint(endPointSN.ContractSlaByQuery().replace("QUERY", query).concat(sparmOffSet));
                 endTime = (System.currentTimeMillis() - startTime);

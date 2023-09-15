@@ -47,6 +47,9 @@ public class SnConfigurationItemController {
     private ISysGroupService sysGroupService;
     @Autowired
     private ICiServiceService ciServiceService;
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -72,7 +75,6 @@ public class SnConfigurationItemController {
             System.out.println(tag.concat("(Get All Sys Users)"));
             List<SysGroup> sysGroups = sysGroupService.findAll();
             System.out.println(tag.concat("(Get All Sys Groups)"));
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

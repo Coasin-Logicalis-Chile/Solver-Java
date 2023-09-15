@@ -43,6 +43,10 @@ public class SnCatalogLineController {
     private IAPIExecutionStatusService statusService;
     @Autowired
     private IConfigurationItemService configurationItemService;
+
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -57,7 +61,6 @@ public class SnCatalogLineController {
         long endTime = 0;
         String tag = "[CatalogLine] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.CatalogLine());
             endTime = (System.currentTimeMillis() - startTime);

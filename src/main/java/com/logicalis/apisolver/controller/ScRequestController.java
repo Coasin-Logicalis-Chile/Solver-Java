@@ -39,7 +39,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class ScRequestController {
-
     @Autowired
     private IScRequestService scRequestService;
     @Autowired
@@ -62,6 +61,8 @@ public class ScRequestController {
     private ISysGroupService sysGroupService;
     @Autowired
     private IConfigurationItemService configurationItemService;
+    @Autowired
+    private Rest rest;
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -392,7 +393,6 @@ public class ScRequestController {
         ScRequest currentScRequest = new ScRequest();
         ScRequest scRequestUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         if (currentScRequest == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(scRequestRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -510,7 +510,6 @@ public class ScRequestController {
         long endTime = 0;
         String tag = "[ScRequest] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -630,7 +629,6 @@ public class ScRequestController {
         long endTime = 0;
         String tag = "[ScRequest] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

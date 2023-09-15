@@ -50,6 +50,9 @@ public class TaskSlaController {
     private IContractSlaService contractSlaService;
     @Autowired
     private ICmnScheduleService cmnScheduleService;
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -179,7 +182,6 @@ public class TaskSlaController {
         long endTime = 0;
         String tag = "[TaskSla] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -345,7 +347,6 @@ public class TaskSlaController {
         long endTime = 0;
         String tag = "[TaskSla] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

@@ -21,6 +21,11 @@ public class IncidentServiceImpl implements IIncidentService {
     private IIncidentDAO dao;
 
     @Override
+    public long count() {
+        return dao.count();
+    }
+
+    @Override
     @Transactional(readOnly = true)
     public List<Incident> findAll() {
         return (List<Incident>) dao.findAll();

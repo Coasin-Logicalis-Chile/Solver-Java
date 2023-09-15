@@ -45,10 +45,13 @@ public class SnCiServiceController {
 	private ISysUserService sysUserService;
 	@Autowired
 	private ISysGroupService sysGroupService;
+	@Autowired
+	private Rest rest;
 
 	private Util util = new Util();
 	App app = new App();
 	EndPointSN endPointSN = new EndPointSN();
+
 	@GetMapping("/sn_ci_services")
 	public List<SnCiService> show() {
 		System.out.println(app.Start());
@@ -70,7 +73,6 @@ public class SnCiServiceController {
 			System.out.println(tag.concat("(Get All Sys Users)"));
 			List<SysGroup> sysGroups = sysGroupService.findAll();
 			System.out.println(tag.concat("(Get All Sys Groups)"));
-			Rest rest = new Rest();
 			startTime = System.currentTimeMillis();
 			final int[] count = {1};
 			for (String sparmOffSet : sparmOffSets) {

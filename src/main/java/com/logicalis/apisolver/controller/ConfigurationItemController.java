@@ -45,6 +45,8 @@ public class ConfigurationItemController {
 	private ISysUserService sysUserService;
 	@Autowired
 	private ISysGroupService sysGroupService;
+	@Autowired
+	private Rest rest;
 	
 	@GetMapping("/configuration_items")
 	public List<ConfigurationItem> index() {
@@ -171,9 +173,7 @@ public class ConfigurationItemController {
 		long endTime = 0;
 		String tag = "[ConfigurationItem] ";
 
-
 		try {
-			Rest rest = new Rest();
 			startTime = System.currentTimeMillis();
 			final int[] count = {1};
 			for (String sparmOffSet : sparmOffSets) {

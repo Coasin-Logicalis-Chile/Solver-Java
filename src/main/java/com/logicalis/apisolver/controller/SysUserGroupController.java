@@ -92,7 +92,6 @@ public class SysUserGroupController {
         SysUserGroup currentSysUserGroup = new SysUserGroup();
         SysUserGroup sysUserGroupUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         if (currentSysUserGroup == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);

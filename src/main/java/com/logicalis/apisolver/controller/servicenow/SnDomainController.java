@@ -40,8 +40,12 @@ public class SnDomainController {
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+    @Autowired
+    private Rest rest;
+
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
+
     @GetMapping("/sn_domains")
     public List<SnDomain> show() {
 
@@ -53,7 +57,6 @@ public class SnDomainController {
         long endTime = 0;
         String tag = "[Domain] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Domain());
             endTime = (System.currentTimeMillis() - startTime);

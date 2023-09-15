@@ -42,6 +42,9 @@ public class SnScCategoryItemController {
     private IAPIExecutionStatusService statusService;
     @Autowired
     private ICatalogService catalogService;
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -55,7 +58,6 @@ public class SnScCategoryItemController {
         long endTime = 0;
         String tag = "[ScCategoryItem] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.ScCategoryItem());
             endTime = (System.currentTimeMillis() - startTime);

@@ -73,7 +73,6 @@ public class ScheduleJobService {
             long endTime = 0;
             String tag = "[ScRequest] ";
             try {
-                Rest rest = new Rest();
                 startTime = System.currentTimeMillis();
                 final int[] count = {1};
                 for (String sparmOffSet : sparmOffSets) {

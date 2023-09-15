@@ -56,7 +56,8 @@ public class SysAuditController {
     private IIncidentService incidentService;
     @Autowired
     private ISysUserService sysUserService;
-
+    @Autowired
+    private Rest rest;
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -209,7 +210,6 @@ public class SysAuditController {
         long endTime = 0;
         String tag = "[SysAudit] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -491,7 +491,6 @@ public class SysAuditController {
         List<ChoiceFields> choicesScTask = choiceService.choicesByScTask();
         SysAudit sysAuditUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         final int[] count = {1};
 
         if (currentSysAudit == null) {

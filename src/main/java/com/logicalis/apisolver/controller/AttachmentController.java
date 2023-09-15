@@ -21,6 +21,10 @@ import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -56,8 +60,10 @@ public class AttachmentController {
     private IScTaskService scTaskService;
     @Autowired
     private IAPIExecutionStatusService statusService;
+    @Autowired
+    private Rest rest;
+
     Util util = new Util();
-    Rest rest = new Rest();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
 
@@ -89,10 +95,8 @@ public class AttachmentController {
 
     @GetMapping("/attachment/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         Attachment attachment = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             attachment = attachmentService.findById(id);
         } catch (DataAccessException e) {
@@ -186,7 +190,6 @@ public class AttachmentController {
 
             }
 
-            Rest rest = new Rest();
             RestTemplate restTemplate = rest.restTemplateServiceNow();
             File downloadFile = rest.responseFileByEndPointSOAsync(attachment, restTemplate, environment.getProperty("setting.attachments.dir"));
             String filePath = rest.getPathDirectory(attachment, environment.getProperty("setting.attachments.dir"));
@@ -198,7 +201,6 @@ public class AttachmentController {
                 attachment.setDomain(exists.getDomain());
                 tagAction = app.UpdateConsole();
             }
-
 
             attachmentUpdated = attachmentService.save(attachment);
             util.printData(tag, tagAction, util.getFieldDisplay(attachment), attachmentRequest.getTable_sys_id());
@@ -340,97 +342,113 @@ public class AttachmentController {
         final long[] startTime = {0};
         final long[] endTime = {0};
         String tag = "[Attachment] ";
-        incidentService.findAll().forEach(i -> {
-            try {
-                Rest rest = new Rest();
-                RestTemplate restTemplate = rest.restTemplateServiceNow();
-                startTime[0] = System.currentTimeMillis();
-                String result = rest.responseByEndPoint(endPointSN.Attachment().concat(i.getIntegrationId()));
-                endTime[0] = (System.currentTimeMillis() - startTime[0]);
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = (JSONObject) parser.parse(result);
-                JSONArray ListSnAttachmentJson = new JSONArray();
-                if (resultJson.get("result") != null)
-                    ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-                final int[] count = {1};
-                ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                    String tagAction = app.CreateConsole();
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    try {
-                        AttachmentSolver attachmentSolver = objectMapper.readValue(snAttachmentJson.toString(), AttachmentSolver.class);
-                        Attachment attachment = new Attachment();
-                        attachment.setActive(attachmentSolver.getActive());
-                        attachment.setIntegrationId(attachmentSolver.getSys_id());
-                        attachment.setDownloadLinkSN(attachmentSolver.getDownload_link());
-                        attachment.setExtension(".".concat(attachmentSolver.getFile_name().substring(Math.max(0, attachmentSolver.getFile_name().length() - 5)).split("\\s*[.]+")[1]));
-                        attachment.setFileName(attachmentSolver.getFile_name());
-                        attachment.setElement(attachmentSolver.getTable_sys_id());
-                        attachment.setOrigin(attachmentSolver.getTable_name());
-                        attachment.setContentType(attachmentSolver.getContent_type());
-                        attachment.setSysCreatedBy(attachmentSolver.getSys_created_by());
-                        attachment.setSysCreatedOn(attachmentSolver.getSys_created_on());
-                        attachment.setSysUpdatedBy(attachmentSolver.getSys_updated_by());
-                        attachment.setSysUpdatedOn(attachmentSolver.getSys_updated_on());
-
-                        Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
-                        if (domain != null)
-                            attachment.setDomain(domain);
-
-                        switch (attachment.getOrigin()) {
-                            case "incident":
-                                Incident incident = incidentService.findByIntegrationId(attachment.getElement());
-                                if (incident != null)
-                                    attachment.setIncident(incident);
-                                break;
-                            case "sc_req_item":
-                                ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(attachment.getElement());
-                                if (scRequestItem != null)
-                                    attachment.setScRequestItem(scRequestItem);
-                                break;
-                            case "sc_task":
-                                ScTask scTask = scTaskService.findByIntegrationId(attachment.getElement());
-                                if (scTask != null)
-                                    attachment.setScTask(scTask);
-                                break;
-                        }
-
-
-                        Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
-                        if (exists != null) {
-                            attachment.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
-                        }
-                        attachmentService.save(attachment);
-                        snAttachments.add(attachmentSolver);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
-
-
-                        count[0] = count[0] + 1;
-                    } catch (JsonProcessingException e) {
-                        System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
-                    }
-                });
-
-                HttpHeaders headers = new HttpHeaders();
-                headers.add("Content-Disposition", "attachments");
-
-                //return ResponseEntity.ok().headers(headers).body(attachments);
-                apiResponse[0] = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Incident());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
-                status.setError(apiResponse[0].getError());
-                status.setMessage(apiResponse[0].getMessage());
-                status.setExecutionTime(endTime[0]);
-                statusService.save(status);
-            } catch (Exception e) {
-                System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+        final long MAXREGISTERS = incidentService.count();
+        /*
+        List<Incident> listInsident = new ArrayList<Incident>();
+        final Integer PAGESIZE = 3000;
+        for(int j = 0; j < MAXREGISTERS;j+=PAGESIZE) {
+            //Pageable paging = PageRequest.of(i, pageSize, Sort.Direction.valueOf("getIntegrationId"));
+            Pageable paging = PageRequest.of(j, PAGESIZE);
+            Page<Incident> pagedResult = incidentService.findAll(paging);
+            if (pagedResult.hasContent()) {
+                listInsident = pagedResult.getContent();
+            } else {
+                listInsident = null;
             }
-        });
+            listInsident = incidentService.findAll();
+            listInsident.forEach(i -> {
+        */
+            incidentService.findAll().forEach(i -> {
+                try {
+                    RestTemplate restTemplate = rest.restTemplateServiceNow();
+                    startTime[0] = System.currentTimeMillis();
+                    String result = rest.responseByEndPoint(endPointSN.Attachment().concat(i.getIntegrationId()));
+                    endTime[0] = (System.currentTimeMillis() - startTime[0]);
+                    ObjectMapper mapper = new ObjectMapper();
+                    mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                    JSONParser parser = new JSONParser();
+                    JSONObject resultJson = (JSONObject) parser.parse(result);
+                    JSONArray ListSnAttachmentJson = new JSONArray();
+                    if (resultJson.get("result") != null)
+                        ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
+                    final int[] count = {1};
+                    ListSnAttachmentJson.forEach(snAttachmentJson -> {
+                        String tagAction = app.CreateConsole();
+                        ObjectMapper objectMapper = new ObjectMapper();
+                        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                        try {
+                            AttachmentSolver attachmentSolver = objectMapper.readValue(snAttachmentJson.toString(), AttachmentSolver.class);
+                            Attachment attachment = new Attachment();
+                            attachment.setActive(attachmentSolver.getActive());
+                            attachment.setIntegrationId(attachmentSolver.getSys_id());
+                            attachment.setDownloadLinkSN(attachmentSolver.getDownload_link());
+                            attachment.setExtension(".".concat(attachmentSolver.getFile_name().substring(Math.max(0, attachmentSolver.getFile_name().length() - 5)).split("\\s*[.]+")[1]));
+                            attachment.setFileName(attachmentSolver.getFile_name());
+                            attachment.setElement(attachmentSolver.getTable_sys_id());
+                            attachment.setOrigin(attachmentSolver.getTable_name());
+                            attachment.setContentType(attachmentSolver.getContent_type());
+                            attachment.setSysCreatedBy(attachmentSolver.getSys_created_by());
+                            attachment.setSysCreatedOn(attachmentSolver.getSys_created_on());
+                            attachment.setSysUpdatedBy(attachmentSolver.getSys_updated_by());
+                            attachment.setSysUpdatedOn(attachmentSolver.getSys_updated_on());
+
+                            Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
+                            if (domain != null)
+                                attachment.setDomain(domain);
+
+                            switch (attachment.getOrigin()) {
+                                case "incident":
+                                    Incident incident = incidentService.findByIntegrationId(attachment.getElement());
+                                    if (incident != null)
+                                        attachment.setIncident(incident);
+                                    break;
+                                case "sc_req_item":
+                                    ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(attachment.getElement());
+                                    if (scRequestItem != null)
+                                        attachment.setScRequestItem(scRequestItem);
+                                    break;
+                                case "sc_task":
+                                    ScTask scTask = scTaskService.findByIntegrationId(attachment.getElement());
+                                    if (scTask != null)
+                                        attachment.setScTask(scTask);
+                                    break;
+                            }
+
+
+                            Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
+                            if (exists != null) {
+                                attachment.setId(exists.getId());
+                                tagAction = app.UpdateConsole();
+                            }
+                            attachmentService.save(attachment);
+                            snAttachments.add(attachmentSolver);
+                            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
+
+
+                            count[0] = count[0] + 1;
+                        } catch (JsonProcessingException e) {
+                            System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                        }
+                    });
+
+                    HttpHeaders headers = new HttpHeaders();
+                    headers.add("Content-Disposition", "attachments");
+
+                    //return ResponseEntity.ok().headers(headers).body(attachments);
+                    apiResponse[0] = mapper.readValue(result, APIResponse.class);
+                    APIExecutionStatus status = new APIExecutionStatus();
+                    status.setUri(endPointSN.Incident());
+                    status.setUserAPI(app.SNUser());
+                    status.setPasswordAPI(app.SNPassword());
+                    status.setError(apiResponse[0].getError());
+                    status.setMessage(apiResponse[0].getMessage());
+                    status.setExecutionTime(endTime[0]);
+                    statusService.save(status);
+                } catch (Exception e) {
+                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                }
+            });
+        //}
         return attachments;
     }
 
@@ -452,7 +470,6 @@ public class AttachmentController {
 
         incidentService.findAll().forEach(i -> {
             try {
-                Rest rest = new Rest();
                 RestTemplate restTemplate = rest.restTemplateServiceNow();
                 startTime[0] = System.currentTimeMillis();
                 String result = "";
@@ -571,7 +588,6 @@ public class AttachmentController {
 
         incidentService.findAll().forEach(i -> {
             try {
-                Rest rest = new Rest();
                 RestTemplate restTemplate = rest.restTemplateServiceNow();
                 startTime[0] = System.currentTimeMillis();
                 String result = "";
@@ -685,7 +701,6 @@ public class AttachmentController {
         long endTime = 0;
         String tag = "[Attachment] ";
         try {
-            Rest rest = new Rest();
             RestTemplate restTemplate = rest.restTemplateServiceNow();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Attachment().concat(integrationId));
@@ -810,7 +825,6 @@ public class AttachmentController {
         long endTime = 0;
         String tag = "[Attachment] ";
         try {
-            Rest rest = new Rest();
             RestTemplate restTemplate = rest.restTemplate();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Attachment().concat(integrationId));

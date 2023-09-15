@@ -13,7 +13,6 @@ import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.ICompanyService;
 import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.services.ISysGroupService;
-import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.SysGroupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -206,7 +205,6 @@ public class SysGroupController {
         SysGroup currentSysGroup = new SysGroup();
         SysGroup sysGroupUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         if (currentSysGroup == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);

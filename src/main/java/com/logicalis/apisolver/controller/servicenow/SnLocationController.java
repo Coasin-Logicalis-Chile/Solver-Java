@@ -42,6 +42,9 @@ public class SnLocationController {
     private IDomainService domainService;
     @Autowired
     private ICompanyService companyService;
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -62,7 +65,6 @@ public class SnLocationController {
             List<Company> companies = companyService.findAll();
             System.out.println(tag.concat("(Get All Companies)"));
 
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -150,12 +152,9 @@ public class SnLocationController {
         String tag = "[Location] ";
         Util util = new Util();
         try {
-
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-
                 String result = rest.responseByEndPoint(endPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(endPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 

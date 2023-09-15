@@ -43,6 +43,9 @@ public class SnGroupController {
     private IDomainService domainService;
     @Autowired
     private ICompanyService companyService;
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -57,7 +60,6 @@ public class SnGroupController {
         Util util = new Util();
         String tag = "[SysGroup] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(endPointSN.Group());
             endTime = (System.currentTimeMillis() - startTime);

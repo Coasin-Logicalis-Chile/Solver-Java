@@ -29,7 +29,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnSysUserGroupController {
-
     @Autowired
     private ISnSysUserGroupService snSysUserGroupService;
     @Autowired
@@ -42,6 +41,8 @@ public class SnSysUserGroupController {
     private ISysGroupService sysGroupService;
     @Autowired
     private IAPIExecutionStatusService statusService;
+    @Autowired
+    private Rest rest;
 
     private Util util = new Util();
     App app = new App();
@@ -57,7 +58,6 @@ public class SnSysUserGroupController {
         long endTime = 0;
         String tag = "[SysUserGroup] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

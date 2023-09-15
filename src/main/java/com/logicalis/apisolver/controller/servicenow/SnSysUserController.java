@@ -45,6 +45,9 @@ public class SnSysUserController {
     private ICompanyService companyService;
     @Autowired
     private IDepartmentService departmentService;
+    @Autowired
+    private Rest rest;
+
     private Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -61,7 +64,6 @@ public class SnSysUserController {
         long endTime = 0;
         String tag = "[SysUser] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -167,7 +169,6 @@ public class SnSysUserController {
         long endTime = 0;
         String tag = "[SysUser] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -270,7 +271,6 @@ public class SnSysUserController {
         long endTime = 0;
         String tag = "[SysUser] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {

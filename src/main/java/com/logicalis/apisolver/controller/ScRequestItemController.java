@@ -67,6 +67,8 @@ public class ScRequestItemController {
     private IScCategoryItemService scCategoryItemService;
     @Autowired
     private IConfigurationItemService configurationItemService;
+    @Autowired
+    private Rest rest;
     Util util = new Util();
     App app = new App();
     EndPointSN endPointSN = new EndPointSN();
@@ -142,10 +144,8 @@ public class ScRequestItemController {
     //@Secured("ROLE_ADMIN")
     @PutMapping("/scRequestItem/{id}")
     public ResponseEntity<?> update(@RequestBody String json, @PathVariable Long id) {
-
         ScRequestItem currentScRequestItem = scRequestItemService.findById(id);
         ScRequestItem scRequestItemUpdated = null;
-        Rest rest = new Rest();
         Map<String, Object> response = new HashMap<>();
 
         if (currentScRequestItem == null) {
@@ -235,7 +235,6 @@ public class ScRequestItemController {
             ScRequestItem currentScRequestItem = new ScRequestItem();
             ScRequestItem scRequestItemUpdated = null;
             Map<String, Object> response = new HashMap<>();
-            Rest rest = new Rest();
             if (currentScRequestItem == null) {
                 response.put("mensaje", Errors.dataAccessExceptionUpdate.get(scRequestItemRequest.getSys_id()));
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -509,7 +508,6 @@ public class ScRequestItemController {
         long endTime = 0;
         String tag = "[ScRequestItem] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
@@ -675,7 +673,6 @@ public class ScRequestItemController {
         long endTime = 0;
         String tag = "[ScRequestItem] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
