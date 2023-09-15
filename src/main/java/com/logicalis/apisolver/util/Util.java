@@ -1,6 +1,5 @@
 package com.logicalis.apisolver.util;
 
-import com.google.gson.JsonObject;
 import com.logicalis.apisolver.model.*;
 import com.logicalis.apisolver.model.enums.App;
 import com.logicalis.apisolver.model.servicenow.SnAttachment;
@@ -29,15 +28,14 @@ import java.util.regex.Pattern;
 
 public class Util {
     //private String remoteHost = "portalsolver.westus2.cloudapp.azure.com";
-    private String remoteHost = "10.10.0.5";
-    private String username = "solveruser";
-    private String password = "Coasinlogic2022$";
-    private String Date_REGEX = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$";
-    private Pattern Date_PATTERN = Pattern.compile(Date_REGEX);
+    private final static String remoteHost = "10.10.0.5";
+    private final static String username = "solveruser";
+    private final static String password = "Coasinlogic2022$";
+    private final static String Date_REGEX = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$";
+    private final static Pattern Date_PATTERN = Pattern.compile(Date_REGEX);
     //COLORS
     @Autowired
     private Environment environment;
-    App app = new App();
     public final String ANSI_RESET = "\u001B[0m";
 
     // Declaring the color
@@ -49,7 +47,7 @@ public class Util {
         return matcher.matches();
     }
 
-    public String getInstanceServiceNow() {
+    public static String getInstanceServiceNow() {
         System.out.println("PATH_INSTANCE_SERVICENOW");
         System.out.println(System.getenv("PATH_INSTANCE_SERVICENOW"));
         return System.getenv("PATH_INSTANCE_SERVICENOW");
@@ -330,17 +328,17 @@ public class Util {
     }
 
     public String getFieldDisplay(ContractSla contractSla) {
-        return contractSla != null ? contractSla.getName() != "" ? contractSla.getName() : app.ContractSla() : app.ContractSla();
+        return contractSla != null ? contractSla.getName() != "" ? contractSla.getName() : App.ContractSla() : App.ContractSla();
     }
 
 
     public String getFieldDisplay(CmnSchedule cmnSchedule) {
-        return cmnSchedule != null ? cmnSchedule.getName() != "" ? cmnSchedule.getName() : app.CmnSchedule() : app.CmnSchedule();
+        return cmnSchedule != null ? cmnSchedule.getName() != "" ? cmnSchedule.getName() : App.CmnSchedule() : App.CmnSchedule();
     }
 
 
     public String getFieldDisplay(Incident incident) {
-        return incident != null ? incident.getNumber() != "" ? incident.getNumber() : app.Incident() : app.Incident();
+        return incident != null ? incident.getNumber() != "" ? incident.getNumber() : App.Incident() : App.Incident();
     }
 
     public String getFieldDisplay(Attachment attachment) {
@@ -352,27 +350,27 @@ public class Util {
     }
 
     public String getFieldDisplay(CatalogLine catalogLine) {
-        return catalogLine != null ? catalogLine.getNumber() != "" ? catalogLine.getNumber() : app.CatalogLine() : app.CatalogLine();
+        return catalogLine != null ? catalogLine.getNumber() != "" ? catalogLine.getNumber() : App.CatalogLine() : App.CatalogLine();
     }
 
     public String getFieldDisplay(ScRequest scRequest) {
-        return scRequest != null ? scRequest.getNumber() != "" ? scRequest.getNumber() : app.ScRequest() : app.ScRequest();
+        return scRequest != null ? scRequest.getNumber() != "" ? scRequest.getNumber() : App.ScRequest() : App.ScRequest();
     }
 
     public String getFieldDisplay(ScRequestItem scRequestItem) {
-        return scRequestItem != null ? scRequestItem.getNumber() != "" ? scRequestItem.getNumber() : app.ScRequestItem() : app.ScRequestItem();
+        return scRequestItem != null ? scRequestItem.getNumber() != "" ? scRequestItem.getNumber() : App.ScRequestItem() : App.ScRequestItem();
     }
 
     public String getFieldDisplay(Company company) {
-        return company != null ? company.getName() != "" ? company.getName() : app.Company() : app.Company();
+        return company != null ? company.getName() != "" ? company.getName() : App.Company() : App.Company();
     }
 
     public String getFieldDisplay(Domain domain) {
-        return domain != null ? domain.getName() != "" ? domain.getName() : app.Domain() : app.Domain();
+        return domain != null ? domain.getName() != "" ? domain.getName() : App.Domain() : App.Domain();
     }
 
     public String getFieldDisplay(SysUser sysUser) {
-        return sysUser != null ? sysUser.getName() != "" ? sysUser.getName() : app.SysUser() : app.SysUser();
+        return sysUser != null ? sysUser.getName() != "" ? sysUser.getName() : App.SysUser() : App.SysUser();
     }
 
     private static ZoneId UTC_ZONE = ZoneId.of("UTC");
@@ -396,23 +394,23 @@ public class Util {
     }
 
     public String getFieldDisplay(Location location) {
-        return location != null ? location.getName() != "" ? location.getName() : app.Location() : app.Location();
+        return location != null ? location.getName() != "" ? location.getName() : App.Location() : App.Location();
     }
 
     public String getFieldDisplay(Department department) {
-        return department != null ? department.getName() != "" ? department.getName() : app.Department() : app.Department();
+        return department != null ? department.getName() != "" ? department.getName() : App.Department() : App.Department();
     }
 
     public String getFieldDisplay(ConfigurationItem configurationItem) {
-        return configurationItem != null ? configurationItem.getName() != "" ? configurationItem.getName() : app.ConfigurationItem() : app.ConfigurationItem();
+        return configurationItem != null ? configurationItem.getName() != "" ? configurationItem.getName() : App.ConfigurationItem() : App.ConfigurationItem();
     }
 
     public String getFieldDisplay(CiService ciService) {
-        return ciService != null ? ciService.getName() != "" ? ciService.getName() : app.CiService() : app.CiService();
+        return ciService != null ? ciService.getName() != "" ? ciService.getName() : App.CiService() : App.CiService();
     }
 
     public String getFieldDisplay(Journal journal) {
-        return journal != null ? journal.getElement() != "" ? journal.getElement() : app.Journal() : app.Journal();
+        return journal != null ? journal.getElement() != "" ? journal.getElement() : App.Journal() : App.Journal();
     }
 
     public String[] offSets65000() {
@@ -527,8 +525,6 @@ public class Util {
         Document document = Jsoup.parse(content);
         document.select("img").remove();
         return document.toString();
-
-
         //return Jsoup.parse(content).text();
     }
 

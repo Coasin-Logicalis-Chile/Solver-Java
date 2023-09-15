@@ -5,126 +5,124 @@ import com.logicalis.apisolver.util.Util;
 import java.util.Base64;
 
 public class App {
-
-    public String SNDevelopment() {
+    public static String SNDevelopment() {
         return "lalogicalisdev";
     }
 
-
-    public String SNTests() {
+    public static String SNTests() {
         return "lalogicalistest";
     }
 
-    public String SNProduction() {
+    public static String SNProduction() {
         return "lalogicalis";
     }
 
-    public String SNInstance() {
-        return "https://".concat(new Util().getInstanceServiceNow()).concat(".service-now.com");
+    public static String SNInstance() {
+        return "https://".concat(Util.getInstanceServiceNow()).concat(".service-now.com");
     }
 
-    public String SNUser() {
+    public static String SNUser() {
         return "solver";
     }
 
-    public String SNPassword() {
+    public static String SNPassword() {
         return new String(Base64.getDecoder().decode("U1ZlbFVPMCFMLVdXcFZBMF1FJEskdSM0YlI="));
     }
 
-    public String Name() {
+    public static String Name() {
         return "Name";
     }
 
-    public String Title() {
+    public static String Title() {
         return "Title";
     }
 
-    public String Domain() {
+    public static String Domain() {
         return "Domain";
     }
 
-    public String Value() {
+    public static String Value() {
         return "value";
     }
 
-    public String Company() {
+    public static String Company() {
         return "Company";
     }
 
-    public String Location() {
+    public static String Location() {
         return "Location";
     }
 
-    public String SysUser() {
+    public static String SysUser() {
         return "SysUser";
     }
 
-    public String ScRequest() {
+    public static String ScRequest() {
         return "ScRequest";
     }
 
-    public String ScRequestItem() {
+    public static String ScRequestItem() {
         return "ScRequestItem";
     }
 
-    public String Department() {
+    public static String Department() {
         return "Department";
     }
 
-    public String CmnSchedule() {
+    public static String CmnSchedule() {
         return "CmnSchedule";
     }
 
-    public String ContractSla() {
+    public static String ContractSla() {
         return "ContractSla";
     }
 
-    public String Incident() {
+    public static String Incident() {
         return "Incident";
     }
 
-    public String ConfigurationItem() {
+    public static String ConfigurationItem() {
         return "ConfigurationItem";
     }
 
-    public String CatalogLine() {
+    public static String CatalogLine() {
         return "CatalogLine";
     }
 
-    public String CiService() {
+    public static String CiService() {
         return "CiService";
     }
 
-    public String Journal() {
+    public static String Journal() {
         return "Journal";
     }
 
-    public String End() {
+    public static String End() {
         return "•••••••••••••••• [ END ] ••••••••••••••••";
     }
 
-    public String Start() {
+    public static String Start() {
         return "•••••••••••••••• [ START ] ••••••••••••••••";
     }
 
-    public String CreateConsole() {
+    public static String CreateConsole() {
 
         return "\u001B[33m( CREATE ) ";
     }
 
-    public String UpdateConsole() {
+    public static String UpdateConsole() {
         return "\u001B[36m( UPDATE ) ";
     }
 
-    public String TableData() {
+    public static String TableData() {
         return "<table style=\"border-collapse: collapse; border-style: none; border-color: transparent;\" border=\"1\">\n" + "<tbody>\n" + "TBODY\n" + "</tbody>\n" + "</table>";
     }
 
-    public String TRData() {
+    public static String TRData() {
         return "<tr>\n" + "<td style=\"text-align: right;\">FIELD: </td>\n" + "<td style=\"text-align: right;\">&nbsp;</td>\n" + "<td style=\"text-align: left;\">VALUE</td>\n" + "</tr>";
     }
 
-    public String OriginFieldChanges() {
+    public static String OriginFieldChanges() {
         return "field_changes";
     }
 
