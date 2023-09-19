@@ -58,15 +58,12 @@ public class SnScRequestItemController {
     @Autowired
     private Rest rest;
 
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
     @GetMapping("/sn_sc_request_item_by_solver")
     public List<SnScRequestItem> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnScRequestItem> snScRequestItems = new ArrayList<>();
-        String[] sparmOffSets = util.offSets99000();
+        String[] sparmOffSets = Util.offSets99000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[ScRequestItem] ";
@@ -74,8 +71,8 @@ public class SnScRequestItemController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.ScRequestItem().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.ScRequestItem().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.ScRequestItem().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.ScRequestItem().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 JSONParser parser = new JSONParser();
@@ -115,63 +112,63 @@ public class SnScRequestItemController {
                         scRequestItem.setSysUpdatedBy(snScRequestItem.getSys_updated_by());
                         scRequestItem.setSysCreatedOn(snScRequestItem.getSys_created_on());
 
-                        Domain domain = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), app.Value());
+                        Domain domain = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), App.Value());
                         if (domain != null)
                             scRequestItem.setDomain(domain);
 
-                        Company company = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), app.Value());
+                        Company company = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), App.Value());
                         if (company != null)
                             scRequestItem.setCompany(company);
 
-                        SysUser requestedFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "requested_for", app.Value());
+                        SysUser requestedFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "requested_for", App.Value());
                         if (requestedFor != null)
                             scRequestItem.setRequestedFor(requestedFor);
 
-                        Location location = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", app.Value());
+                        Location location = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", App.Value());
                         if (requestedFor != null)
                             scRequestItem.setLocation(location);
 
-                        ScCategoryItem scCategoryItem = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", app.Value());
+                        ScCategoryItem scCategoryItem = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", App.Value());
                         if (scCategoryItem != null)
                             scRequestItem.setScCategoryItem(scCategoryItem);
 
 
-                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", app.Value());
+                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", App.Value());
                         if (assignedTo != null)
                             scRequestItem.setAssignedTo(assignedTo);
 
-                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", app.Value());
+                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", App.Value());
                         if (openedBy != null)
                             scRequestItem.setOpenedBy(openedBy);
 
-                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", app.Value());
+                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", App.Value());
                         if (taskFor != null)
                             scRequestItem.setTaskFor(taskFor);
 
-                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", app.Value());
+                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", App.Value());
                         if (businessService != null)
                             scRequestItem.setBusinessService(businessService);
 
-                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", app.Value());
+                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", App.Value());
                         if (configurationItem != null)
                             scRequestItem.setConfigurationItem(configurationItem);
 
-                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", app.Value());
+                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", App.Value());
                         if (sysGroup != null)
                             scRequestItem.setAssignmentGroup(sysGroup);
 
-                        ScRequest scRequest = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", app.Value());
+                        ScRequest scRequest = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", App.Value());
                         if (scRequest != null)
                             scRequestItem.setScRequest(scRequest);
 
                         ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItem.getIntegrationId());
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         if (exists != null) {
                             scRequestItem.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
 
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(scRequestItem)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
 
                         scRequestItemService.save(scRequestItem);
 
@@ -184,9 +181,9 @@ public class SnScRequestItemController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -197,16 +194,16 @@ public class SnScRequestItemController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snScRequestItems;
     }
 
     @GetMapping("/snSCRequestItemBySolverAndQuery")
     public List<SnScRequestItem> show(String query) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnScRequestItem> snScRequestItems = new ArrayList<>();
-        String[] sparmOffSets = util.offSets99000();
+        String[] sparmOffSets = Util.offSets99000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[ScRequestItem] ";
@@ -214,8 +211,8 @@ public class SnScRequestItemController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.ScRequestItemByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.ScRequestItemByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.ScRequestItemByQuery().replace("QUERY", query).concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.ScRequestItemByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 JSONParser parser = new JSONParser();
@@ -258,63 +255,63 @@ public class SnScRequestItemController {
                         scRequestItem.setSysUpdatedBy(snScRequestItem.getSys_updated_by());
                         scRequestItem.setSysCreatedOn(snScRequestItem.getSys_created_on());
 
-                        Domain domain = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), app.Value());
+                        Domain domain = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), App.Value());
                         if (domain != null)
                             scRequestItem.setDomain(domain);
 
-                        Company company = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), app.Value());
+                        Company company = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), App.Value());
                         if (company != null)
                             scRequestItem.setCompany(company);
 
-                        SysUser requestedFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "requested_for", app.Value());
+                        SysUser requestedFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "requested_for", App.Value());
                         if (requestedFor != null)
                             scRequestItem.setRequestedFor(requestedFor);
 
-                        Location location = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", app.Value());
+                        Location location = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", App.Value());
                         if (requestedFor != null)
                             scRequestItem.setLocation(location);
 
-                        ScCategoryItem scCategoryItem = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", app.Value());
+                        ScCategoryItem scCategoryItem = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", App.Value());
                         if (scCategoryItem != null)
                             scRequestItem.setScCategoryItem(scCategoryItem);
 
 
-                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", app.Value());
+                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", App.Value());
                         if (assignedTo != null)
                             scRequestItem.setAssignedTo(assignedTo);
 
-                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", app.Value());
+                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", App.Value());
                         if (openedBy != null)
                             scRequestItem.setOpenedBy(openedBy);
 
-                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", app.Value());
+                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", App.Value());
                         if (taskFor != null)
                             scRequestItem.setTaskFor(taskFor);
 
-                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", app.Value());
+                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", App.Value());
                         if (businessService != null)
                             scRequestItem.setBusinessService(businessService);
 
-                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", app.Value());
+                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", App.Value());
                         if (configurationItem != null)
                             scRequestItem.setConfigurationItem(configurationItem);
 
-                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", app.Value());
+                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", App.Value());
                         if (sysGroup != null)
                             scRequestItem.setAssignmentGroup(sysGroup);
 
-                        ScRequest scRequest = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", app.Value());
+                        ScRequest scRequest = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", App.Value());
                         if (scRequest != null)
                             scRequestItem.setScRequest(scRequest);
 
                         ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItem.getIntegrationId());
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         if (exists != null) {
                             scRequestItem.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
 
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(scRequestItem)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
 
                         scRequestItemService.save(scRequestItem);
 
@@ -327,9 +324,9 @@ public class SnScRequestItemController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -340,77 +337,77 @@ public class SnScRequestItemController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snScRequestItems;
     }
 
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public CiService getCiServiceByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return ciServiceService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Company getCompanyByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return companyService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public ConfigurationItem getConfigurationItemByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return configurationItemService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public SysGroup getSysGroupByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysGroupService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Location getLocationByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return locationService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public ScCategoryItem getScCategoryItemByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return scCategoryItemService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public ScRequest getScRequestByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return scRequestService.findByIntegrationId(integrationId);
         } else
             return null;

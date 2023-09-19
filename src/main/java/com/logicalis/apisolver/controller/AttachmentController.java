@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -43,7 +42,6 @@ import java.util.zip.Deflater;
 @RestController
 @RequestMapping("/api/v1")
 public class AttachmentController {
-
     @Autowired
     private IAttachmentService attachmentService;
     @Autowired
@@ -62,10 +60,6 @@ public class AttachmentController {
     private IAPIExecutionStatusService statusService;
     @Autowired
     private Rest rest;
-
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
 
     @GetMapping("/attachments")
     public List<Attachment> index() {
@@ -139,7 +133,7 @@ public class AttachmentController {
         Attachment attachmentUpdated = null;
         Map<String, Object> response = new HashMap<>();
 
-        String tagAction = app.CreateConsole();
+        String tagAction = App.CreateConsole();
         String tag = "[Attachment] ";
 
         if (currentAttachment == null) {
@@ -149,19 +143,17 @@ public class AttachmentController {
 
         try {
             Attachment attachment = new Attachment();
-
-
             attachment.setIntegrationId(attachmentRequest.getSys_id());
-            attachment.setDownloadLinkSN(endPointSN.ApiAttachment().concat("/").concat(attachmentRequest.getSys_id()).concat("/file"));
+            attachment.setDownloadLinkSN(EndPointSN.ApiAttachment().concat("/").concat(attachmentRequest.getSys_id()).concat("/file"));
             attachment.setExtension(".".concat(FilenameUtils.getExtension(attachmentRequest.getFile_name())));
-            attachment.setFileName(util.isNull(attachmentRequest.getFile_name()));
-            attachment.setElement(util.isNull(attachmentRequest.getTable_sys_id()));
-            attachment.setOrigin(util.isNull(attachmentRequest.getTable_name()));
-            attachment.setContentType(util.isNull(attachmentRequest.getContent_type()));
-            attachment.setSysCreatedBy(util.isNull(attachmentRequest.getSys_created_by()));
-            attachment.setSysCreatedOn(util.isNull(attachmentRequest.getSys_created_on()));
-            attachment.setSysUpdatedBy(util.isNull(attachmentRequest.getSys_updated_by()));
-            attachment.setSysUpdatedOn(util.isNull(attachmentRequest.getSys_updated_on()));
+            attachment.setFileName(Util.isNull(attachmentRequest.getFile_name()));
+            attachment.setElement(Util.isNull(attachmentRequest.getTable_sys_id()));
+            attachment.setOrigin(Util.isNull(attachmentRequest.getTable_name()));
+            attachment.setContentType(Util.isNull(attachmentRequest.getContent_type()));
+            attachment.setSysCreatedBy(Util.isNull(attachmentRequest.getSys_created_by()));
+            attachment.setSysCreatedOn(Util.isNull(attachmentRequest.getSys_created_on()));
+            attachment.setSysUpdatedBy(Util.isNull(attachmentRequest.getSys_updated_by()));
+            attachment.setSysUpdatedOn(Util.isNull(attachmentRequest.getSys_updated_on()));
 
 
             if (attachmentRequest.getTable_name().equals(SnTable.Incident.get())) {
@@ -199,11 +191,11 @@ public class AttachmentController {
             if (exists != null) {
                 attachment.setId(exists.getId());
                 attachment.setDomain(exists.getDomain());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
 
             attachmentUpdated = attachmentService.save(attachment);
-            util.printData(tag, tagAction, util.getFieldDisplay(attachment), attachmentRequest.getTable_sys_id());
+            Util.printData(tag, tagAction, Util.getFieldDisplay(attachment), attachmentRequest.getTable_sys_id());
 
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
@@ -334,11 +326,10 @@ public class AttachmentController {
     @GetMapping("/findBySolver")
     public List<Attachment> show() {
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         final APIResponse[] apiResponse = {null};
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
-        Util util = new Util();
         final long[] startTime = {0};
         final long[] endTime = {0};
         String tag = "[Attachment] ";
@@ -362,7 +353,7 @@ public class AttachmentController {
                 try {
                     RestTemplate restTemplate = rest.restTemplateServiceNow();
                     startTime[0] = System.currentTimeMillis();
-                    String result = rest.responseByEndPoint(endPointSN.Attachment().concat(i.getIntegrationId()));
+                    String result = rest.responseByEndPoint(EndPointSN.Attachment().concat(i.getIntegrationId()));
                     endTime[0] = (System.currentTimeMillis() - startTime[0]);
                     ObjectMapper mapper = new ObjectMapper();
                     mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -373,7 +364,7 @@ public class AttachmentController {
                         ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                     final int[] count = {1};
                     ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         ObjectMapper objectMapper = new ObjectMapper();
                         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                         try {
@@ -392,7 +383,7 @@ public class AttachmentController {
                             attachment.setSysUpdatedBy(attachmentSolver.getSys_updated_by());
                             attachment.setSysUpdatedOn(attachmentSolver.getSys_updated_on());
 
-                            Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
+                            Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
                             if (domain != null)
                                 attachment.setDomain(domain);
 
@@ -418,11 +409,11 @@ public class AttachmentController {
                             Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
                             if (exists != null) {
                                 attachment.setId(exists.getId());
-                                tagAction = app.UpdateConsole();
+                                tagAction = App.UpdateConsole();
                             }
                             attachmentService.save(attachment);
                             snAttachments.add(attachmentSolver);
-                            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
+                            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain));
 
 
                             count[0] = count[0] + 1;
@@ -437,9 +428,9 @@ public class AttachmentController {
                     //return ResponseEntity.ok().headers(headers).body(attachments);
                     apiResponse[0] = mapper.readValue(result, APIResponse.class);
                     APIExecutionStatus status = new APIExecutionStatus();
-                    status.setUri(endPointSN.Incident());
-                    status.setUserAPI(app.SNUser());
-                    status.setPasswordAPI(app.SNPassword());
+                    status.setUri(EndPointSN.Incident());
+                    status.setUserAPI(App.SNUser());
+                    status.setPasswordAPI(App.SNPassword());
                     status.setError(apiResponse[0].getError());
                     status.setMessage(apiResponse[0].getMessage());
                     status.setExecutionTime(endTime[0]);
@@ -455,15 +446,14 @@ public class AttachmentController {
     @GetMapping("/findBySolverByQuery")
     public List<Attachment> show(String query, boolean flagQuery) {
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         final APIResponse[] apiResponse = {null};
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
-        Util util = new Util();
         final long[] startTime = {0};
         final long[] endTime = {0};
         String tag = "[Attachment] ";
-        String[] sparmOffSets = util.offSets1500000();
+        String[] sparmOffSets = Util.offSets1500000();
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -475,7 +465,7 @@ public class AttachmentController {
                 String result = "";
 
                 for (String sparmOffSet : sparmOffSets) {
-                    result = rest.responseByEndPoint(endPointSN.AttachmentByQuery().replace("QUERY", query).concat(sparmOffSet));
+                    result = rest.responseByEndPoint(EndPointSN.AttachmentByQuery().replace("QUERY", query).concat(sparmOffSet));
                     endTime[0] = (System.currentTimeMillis() - startTime[0]);
 
                     JSONParser parser = new JSONParser();
@@ -485,7 +475,7 @@ public class AttachmentController {
                         ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                     final int[] count = {1};
                     ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         ObjectMapper objectMapper = new ObjectMapper();
                         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                         try {
@@ -509,7 +499,7 @@ public class AttachmentController {
                             attachment.setSysUpdatedBy(attachmentSolver.getSys_updated_by());
                             attachment.setSysUpdatedOn(attachmentSolver.getSys_updated_on());
 
-                            Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
+                            Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
                             if (domain != null)
                                 attachment.setDomain(domain);
 
@@ -531,15 +521,14 @@ public class AttachmentController {
                                     break;
                             }
 
-
                             Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
                             if (exists != null) {
                                 attachment.setId(exists.getId());
-                                tagAction = app.UpdateConsole();
+                                tagAction = App.UpdateConsole();
                             }
                             attachmentService.save(attachment);
                             snAttachments.add(attachmentSolver);
-                            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
+                            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain));
 
 
                             count[0] = count[0] + 1;
@@ -556,9 +545,9 @@ public class AttachmentController {
                 //return ResponseEntity.ok().headers(headers).body(attachments);
                 apiResponse[0] = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Incident());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Incident());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse[0].getError());
                 status.setMessage(apiResponse[0].getMessage());
                 status.setExecutionTime(endTime[0]);
@@ -573,15 +562,14 @@ public class AttachmentController {
     @GetMapping("/findBySolverByQueryCreate")
     public List<Attachment> show(String query, boolean flagQuery, boolean flagCreate) {
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         final APIResponse[] apiResponse = {null};
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
-        Util util = new Util();
         final long[] startTime = {0};
         final long[] endTime = {0};
         String tag = "[Attachment] ";
-        String[] sparmOffSets = util.offSets1500000();
+        String[] sparmOffSets = Util.offSets1500000();
 
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -593,7 +581,7 @@ public class AttachmentController {
                 String result = "";
 
                 for (String sparmOffSet : sparmOffSets) {
-                    result = rest.responseByEndPoint(endPointSN.AttachmentByQuery().replace("QUERY", query).concat(sparmOffSet));
+                    result = rest.responseByEndPoint(EndPointSN.AttachmentByQuery().replace("QUERY", query).concat(sparmOffSet));
                     endTime[0] = (System.currentTimeMillis() - startTime[0]);
 
                     JSONParser parser = new JSONParser();
@@ -603,22 +591,19 @@ public class AttachmentController {
                         ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                     final int[] count = {1};
                     ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         ObjectMapper objectMapper = new ObjectMapper();
                         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                         try {
-
-
                             Gson gson = new Gson();
                             AttachmentSolver attachmentSolver = gson.fromJson(snAttachmentJson.toString(), AttachmentSolver.class);
-
 
                             Attachment attachment = new Attachment();
 
                             Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
                             if (exists != null) {
                                 attachment.setId(exists.getId());
-                                tagAction = app.UpdateConsole();
+                                tagAction = App.UpdateConsole();
                             } else {
                                 attachment.setActive(attachmentSolver.getActive());
                                 attachment.setIntegrationId(attachmentSolver.getSys_id());
@@ -633,7 +618,7 @@ public class AttachmentController {
                                 attachment.setSysUpdatedBy(attachmentSolver.getSys_updated_by());
                                 attachment.setSysUpdatedOn(attachmentSolver.getSys_updated_on());
 
-                                Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
+                                Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
                                 if (domain != null)
                                     attachment.setDomain(domain);
 
@@ -658,7 +643,7 @@ public class AttachmentController {
 
                                 attachmentService.save(attachment);
                                 snAttachments.add(attachmentSolver);
-                                util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
+                                Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain));
 
 
                                 count[0] = count[0] + 1;
@@ -675,9 +660,9 @@ public class AttachmentController {
                 //return ResponseEntity.ok().headers(headers).body(attachments);
                 apiResponse[0] = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Incident());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Incident());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse[0].getError());
                 status.setMessage(apiResponse[0].getMessage());
                 status.setExecutionTime(endTime[0]);
@@ -692,18 +677,17 @@ public class AttachmentController {
     @GetMapping("/findByElement/{integrationId}")
     public List<Attachment> findByElement(@PathVariable String integrationId) {
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Attachment] ";
         try {
             RestTemplate restTemplate = rest.restTemplateServiceNow();
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Attachment().concat(integrationId));
+            String result = rest.responseByEndPoint(EndPointSN.Attachment().concat(integrationId));
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -714,7 +698,7 @@ public class AttachmentController {
                 ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                String tagAction = app.CreateConsole();
+                String tagAction = App.CreateConsole();
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
@@ -733,9 +717,9 @@ public class AttachmentController {
                     attachment.setSysUpdatedBy(attachmentSolver.getSys_updated_by());
                     attachment.setSysUpdatedOn(attachmentSolver.getSys_updated_on());
 
-                    Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
+                    Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
 
-                    attachment.setDomain(getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value()));
+                    attachment.setDomain(getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value()));
 
                     switch (attachment.getOrigin()) {
                         case "incident":
@@ -759,11 +743,11 @@ public class AttachmentController {
                     Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
                     if (exists != null) {
                         attachment.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
                     attachmentService.save(attachment);
                     snAttachments.add(attachmentSolver);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain));
 
 
                     count[0] = count[0] + 1;
@@ -778,9 +762,9 @@ public class AttachmentController {
             //return ResponseEntity.ok().headers(headers).body(attachments);
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Incident());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Incident());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -816,18 +800,17 @@ public class AttachmentController {
         return new ResponseEntity<Attachment>(attachment, HttpStatus.OK);
 
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Attachment] ";
         try {
             RestTemplate restTemplate = rest.restTemplate();
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Attachment().concat(integrationId));
+            String result = rest.responseByEndPoint(EndPointSN.Attachment().concat(integrationId));
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -838,7 +821,7 @@ public class AttachmentController {
                 ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                String tagAction = app.CreateConsole();
+                String tagAction = App.CreateConsole();
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
@@ -857,9 +840,9 @@ public class AttachmentController {
                     attachment.setSysUpdatedBy(attachmentSolver.getSys_updated_by());
                     attachment.setSysUpdatedOn(attachmentSolver.getSys_updated_on());
 
-                    Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
+                    Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
 
-                    attachment.setDomain(getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value()));
+                    attachment.setDomain(getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value()));
 
                     switch (attachment.getOrigin()) {
                         case "incident":
@@ -883,11 +866,11 @@ public class AttachmentController {
                     Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
                     if (exists != null) {
                         attachment.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
                     attachmentService.save(attachment);
                     snAttachments.add(attachmentSolver);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain));
 
 
                     count[0] = count[0] + 1;
@@ -902,9 +885,9 @@ public class AttachmentController {
             //return ResponseEntity.ok().headers(headers).body(attachments);
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Incident());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Incident());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -922,7 +905,7 @@ public class AttachmentController {
             String type = element.split(",")[1];
             element = element.split(",")[0];
             String tag = "[Attachment] ";
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             if (!file.isEmpty() && element != null) {
 
                 Attachment current = new Attachment();
@@ -935,11 +918,11 @@ public class AttachmentController {
                 current.setOrigin(type);
 
                 attachmentService.save(current);
-                util.printData(tag, tagAction.concat("BD"), util.getFieldDisplay(current), current.getElement());
+                Util.printData(tag, tagAction.concat("BD"), Util.getFieldDisplay(current), current.getElement());
 
                 attachment = rest.sendFileToServiceNow(element, file, type, file.getOriginalFilename());
                 if (attachment != null)
-                    util.printData(tag, tagAction.concat("(ServiceNow)"), util.getFieldDisplay(current), current.getElement());
+                    Util.printData(tag, tagAction.concat("(ServiceNow)"), Util.getFieldDisplay(current), current.getElement());
 
                 attachment.setId(current.getId());
                 attachment.setExtension(current.getExtension());
@@ -958,13 +941,13 @@ public class AttachmentController {
                 try (OutputStream outStream = new FileOutputStream(targetFile)) {
                     outStream.write(buffer);
                     outStream.close();
-                    util.printData(tag, tagAction.concat("(SO)"), util.getFieldDisplay(current), current.getElement());
+                    Util.printData(tag, tagAction.concat("(SO)"), Util.getFieldDisplay(current), current.getElement());
                     attachment.setDownloadLink(pathDirectory);
                 }
 
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
                 attachmentService.save(attachment);
-                util.printData(tag, tagAction.concat("(BD)"), util.getFieldDisplay(attachment), attachment.getElement());
+                Util.printData(tag, tagAction.concat("(BD)"), Util.getFieldDisplay(attachment), attachment.getElement());
             }
 
         } catch (DataAccessException | IOException e) {
@@ -997,8 +980,8 @@ public class AttachmentController {
     }
 
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;

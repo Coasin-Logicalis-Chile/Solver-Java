@@ -45,21 +45,17 @@ public class SnScCategoryItemController {
     @Autowired
     private Rest rest;
 
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
     @GetMapping("/sn_sc_category_items")
     public List<SnScCategoryItem> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnScCategoryItem> snCatalogs = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[ScCategoryItem] ";
         try {
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.ScCategoryItem());
+            String result = rest.responseByEndPoint(EndPointSN.ScCategoryItem());
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -85,19 +81,19 @@ public class SnScCategoryItemController {
                     if (catalog != null)
                         scCategoryItem.setCatalog(catalog);
 
-                    ScCategory scCategory = getScCategoryByIntegrationId((JSONObject) snCatalogJson, "category", app.Value());
+                    ScCategory scCategory = getScCategoryByIntegrationId((JSONObject) snCatalogJson, "category", App.Value());
                     if (scCategory != null)
                         scCategoryItem.setScCategory(scCategory);
 
 
                    ScCategoryItem exists = scCategoryItemService.findByIntegrationId(scCategoryItem.getIntegrationId());
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     if (exists != null) {
                         scCategoryItem.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
 
-                    util.printData(tag, count[0],  tagAction.concat(scCategoryItem != null ? scCategoryItem.getName() != "" &&  scCategoryItem.getName() != null  ? scCategoryItem.getName() : app.Title() : app.Title()));
+                    Util.printData(tag, count[0],  tagAction.concat(scCategoryItem != null ? scCategoryItem.getName() != "" &&  scCategoryItem.getName() != null  ? scCategoryItem.getName() : App.Title() : App.Title()));
 
                     scCategoryItemService.save(scCategoryItem);
                     count[0] = count[0] + 1;
@@ -109,9 +105,9 @@ public class SnScCategoryItemController {
             apiResponse = mapper.readValue(result, APIResponse.class);
 
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.ScCategoryItem());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.ScCategoryItem());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -121,20 +117,20 @@ public class SnScCategoryItemController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snCatalogs;
     }
 
     public Catalog getCatalogByIntegrationId(JSONObject jsonObject, String levelOne) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne);
+        if (Util.hasData(integrationId)) {
             return catalogService.findByIntegrationId(integrationId);
         } else
             return null;
     }
     public ScCategory getScCategoryByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne,levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne,levelTwo);
+        if (Util.hasData(integrationId)) {
             return scCategoryService.findByIntegrationId(integrationId);
         } else
             return null;

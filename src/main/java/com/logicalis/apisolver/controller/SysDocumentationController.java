@@ -42,10 +42,6 @@ public class SysDocumentationController {
     @Autowired
     private Rest rest;
 
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sysDocumentations")
     public List<SysDocumentation> index() {
         return sysDocumentationService.findAll();
@@ -184,10 +180,10 @@ public class SysDocumentationController {
 
     @GetMapping("/sysDocumentationsBySolver")
     public List<SysDocumentationRequest> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SysDocumentationRequest> sysDocumentationRequests = new ArrayList<>();
-        String[] sparmOffSets = util.offSets99000();
+        String[] sparmOffSets = Util.offSets99000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysDocumentation] ";
@@ -195,8 +191,8 @@ public class SysDocumentationController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.SysDocumentation().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.SysDocumentation().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.SysDocumentation().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.SysDocumentation().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -230,14 +226,14 @@ public class SysDocumentationController {
 
                         sysDocumentation.setActive(true);
 
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         SysDocumentation exists = sysDocumentationService.findByUniqueIdentifier(sysDocumentation.getUniqueIdentifier());
                         if (exists != null) {
                             sysDocumentation.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
 
                         }
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysDocumentation)));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(sysDocumentation)));
                         sysDocumentationService.save(sysDocumentation);
                         count[0] = count[0] + 1;
 
@@ -248,9 +244,9 @@ public class SysDocumentationController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -261,7 +257,7 @@ public class SysDocumentationController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return sysDocumentationRequests;
     }
 }

@@ -44,16 +44,12 @@ public class SnSysUserGroupController {
     @Autowired
     private Rest rest;
 
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sn_sys_user_groups")
     public List<SnSysUserGroup> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUserGroup> snSysUserGroups = new ArrayList<>();
-        String[] sparmOffSets = util.offSets99000();
+        String[] sparmOffSets = Util.offSets99000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysUserGroup] ";
@@ -61,8 +57,8 @@ public class SnSysUserGroupController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.SysUserGroup().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.SysUserGroup().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.SysUserGroup().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.SysUserGroup().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 JSONParser parser = new JSONParser();
@@ -75,7 +71,7 @@ public class SnSysUserGroupController {
 
                 ListSnSysUserGroupJson.stream().forEach(snSysUserGroupJson -> {
 
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     ObjectMapper objectMapper = new ObjectMapper();
                     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     SnSysUserGroup snSysUserGroup = new SnSysUserGroup();
@@ -88,11 +84,11 @@ public class SnSysUserGroupController {
                         SysUserGroup sysUserGroup = new SysUserGroup();
                         sysUserGroup.setIntegrationId(snSysUserGroup.getSys_id());
                         sysUserGroup.setActive(snSysUserGroup.isActive());
-                        SysUser sysUser = getSysUserByIntegrationId((JSONObject) snSysUserGroupJson, "user", app.Value());
+                        SysUser sysUser = getSysUserByIntegrationId((JSONObject) snSysUserGroupJson, "user", App.Value());
                         if (sysUser != null)
                             sysUserGroup.setSysUser(sysUser);
 
-                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snSysUserGroupJson, "group", app.Value());
+                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snSysUserGroupJson, "group", App.Value());
                         if (sysGroup != null)
                             sysUserGroup.setSysGroup(sysGroup);
 
@@ -100,11 +96,11 @@ public class SnSysUserGroupController {
 
                         if (exists != null) {
                             sysUserGroup.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
 
                         sysUserGroup.setActive(true);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysUserGroup)), util.getFieldDisplay(sysUser));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(sysUserGroup)), Util.getFieldDisplay(sysUser));
                         sysUserGroupService.save(sysUserGroup);
                         count[0] = count[0] + 1;
 
@@ -115,9 +111,9 @@ public class SnSysUserGroupController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -128,21 +124,21 @@ public class SnSysUserGroupController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snSysUserGroups;
     }
 
     public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public SysGroup getSysGroupByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysGroupService.findByIntegrationId(integrationId);
         } else
             return null;

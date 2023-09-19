@@ -31,16 +31,13 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class SysUserGroupController {
-
     @Autowired
     private ISysUserGroupService sysUserGroupService;
     @Autowired
     private ISysUserService sysUserService;
     @Autowired
     private ISysGroupService sysGroupService;
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+
     @GetMapping("/sysUserGroups")
     public List<SysUserGroup> index() {
         return sysUserGroupService.findAll();
@@ -99,16 +96,16 @@ public class SysUserGroupController {
 
         try {
             SysUserGroup sysUserGroup = new SysUserGroup();
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             String tag = "[SysUserGroup] ";
             sysUserGroup.setActive(sysUserGroupRequest.getActive());
             sysUserGroup.setIntegrationId(sysUserGroupRequest.getSys_id());
-            if (util.hasData(sysUserGroupRequest.getGroup())) {
+            if (Util.hasData(sysUserGroupRequest.getGroup())) {
                 SysGroup sysGroup = sysGroupService.findByIntegrationId(sysUserGroupRequest.getGroup());
                 if (sysGroup != null)
                     sysUserGroup.setSysGroup(sysGroup);
             }
-            if (util.hasData(sysUserGroupRequest.getUser())) {
+            if (Util.hasData(sysUserGroupRequest.getUser())) {
                 SysUser sysUser = sysUserService.findByIntegrationId(sysUserGroupRequest.getUser());
                 if (sysUser != null)
                     sysUserGroup.setSysUser(sysUser);
@@ -116,7 +113,7 @@ public class SysUserGroupController {
             SysUserGroup exists = sysUserGroupService.findByIntegrationId(sysUserGroup.getIntegrationId());
             if (exists != null) {
                 sysUserGroup.setId(exists.getId());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
             sysUserGroupUpdated = sysUserGroupService.save(sysUserGroup);
             //util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUserGroup)));

@@ -53,12 +53,10 @@ public class SnDepartmentController {
         System.out.println(app.Start());
         APIResponse apiResponse = null;
         List<SnDepartment> snDepartments = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Department] ";
         try {
-
             List<Domain> domains = domainService.findAll();
             System.out.println(tag.concat("(Get All Domains)"));
             List<Company> companies = companyService.findAll();
@@ -88,13 +86,13 @@ public class SnDepartmentController {
                     department.setDescription(snDepartment.getDescription());
                     department.setIntegrationId(snDepartment.getsys_id());
 
-                    String domainSysId = util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
+                    String domainSysId = Util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Domain.get(), app.Value());
+                    Domain domain = Util.filterDomain(domains, domainSysId);
                     if (domain != null)
                         department.setDomain(domain);
 
-                    String companySysId = util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Company.get(), app.Value());
-                    Company company = util.filterCompany(companies, companySysId);
+                    String companySysId = Util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Company.get(), app.Value());
+                    Company company = Util.filterCompany(companies, companySysId);
                     if (company != null)
                         department.setCompany(company);
 
@@ -106,7 +104,7 @@ public class SnDepartmentController {
                         tagAction = app.UpdateConsole();
                     }
 
-                    util.printData(tag,
+                    Util.printData(tag,
                             count[0],
                             tagAction.concat((department != null ? department.getName() != "" ? department.getName() : app.Name() : app.Name())),
                             (company != null ? company.getName() != "" ? company.getName() : app.Company() : app.Company()));

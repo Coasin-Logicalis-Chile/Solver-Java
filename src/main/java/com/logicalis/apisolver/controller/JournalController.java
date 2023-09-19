@@ -53,9 +53,6 @@ public class JournalController {
     private IAPIExecutionStatusService statusService;
     @Autowired
     private Rest rest;
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
     @Autowired
     private Environment environment;
     @Async
@@ -77,7 +74,7 @@ public class JournalController {
             System.out.println("journalRequest.getSys_created_on: ".concat(journalRequest.getSys_created_on()));*/
 
             Journal journal = new Journal();
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             String tag = "[Journal] ";
             journal.setOrigin(journalRequest.getElement());
             journal.setElement(journalRequest.getElement_id());
@@ -88,18 +85,18 @@ public class JournalController {
                 Incident incident = incidentService.findByIntegrationId(journal.getElement());
                 if (incident != null) {
                     journal.setIncident(incident);
-                    element = util.getFieldDisplay(incident);
+                    element = Util.getFieldDisplay(incident);
                 }
             } else if (journalRequest.getName().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journal.getElement());
                 if (scRequestItem != null) {
                     journal.setScRequestItem(scRequestItem);
 
-                    element = util.getFieldDisplay(scRequestItem);
+                    element = Util.getFieldDisplay(scRequestItem);
                 }
             }
 
-            if (util.hasData(journalRequest.getSys_created_by())) {
+            if (Util.hasData(journalRequest.getSys_created_by())) {
                 SysUser openedBy = sysUserService.findByUserName(journalRequest.getSys_created_by());
                 if (openedBy != null)
                     journal.setCreateBy(openedBy);
@@ -107,9 +104,9 @@ public class JournalController {
             Journal exists = journalService.findByIntegrationId(journal.getIntegrationId());
             if (exists != null) {
                 journal.setId(exists.getId());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
-            journal.setValue(util.reeplaceImg(journalRequest.getValue()));
+            journal.setValue(Util.reeplaceImg(journalRequest.getValue()));
            /* System.out.println("IMG VALUE READ");
             System.out.println(journalRequest.getValue());
             System.out.println("IMG VALUE PROCESS");
@@ -117,7 +114,7 @@ public class JournalController {
 
             journalService.save(journal);
 
-            //util.printData(tag, tagAction, util.getFieldDisplay(journal), element);
+            //Util.printData(tag, tagAction, Util.getFieldDisplay(journal), element);
 
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
@@ -148,7 +145,7 @@ public class JournalController {
                     journal.setParse(true);
                     journal.setReviewed(true);
                     String master = journal.getValue();
-                    String target = endPointSN.SrcAttachment().concat(attachment.getIntegrationId());
+                    String target = EndPointSN.SrcAttachment().concat(attachment.getIntegrationId());
                     String replacement = environment.getProperty("setting.url.api.img").concat(":").concat(environment.getProperty("server.port")).concat(environment.getProperty("setting.api.version")).concat("/").concat("snAttachment/").concat(attachment.getId().toString());
                     int startIndex = master.indexOf(target);
                     int stopIndex = startIndex + target.length();
@@ -159,13 +156,13 @@ public class JournalController {
                         System.out.println("IMG VALUE READ");
                         System.out.println(builder.toString());
                         System.out.println("IMG VALUE PROCESS");
-                        System.out.println(util.reeplaceImg(builder.toString()));
+                        System.out.println(Util.reeplaceImg(builder.toString()));
 
-                        journal.setValue(util.reeplaceImg(builder.toString()));
+                        journal.setValue(Util.reeplaceImg(builder.toString()));
                         journal.setValue(builder.toString());
                     }
                     //String newValue = journal.getValue().
-                    //       replaceAll(endPointSN.SrcAttachment().concat(attachment.getIntegrationId()),
+                    //       replaceAll(EndPointSN.SrcAttachment().concat(attachment.getIntegrationId()),
                     //               environment.getProperty("setting.url.api").concat(":").concat(environment.getProperty("server.port")).concat(environment.getProperty("setting.api.version")).concat("/").concat(attachment.getIntegrationId()));
 
                 });
@@ -195,15 +192,15 @@ public class JournalController {
                     journal.setParse(true);
                     journal.setReviewed(true);
                     String master = journal.getValue();
-                    String target = endPointSN.SrcAttachment().concat(attachment.getIntegrationId());
+                    String target = EndPointSN.SrcAttachment().concat(attachment.getIntegrationId());
                     String replacement = environment.getProperty("setting.url.api.img").concat(":").concat(environment.getProperty("server.port")).concat(environment.getProperty("setting.api.version")).concat("/").concat("snAttachment/").concat(attachment.getId().toString());
                     int startIndex = master.indexOf(target);
                     int stopIndex = startIndex + target.length();
                     StringBuilder builder = new StringBuilder(master);
                     if (startIndex != -1) {
                         builder.replace(startIndex, stopIndex, replacement);
-                        //System.out.println(util.reeplaceImg(builder.toString()));
-                        journal.setValue(util.reeplaceImg(builder.toString()));
+                        //System.out.println(Util.reeplaceImg(builder.toString()));
+                        journal.setValue(Util.reeplaceImg(builder.toString()));
                         //(journal.setValue(builder.toString());
                     }
                 });
@@ -228,7 +225,7 @@ public class JournalController {
                     journal.setParse(true);
                     journal.setReviewed(true);
                     String master = journal.getValue();
-                    String target = endPointSN.SrcAttachment().concat(attachment.getIntegrationId());
+                    String target = EndPointSN.SrcAttachment().concat(attachment.getIntegrationId());
                     String replacement = environment.getProperty("setting.url.api.img").concat(":").concat(environment.getProperty("server.port")).concat(environment.getProperty("setting.api.version")).concat("/").concat("snAttachment/").concat(attachment.getId().toString());
                     int startIndex = master.indexOf(target);
                     int stopIndex = startIndex + target.length();
@@ -259,7 +256,7 @@ public class JournalController {
                     journal.setParse(true);
                     journal.setReviewed(true);
                     String master = journal.getValue();
-                    String target = endPointSN.SrcAttachment().concat(attachment.getIntegrationId());
+                    String target = EndPointSN.SrcAttachment().concat(attachment.getIntegrationId());
                     String replacement = environment.getProperty("setting.url.api.img").concat(":").concat(environment.getProperty("server.port")).concat(environment.getProperty("setting.api.version")).concat("/").concat("snAttachment/").concat(attachment.getId().toString());
                     int startIndex = master.indexOf(target);
                     int stopIndex = startIndex + target.length();
@@ -313,10 +310,10 @@ public class JournalController {
         Journal addJournal = new Journal();
         try {
             Journal journal = new Journal();
-            journal.setValue(util.parseJson(json, "journal", "value"));
-            journal.setOrigin(util.parseJson(json, "journal", "origin"));
-            journal.setName(util.parseJson(json, "journal", "name"));
-            journal.setElement(util.parseJson(json, "journal", "element"));
+            journal.setValue(Util.parseJson(json, "journal", "value"));
+            journal.setOrigin(Util.parseJson(json, "journal", "origin"));
+            journal.setName(Util.parseJson(json, "journal", "name"));
+            journal.setElement(Util.parseJson(json, "journal", "element"));
             if (journal.getName().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(journal.getElement());
                 if (incident != null)
@@ -326,8 +323,8 @@ public class JournalController {
                 if (scRequestItem != null)
                     journal.setScRequestItem(scRequestItem);
             }
-            journal.setCreateBy(sysUserService.findById(util.parseIdJson(json, "journal", "createBy")));
-            addJournal = rest.addJournal(endPointSN.PostJournal(), journal);
+            journal.setCreateBy(sysUserService.findById(Util.parseIdJson(json, "journal", "createBy")));
+            addJournal = rest.addJournal(EndPointSN.PostJournal(), journal);
             journalService.save(addJournal);
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
@@ -404,10 +401,10 @@ public class JournalController {
 
     @GetMapping("/journalsBySolver")
     public List<JournalRequest> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
-        String[] sparmOffSets = util.offSets1500000();
+        String[] sparmOffSets = Util.offSets1500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Journal] ";
@@ -415,8 +412,8 @@ public class JournalController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.Journal().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.Journal().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.Journal().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.Journal().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -444,24 +441,24 @@ public class JournalController {
                             if (incident != null) {
                                 journal.setIncident(incident);
                                 flag = incident.getCompany().getSolver();
-                                company = util.getFieldDisplay(incident.getCompany());
-                                element = util.getFieldDisplay(incident);
+                                company = Util.getFieldDisplay(incident.getCompany());
+                                element = Util.getFieldDisplay(incident);
                             }
                         } else if (journalRequest.getName().equals(SnTable.ScRequestItem.get())) {
                             ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journalRequest.getElement_id());
                             if (scRequestItem != null) {
                                 journal.setScRequestItem(scRequestItem);
                                 flag = scRequestItem.getCompany().getSolver();
-                                company = util.getFieldDisplay(scRequestItem.getCompany());
-                                element = util.getFieldDisplay(scRequestItem);
+                                company = Util.getFieldDisplay(scRequestItem.getCompany());
+                                element = Util.getFieldDisplay(scRequestItem);
                             }
                         } else if (journalRequest.getName().equals(SnTable.ScRequest.get())) {
                             ScRequest scRequest = scRequestService.findByIntegrationId(journalRequest.getElement_id());
                             if (scRequest != null) {
                                 journal.setScRequest(scRequest);
                                 flag = scRequest.getCompany().getSolver();
-                                company = util.getFieldDisplay(scRequest.getCompany());
-                                element = util.getFieldDisplay(scRequest);
+                                company = Util.getFieldDisplay(scRequest.getCompany());
+                                element = Util.getFieldDisplay(scRequest);
                             }
                         }
 
@@ -469,23 +466,23 @@ public class JournalController {
                             journalRequests.add(journalRequest);
                             journal.setOrigin(journalRequest.getElement());
                             journal.setElement(journalRequest.getElement_id());
-                            journal.setValue(util.reeplaceImg(journalRequest.getValue().trim()));
+                            journal.setValue(Util.reeplaceImg(journalRequest.getValue().trim()));
                             journal.setCreatedOn(journalRequest.getSys_created_on());
                             journal.setIntegrationId(journalRequest.getSys_id());
                             journal.setActive(true);
-                            if (util.hasData(journalRequest.getSys_created_by())) {
+                            if (Util.hasData(journalRequest.getSys_created_by())) {
                                 SysUser openedBy = sysUserService.findByUserName(journalRequest.getSys_created_by());
                                 if (openedBy != null)
                                     journal.setCreateBy(openedBy);
                             }
 
-                            String tagAction = app.CreateConsole();
+                            String tagAction = App.CreateConsole();
                             Journal exists = journalService.findByIntegrationId(journal.getIntegrationId());
                             if (exists != null) {
                                 journal.setId(exists.getId());
-                                tagAction = app.UpdateConsole();
+                                tagAction = App.UpdateConsole();
                             }
-                            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(journal)), element, company);
+                            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(journal)), element, company);
 
 
                             journalService.save(journal);
@@ -500,9 +497,9 @@ public class JournalController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -513,17 +510,17 @@ public class JournalController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return journalRequests;
     }
 
 
     @GetMapping("/journalsBySolverByQuery")
     public List<JournalRequest> show(String query, boolean flagQuery) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
-        String[] sparmOffSets = util.offSets1500000();
+        String[] sparmOffSets = Util.offSets1500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Journal] ";
@@ -532,8 +529,8 @@ public class JournalController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
 
-                String result = rest.responseByEndPoint(endPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
+                String result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -561,24 +558,24 @@ public class JournalController {
                             if (incident != null) {
                                 journal.setIncident(incident);
                                 flag = incident.getCompany().getSolver();
-                                company = util.getFieldDisplay(incident.getCompany());
-                                element = util.getFieldDisplay(incident);
+                                company = Util.getFieldDisplay(incident.getCompany());
+                                element = Util.getFieldDisplay(incident);
                             }
                         } else if (journalRequest.getName().equals(SnTable.ScRequestItem.get())) {
                             ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journalRequest.getElement_id());
                             if (scRequestItem != null) {
                                 journal.setScRequestItem(scRequestItem);
                                 flag = scRequestItem.getCompany().getSolver();
-                                company = util.getFieldDisplay(scRequestItem.getCompany());
-                                element = util.getFieldDisplay(scRequestItem);
+                                company = Util.getFieldDisplay(scRequestItem.getCompany());
+                                element = Util.getFieldDisplay(scRequestItem);
                             }
                         } else if (journalRequest.getName().equals(SnTable.ScRequest.get())) {
                             ScRequest scRequest = scRequestService.findByIntegrationId(journalRequest.getElement_id());
                             if (scRequest != null) {
                                 journal.setScRequest(scRequest);
                                 flag = scRequest.getCompany().getSolver();
-                                company = util.getFieldDisplay(scRequest.getCompany());
-                                element = util.getFieldDisplay(scRequest);
+                                company = Util.getFieldDisplay(scRequest.getCompany());
+                                element = Util.getFieldDisplay(scRequest);
                             }
                         }
 
@@ -586,23 +583,23 @@ public class JournalController {
                             journalRequests.add(journalRequest);
                             journal.setOrigin(journalRequest.getElement());
                             journal.setElement(journalRequest.getElement_id());
-                            journal.setValue(util.reeplaceImg(journalRequest.getValue().trim()));
+                            journal.setValue(Util.reeplaceImg(journalRequest.getValue().trim()));
                             journal.setCreatedOn(journalRequest.getSys_created_on());
                             journal.setIntegrationId(journalRequest.getSys_id());
                             journal.setActive(true);
-                            if (util.hasData(journalRequest.getSys_created_by())) {
+                            if (Util.hasData(journalRequest.getSys_created_by())) {
                                 SysUser openedBy = sysUserService.findByUserName(journalRequest.getSys_created_by());
                                 if (openedBy != null)
                                     journal.setCreateBy(openedBy);
                             }
 
-                            String tagAction = app.CreateConsole();
+                            String tagAction = App.CreateConsole();
                             Journal exists = journalService.findByIntegrationId(journal.getIntegrationId());
                             if (exists != null) {
                                 journal.setId(exists.getId());
-                                tagAction = app.UpdateConsole();
+                                tagAction = App.UpdateConsole();
                             }
-                            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(journal)), element, company);
+                            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(journal)), element, company);
 
 
                             journalService.save(journal);
@@ -617,9 +614,9 @@ public class JournalController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -630,17 +627,17 @@ public class JournalController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return journalRequests;
     }
 
 
     @GetMapping("/journalsBySolverAndQueryCreate")
     public List<JournalRequest> show(String query, boolean flagQuery, boolean flagA) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
-        String[] sparmOffSets = util.offSets1500000();
+        String[] sparmOffSets = Util.offSets1500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Journal] ";
@@ -649,8 +646,8 @@ public class JournalController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
 
-                String result = rest.responseByEndPoint(endPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
+                String result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -670,12 +667,12 @@ public class JournalController {
                     boolean flag = false;
                     try {
                         Journal journal = new Journal();
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         journalRequest = objectMapper.readValue(snJournalJson.toString(), JournalRequest.class);
                         Journal exists = journalService.findByIntegrationId(journalRequest.getSys_id());
                         if (exists != null) {
                             journal.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         } else {
 
 
@@ -688,24 +685,24 @@ public class JournalController {
                                 if (incident != null) {
                                     journal.setIncident(incident);
                                     flag = incident.getCompany().getSolver();
-                                    company = util.getFieldDisplay(incident.getCompany());
-                                    element = util.getFieldDisplay(incident);
+                                    company = Util.getFieldDisplay(incident.getCompany());
+                                    element = Util.getFieldDisplay(incident);
                                 }
                             } else if (journalRequest.getName().equals(SnTable.ScRequestItem.get())) {
                                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journalRequest.getElement_id());
                                 if (scRequestItem != null) {
                                     journal.setScRequestItem(scRequestItem);
                                     flag = scRequestItem.getCompany().getSolver();
-                                    company = util.getFieldDisplay(scRequestItem.getCompany());
-                                    element = util.getFieldDisplay(scRequestItem);
+                                    company = Util.getFieldDisplay(scRequestItem.getCompany());
+                                    element = Util.getFieldDisplay(scRequestItem);
                                 }
                             } else if (journalRequest.getName().equals(SnTable.ScRequest.get())) {
                                 ScRequest scRequest = scRequestService.findByIntegrationId(journalRequest.getElement_id());
                                 if (scRequest != null) {
                                     journal.setScRequest(scRequest);
                                     flag = scRequest.getCompany().getSolver();
-                                    company = util.getFieldDisplay(scRequest.getCompany());
-                                    element = util.getFieldDisplay(scRequest);
+                                    company = Util.getFieldDisplay(scRequest.getCompany());
+                                    element = Util.getFieldDisplay(scRequest);
                                 }
                             }
 
@@ -713,18 +710,18 @@ public class JournalController {
                                 journalRequests.add(journalRequest);
                                 journal.setOrigin(journalRequest.getElement());
                                 journal.setElement(journalRequest.getElement_id());
-                                journal.setValue(util.reeplaceImg(journalRequest.getValue().trim()));
+                                journal.setValue(Util.reeplaceImg(journalRequest.getValue().trim()));
                                 journal.setCreatedOn(journalRequest.getSys_created_on());
                                 journal.setIntegrationId(journalRequest.getSys_id());
                                 journal.setActive(true);
-                                if (util.hasData(journalRequest.getSys_created_by())) {
+                                if (Util.hasData(journalRequest.getSys_created_by())) {
                                     SysUser openedBy = sysUserService.findByUserName(journalRequest.getSys_created_by());
                                     if (openedBy != null)
                                         journal.setCreateBy(openedBy);
                                 }
 
 
-                                util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(journal)), element, company);
+                                Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(journal)), element, company);
 
 
                                 journalService.save(journal);
@@ -740,9 +737,9 @@ public class JournalController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -753,13 +750,13 @@ public class JournalController {
         } catch (Exception e) {
            // System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return journalRequests;
     }
 
     @GetMapping("/journalsSNByElement")
     public List<JournalRequest> findJournalsSNByElement(String elementId) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
         long startTime = 0;
@@ -769,8 +766,8 @@ public class JournalController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
 
-            String result = rest.responseByEndPoint(endPointSN.JournalByElement().concat(elementId));
-            System.out.println(tag.concat("(".concat(endPointSN.JournalByElement().concat(elementId)).concat(")")));
+            String result = rest.responseByEndPoint(EndPointSN.JournalByElement().concat(elementId));
+            System.out.println(tag.concat("(".concat(EndPointSN.JournalByElement().concat(elementId)).concat(")")));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             List<Attachment> attachments = attachmentService.findByElement(elementId);
@@ -796,24 +793,24 @@ public class JournalController {
                         if (incident != null) {
                             journal.setIncident(incident);
                             flag = incident.getCompany().getSolver();
-                            company = util.getFieldDisplay(incident.getCompany());
-                            element = util.getFieldDisplay(incident);
+                            company = Util.getFieldDisplay(incident.getCompany());
+                            element = Util.getFieldDisplay(incident);
                         }
                     } else if (journalRequest.getName().equals(SnTable.ScRequestItem.get())) {
                         ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journalRequest.getElement_id());
                         if (scRequestItem != null) {
                             journal.setScRequestItem(scRequestItem);
                             flag = scRequestItem.getCompany().getSolver();
-                            company = util.getFieldDisplay(scRequestItem.getCompany());
-                            element = util.getFieldDisplay(scRequestItem);
+                            company = Util.getFieldDisplay(scRequestItem.getCompany());
+                            element = Util.getFieldDisplay(scRequestItem);
                         }
                     } else if (journalRequest.getName().equals(SnTable.ScRequest.get())) {
                         ScRequest scRequest = scRequestService.findByIntegrationId(journalRequest.getElement_id());
                         if (scRequest != null) {
                             journal.setScRequest(scRequest);
                             flag = scRequest.getCompany().getSolver();
-                            company = util.getFieldDisplay(scRequest.getCompany());
-                            element = util.getFieldDisplay(scRequest);
+                            company = Util.getFieldDisplay(scRequest.getCompany());
+                            element = Util.getFieldDisplay(scRequest);
                         }
                     }
 
@@ -821,7 +818,7 @@ public class JournalController {
                         journalRequests.add(journalRequest);
                         journal.setOrigin(journalRequest.getElement());
                         journal.setElement(journalRequest.getElement_id());
-                        journal.setValue(util.reeplaceImg(journalRequest.getValue().trim()));
+                        journal.setValue(Util.reeplaceImg(journalRequest.getValue().trim()));
                         Pattern p = Pattern.compile(".*\\<[^>]+>.*");
                         Matcher m = p.matcher(journal.getValue());
                         if (m.find() && !journal.getReviewed()) {
@@ -829,7 +826,7 @@ public class JournalController {
                                 journal.setParse(true);
                                 journal.setReviewed(true);
                                 String master = journal.getValue();
-                                String target = endPointSN.SrcAttachment().concat(attachment.getIntegrationId());
+                                String target = EndPointSN.SrcAttachment().concat(attachment.getIntegrationId());
                                 String replacement = environment.getProperty("setting.url.api.img").concat(":").concat(environment.getProperty("server.port")).concat(environment.getProperty("setting.api.version")).concat("/").concat("snAttachment/").concat(attachment.getId().toString());
                                 int startIndex = master.indexOf(target);
                                 int stopIndex = startIndex + target.length();
@@ -843,19 +840,19 @@ public class JournalController {
                         journal.setCreatedOn(journalRequest.getSys_created_on());
                         journal.setIntegrationId(journalRequest.getSys_id());
                         journal.setActive(true);
-                        if (util.hasData(journalRequest.getSys_created_by())) {
+                        if (Util.hasData(journalRequest.getSys_created_by())) {
                             SysUser openedBy = sysUserService.findByUserName(journalRequest.getSys_created_by());
                             if (openedBy != null)
                                 journal.setCreateBy(openedBy);
                         }
 
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         Journal exists = journalService.findByIntegrationId(journal.getIntegrationId());
                         if (exists != null) {
                             journal.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(journal)), element, company);
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(journal)), element, company);
 
 
                         journalService.save(journal);
@@ -870,9 +867,9 @@ public class JournalController {
 
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
@@ -883,7 +880,7 @@ public class JournalController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return journalRequests;
     }
 

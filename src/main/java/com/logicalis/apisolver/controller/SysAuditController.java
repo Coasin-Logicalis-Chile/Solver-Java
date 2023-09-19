@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -58,9 +57,7 @@ public class SysAuditController {
     private ISysUserService sysUserService;
     @Autowired
     private Rest rest;
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+
     @GetMapping("/sysAudits")
     public List<SysAudit> index() {
         return sysAuditService.findAll();
@@ -198,14 +195,14 @@ public class SysAuditController {
 
     @GetMapping("/sysAuditsBySolver")
     public List<SysAuditRequest> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SysAuditRequest> sysAuditRequests = new ArrayList<>();
         List<SysDocumentation> sysDocumentations = sysDocumentationService.findAll();
         List<ChoiceFields> choicesIncident = choiceService.choicesByIncident();
         List<ChoiceFields> choicesScTask = choiceService.choicesByScTask();
 
-        String[] sparmOffSets = util.offSets7500000();
+        String[] sparmOffSets = Util.offSets7500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysAudit] ";
@@ -214,8 +211,8 @@ public class SysAuditController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
 
-                String result = rest.responseByEndPoint(endPointSN.SysAudit().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.SysAudit().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.SysAudit().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.SysAudit().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -248,16 +245,16 @@ public class SysAuditController {
                         sysAudit.setOldvalue(sysAuditRequest.getOldvalue());
                         sysAudit.setSysCreatedBy(sysAuditRequest.getSys_created_by());
                         sysAudit.setActive(true);
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         SysAudit exists = sysAuditService.findByIntegrationId(sysAudit.getIntegrationId());
                         String element = "";
                         String company = "";
                         if (exists != null) {
                             sysAudit.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
 
                         }
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysAudit)));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(sysAudit)));
                         sysAuditService.save(sysAudit);
 
                         List<SysAudit> sysAudits = sysAuditService.findByInternalCheckpoint(sysAudit.getInternalCheckpoint()).stream().
@@ -267,11 +264,11 @@ public class SysAuditController {
                                         !p.getFieldname().equals(Field.TimeWorked.get()) &&
                                         !p.getFieldname().equals(Field.BusinessStc.get())).
                                 collect(Collectors.toList());
-                        String template = app.TableData();
+                        String template = App.TableData();
                         final String[] templateDetail = {""};
                         Journal journal = new Journal();
 
-                        journal.setOrigin(app.OriginFieldChanges());
+                        journal.setOrigin(App.OriginFieldChanges());
                         journal.setElement(sysAudit.getDocumentkey());
                         journal.setReviewed(true);
                         journal.setCreatedOn(sysAudit.getSysCreatedOn());
@@ -283,33 +280,33 @@ public class SysAuditController {
                             Incident incident = incidentService.findByIntegrationId(sysAudit.getDocumentkey());
                             if (incident != null) {
                                 journal.setIncident(incident);
-                                company = util.getFieldDisplay(incident.getCompany());
-                                element = util.getFieldDisplay(incident);
+                                company = Util.getFieldDisplay(incident.getCompany());
+                                element = Util.getFieldDisplay(incident);
                             }
                         } else if (sysAuditRequest.getTablename().equals(SnTable.ScRequestItem.get())) {
                             ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(sysAudit.getDocumentkey());
                             if (scRequestItem != null) {
                                 journal.setScRequestItem(scRequestItem);
-                                company = util.getFieldDisplay(scRequestItem.getCompany());
-                                element = util.getFieldDisplay(scRequestItem);
+                                company = Util.getFieldDisplay(scRequestItem.getCompany());
+                                element = Util.getFieldDisplay(scRequestItem);
                             }
                         } else if (sysAuditRequest.getTablename().equals(SnTable.ScRequest.get())) {
                             ScRequest scRequest = scRequestService.findByIntegrationId(sysAudit.getDocumentkey());
                             if (scRequest != null) {
                                 journal.setScRequest(scRequest);
-                                company = util.getFieldDisplay(scRequest.getCompany());
-                                element = util.getFieldDisplay(scRequest);
+                                company = Util.getFieldDisplay(scRequest.getCompany());
+                                element = Util.getFieldDisplay(scRequest);
                             }
                         } else if (sysAuditRequest.getTablename().equals(SnTable.ScTask.get())) {
                             ScTask scTask = scTaskService.findByIntegrationId(sysAudit.getDocumentkey());
                             ScRequestItem scRequestItem = scTask.getScRequestItem();
                             if (scRequestItem != null) {
                                 journal.setScRequestItem(scRequestItem);
-                                company = util.getFieldDisplay(scRequestItem.getCompany());
-                                element = util.getFieldDisplay(scRequestItem);
+                                company = Util.getFieldDisplay(scRequestItem.getCompany());
+                                element = Util.getFieldDisplay(scRequestItem);
                             }
                         }
-                        if (util.hasData(sysAuditRequest.getUser())) {
+                        if (Util.hasData(sysAuditRequest.getUser())) {
                             SysUser createdBy = sysUserService.findByUserName(sysAuditRequest.getUser());
                             if (createdBy != null)
                                 journal.setCreateBy(createdBy);
@@ -429,31 +426,31 @@ public class SysAuditController {
                                 if (ciService != null) {
                                     oldValue = ciService.getName();
                                 }
-                            } else if (util.dateValidator(audit.getNewvalue()) || util.dateValidator(audit.getOldvalue())) {
-                                if (util.dateValidator(audit.getNewvalue())) {
-                                    newValue = util.LocalDateTimeToString(util.getLocalDateTime(util.isNull(audit.getNewvalue())));
+                            } else if (Util.dateValidator(audit.getNewvalue()) || Util.dateValidator(audit.getOldvalue())) {
+                                if (Util.dateValidator(audit.getNewvalue())) {
+                                    newValue = Util.LocalDateTimeToString(Util.getLocalDateTime(Util.isNull(audit.getNewvalue())));
                                 }
-                                if (util.dateValidator(audit.getOldvalue())) {
-                                    oldValue = util.LocalDateTimeToString(util.getLocalDateTime(util.isNull(audit.getOldvalue())));
+                                if (Util.dateValidator(audit.getOldvalue())) {
+                                    oldValue = Util.LocalDateTimeToString(Util.getLocalDateTime(Util.isNull(audit.getOldvalue())));
                                 }
                             }
 
 
-                            templateDetail[0] = templateDetail[0].concat(app.TRData().
+                            templateDetail[0] = templateDetail[0].concat(App.TRData().
                                     replace("FIELD", field).
                                     replace("VALUE", newValue.concat("  \uD835\uDE5A\uD835\uDE67\uD835\uDE56  ".concat(oldValue))));
                         });
 
                         template = template.replace("TBODY", templateDetail[0]);
                         journal.setValue(template);
-                        tagAction = app.CreateConsole();
+                        tagAction = App.CreateConsole();
                         Journal journalExists = journalService.findByIntegrationId(journal.getIntegrationId());
                         if (journalExists != null) {
                             journal.setId(journalExists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
 
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(journal)), element, company);
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(journal)), element, company);
                         journalService.save(journal);
                         count[0] = count[0] + 1;
 
@@ -464,9 +461,9 @@ public class SysAuditController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -477,7 +474,7 @@ public class SysAuditController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return sysAuditRequests;
     }
 
@@ -501,7 +498,7 @@ public class SysAuditController {
         try {
 
             SysAudit sysAudit = new SysAudit();
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             String tag = "[SysAudit] ";
             sysAudit.setFieldname(sysAuditRequest.getFieldname());
             sysAudit.setReason(sysAuditRequest.getReason());
@@ -521,10 +518,10 @@ public class SysAuditController {
             String company = "";
             if (exists != null) {
                 sysAudit.setId(exists.getId());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
 
             }
-            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysAudit)));
+            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(sysAudit)));
             sysAuditService.save(sysAudit);
 
             List<SysAudit> sysAudits = sysAuditService.findByInternalCheckpoint(sysAudit.getInternalCheckpoint()).stream().
@@ -534,11 +531,11 @@ public class SysAuditController {
                             !p.getFieldname().equals(Field.TimeWorked.get()) &&
                             !p.getFieldname().equals(Field.BusinessStc.get())).
                     collect(Collectors.toList());
-            String template = app.TableData();
+            String template = App.TableData();
             final String[] templateDetail = {""};
             Journal journal = new Journal();
 
-            journal.setOrigin(app.OriginFieldChanges());
+            journal.setOrigin(App.OriginFieldChanges());
             journal.setElement(sysAudit.getDocumentkey());
             journal.setReviewed(true);
             journal.setCreatedOn(sysAudit.getSysCreatedOn());
@@ -550,33 +547,33 @@ public class SysAuditController {
                 Incident incident = incidentService.findByIntegrationId(sysAudit.getDocumentkey());
                 if (incident != null) {
                     journal.setIncident(incident);
-                    company = util.getFieldDisplay(incident.getCompany());
-                    element = util.getFieldDisplay(incident);
+                    company = Util.getFieldDisplay(incident.getCompany());
+                    element = Util.getFieldDisplay(incident);
                 }
             } else if (sysAuditRequest.getTablename().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(sysAudit.getDocumentkey());
                 if (scRequestItem != null) {
                     journal.setScRequestItem(scRequestItem);
-                    company = util.getFieldDisplay(scRequestItem.getCompany());
-                    element = util.getFieldDisplay(scRequestItem);
+                    company = Util.getFieldDisplay(scRequestItem.getCompany());
+                    element = Util.getFieldDisplay(scRequestItem);
                 }
             } else if (sysAuditRequest.getTablename().equals(SnTable.ScRequest.get())) {
                 ScRequest scRequest = scRequestService.findByIntegrationId(sysAudit.getDocumentkey());
                 if (scRequest != null) {
                     journal.setScRequest(scRequest);
-                    company = util.getFieldDisplay(scRequest.getCompany());
-                    element = util.getFieldDisplay(scRequest);
+                    company = Util.getFieldDisplay(scRequest.getCompany());
+                    element = Util.getFieldDisplay(scRequest);
                 }
             } else if (sysAuditRequest.getTablename().equals(SnTable.ScTask.get())) {
                 ScTask scTask = scTaskService.findByIntegrationId(sysAudit.getDocumentkey());
                 ScRequestItem scRequestItem = scTask.getScRequestItem();
                 if (scRequestItem != null) {
                     journal.setScRequestItem(scRequestItem);
-                    company = util.getFieldDisplay(scRequestItem.getCompany());
-                    element = util.getFieldDisplay(scRequestItem);
+                    company = Util.getFieldDisplay(scRequestItem.getCompany());
+                    element = Util.getFieldDisplay(scRequestItem);
                 }
             }
-            if (util.hasData(sysAuditRequest.getUser())) {
+            if (Util.hasData(sysAuditRequest.getUser())) {
                 SysUser createdBy = sysUserService.findByUserName(sysAuditRequest.getUser());
                 if (createdBy != null)
                     journal.setCreateBy(createdBy);
@@ -696,31 +693,30 @@ public class SysAuditController {
                     if (ciService != null) {
                         oldValue = ciService.getName();
                     }
-                } else if (util.dateValidator(audit.getNewvalue()) || util.dateValidator(audit.getOldvalue())) {
-                    if (util.dateValidator(audit.getNewvalue())) {
-                        newValue = util.LocalDateTimeToString(util.getLocalDateTime(util.isNull(audit.getNewvalue())));
+                } else if (Util.dateValidator(audit.getNewvalue()) || Util.dateValidator(audit.getOldvalue())) {
+                    if (Util.dateValidator(audit.getNewvalue())) {
+                        newValue = Util.LocalDateTimeToString(Util.getLocalDateTime(Util.isNull(audit.getNewvalue())));
                     }
-                    if (util.dateValidator(audit.getOldvalue())) {
-                        oldValue = util.LocalDateTimeToString(util.getLocalDateTime(util.isNull(audit.getOldvalue())));
+                    if (Util.dateValidator(audit.getOldvalue())) {
+                        oldValue = Util.LocalDateTimeToString(Util.getLocalDateTime(Util.isNull(audit.getOldvalue())));
                     }
                 }
 
-
-                templateDetail[0] = templateDetail[0].concat(app.TRData().
+                templateDetail[0] = templateDetail[0].concat(App.TRData().
                         replace("FIELD", field).
                         replace("VALUE", newValue.concat("  \uD835\uDE5A\uD835\uDE67\uD835\uDE56  ".concat(oldValue))));
             });
 
             template = template.replace("TBODY", templateDetail[0]);
             journal.setValue(template);
-            tagAction = app.CreateConsole();
+            tagAction = App.CreateConsole();
             Journal journalExists = journalService.findByIntegrationId(journal.getIntegrationId());
             if (journalExists != null) {
                 journal.setId(journalExists.getId());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
 
-            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(journal)), element, company);
+            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(journal)), element, company);
             journalService.save(journal);
             count[0] = count[0] + 1;
 

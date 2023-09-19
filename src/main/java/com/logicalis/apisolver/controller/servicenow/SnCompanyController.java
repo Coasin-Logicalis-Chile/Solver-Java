@@ -46,23 +46,19 @@ public class SnCompanyController {
     @Autowired
     private Rest rest;
 
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sn_companies")
     public List<SnCompany> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnCompany> snCompanies = new ArrayList<>();
         long startTime = 0;
         long endTime = 0;
-        Util util = new Util();
         String tag = "[Company] ";
         try {
             List<Domain> domains = domainService.findAll();
             System.out.println(tag.concat("(Get All Domains)"));
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Company());
+            String result = rest.responseByEndPoint(EndPointSN.Company());
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -84,23 +80,23 @@ public class SnCompanyController {
                     company.setIntegrationId(snCompany.getSys_id());
                     company.setSolver(snCompany.getU_solver());
 
-                    String domainSysId = util.getIdByJson((JSONObject) snCompanyJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
+                    String domainSysId = Util.getIdByJson((JSONObject) snCompanyJson, SnTable.Domain.get(), App.Value());
+                    Domain domain = Util.filterDomain(domains, domainSysId);
                     if (domain != null)
                         company.setDomain(domain);
 
 
                     Company exists = companyService.findByIntegrationId(company.getIntegrationId());
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     if (exists != null) {
                         company.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
 
-                    util.printData(tag,
+                    Util.printData(tag,
                             count[0],
-                            tagAction.concat(company != null ? company.getName() != "" ? company.getName() : app.Name() : app.Name()),
-                            (domain != null ? domain.getName() != "" ? domain.getName() : app.Domain() : app.Domain()));
+                            tagAction.concat(company != null ? company.getName() != "" ? company.getName() : App.Name() : App.Name()),
+                            (domain != null ? domain.getName() != "" ? domain.getName() : App.Domain() : App.Domain()));
 
                     companyService.save(company);
                     count[0] = count[0] + 1;
@@ -112,9 +108,9 @@ public class SnCompanyController {
             apiResponse = mapper.readValue(result, APIResponse.class);
 
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Company());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Company());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -124,7 +120,7 @@ public class SnCompanyController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snCompanies;
     }
 }

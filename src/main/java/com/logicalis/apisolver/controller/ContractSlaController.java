@@ -40,9 +40,7 @@ public class ContractSlaController {
     private IDomainService domainService;
     @Autowired
     private Rest rest;
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+
     @GetMapping("/contractSlas")
     public List<ContractSla> index() {
         return contractSlaService.findAll();
@@ -158,16 +156,15 @@ public class ContractSlaController {
 
     @GetMapping("/contractsSlaSN")
     public List<ContractSlaSolver> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<ContractSlaSolver> snContractsSlaSolver = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[ContractSla] ";
         try {
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.ContractSla());
+            String result = rest.responseByEndPoint(EndPointSN.ContractSla());
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -213,19 +210,19 @@ public class ContractSlaController {
                     contractSla.setWhenToCancel(contractSlaSolver.getWhen_to_cancel());
                     contractSla.setWhenToResume(contractSlaSolver.getWhen_to_resume());
                     contractSla.setIntegrationId(contractSlaSolver.getSys_id());
-                    Domain domain = getDomainByIntegrationId((JSONObject) contractSlaJson, SnTable.Domain.get(), app.Value());
+                    Domain domain = getDomainByIntegrationId((JSONObject) contractSlaJson, SnTable.Domain.get(), App.Value());
 
                     if (domain != null)
                         contractSla.setDomain(domain);
                     ContractSla exists = contractSlaService.findByIntegrationId(contractSla.getIntegrationId());
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
 
                     if (exists != null) {
                         contractSla.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
 
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(contractSla)), util.getFieldDisplay(contractSla.getDomain()));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(contractSla)), Util.getFieldDisplay(contractSla.getDomain()));
                     contractSlaService.save(contractSla);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
@@ -236,9 +233,9 @@ public class ContractSlaController {
             apiResponse = mapper.readValue(result, APIResponse.class);
 
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Catalog());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Catalog());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -248,26 +245,25 @@ public class ContractSlaController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snContractsSlaSolver;
     }
 
 
     @GetMapping("/contractsSlaSolver")
     public List<ContractSlaSolver> show(String query) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<ContractSlaSolver> snContractsSlaSolver = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[ContractSla] ";
-        String[] sparmOffSets = util.offSets50000();
+        String[] sparmOffSets = Util.offSets50000();
 
         for (String sparmOffSet : sparmOffSets) {
             try {
                 startTime = System.currentTimeMillis();
-                String result = rest.responseByEndPoint(endPointSN.ContractSlaByQuery().replace("QUERY", query).concat(sparmOffSet));
+                String result = rest.responseByEndPoint(EndPointSN.ContractSlaByQuery().replace("QUERY", query).concat(sparmOffSet));
                 endTime = (System.currentTimeMillis() - startTime);
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -313,17 +309,17 @@ public class ContractSlaController {
                         contractSla.setWhenToCancel(contractSlaSolver.getWhen_to_cancel());
                         contractSla.setWhenToResume(contractSlaSolver.getWhen_to_resume());
                         contractSla.setIntegrationId(contractSlaSolver.getSys_id());
-                        Domain domain = getDomainByIntegrationId((JSONObject) contractSlaJson, SnTable.Domain.get(), app.Value());
+                        Domain domain = getDomainByIntegrationId((JSONObject) contractSlaJson, SnTable.Domain.get(), App.Value());
                         if (domain != null)
                             contractSla.setDomain(domain);
                         ContractSla exists = contractSlaService.findByIntegrationId(contractSla.getIntegrationId());
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         if (exists != null) {
                             contractSla.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
 
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(contractSla)), util.getFieldDisplay(contractSla.getDomain()));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(contractSla)), Util.getFieldDisplay(contractSla.getDomain()));
                         contractSlaService.save(contractSla);
                         count[0] = count[0] + 1;
                     } catch (JsonProcessingException e) {
@@ -334,30 +330,24 @@ public class ContractSlaController {
                 apiResponse = mapper.readValue(result, APIResponse.class);
 
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.ContractSla());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.ContractSla());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 status.setExecutionTime(endTime);
                 statusService.save(status);
-
-
             } catch (Exception e) {
                 System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
             }
-            System.out.println(app.End());
+            System.out.println(App.End());
         }
         return snContractsSlaSolver;
     }
 
-
-
-
-
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;

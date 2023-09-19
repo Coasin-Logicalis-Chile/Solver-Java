@@ -34,15 +34,17 @@ public class Util {
     private final static String Date_REGEX = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$";
     private final static Pattern Date_PATTERN = Pattern.compile(Date_REGEX);
     //COLORS
+    /*
     @Autowired
     private Environment environment;
-    public final String ANSI_RESET = "\u001B[0m";
+    */
+    public final static String ANSI_RESET = "\u001B[0m";
 
     // Declaring the color
     // Custom declaration
-    public final String ANSI_YELLOW = "\u001B[33m";
+    public final static String ANSI_YELLOW = "\u001B[33m";
 
-    public boolean dateValidator(String date) {
+    public static boolean dateValidator(String date) {
         Matcher matcher = Date_PATTERN.matcher(date);
         return matcher.matches();
     }
@@ -53,6 +55,7 @@ public class Util {
         return System.getenv("PATH_INSTANCE_SERVICENOW");
     }
 
+    /*
     public void uploadFile(File localFile, SnAttachment snAttachment) throws IOException {
         SSHClient sshClient = setupSshj();
         SFTPClient sftpClient = sshClient.newSFTPClient();
@@ -67,8 +70,9 @@ public class Util {
         sftpClient.close();
         sshClient.disconnect();
     }
+     */
 
-    private SSHClient setupSshj() throws IOException {
+    private static SSHClient setupSshj() throws IOException {
         SSHClient client = new SSHClient();
         client.addHostKeyVerifier(new PromiscuousVerifier());
         client.connect(remoteHost);
@@ -76,7 +80,7 @@ public class Util {
         return client;
     }
 
-    public String parseJson(String journal, String levelOne, String levelTwo) {
+    public static String parseJson(String journal, String levelOne, String levelTwo) {
         JSONParser parser = new JSONParser();
         try {
             return ((JSONObject) parser.parse(((JSONObject) parser.parse(journal)).get(levelOne).toString())).get(levelTwo).toString();
@@ -86,7 +90,7 @@ public class Util {
         return "";
     }
 
-    public String parseJson(String journal, String levelOne) {
+    public static String parseJson(String journal, String levelOne) {
         JSONParser parser = new JSONParser();
         try {
             return ((JSONObject) parser.parse(journal)).get(levelOne).toString();
@@ -96,7 +100,7 @@ public class Util {
         return "";
     }
 
-    public boolean parseBooleanJson(String journal, String levelOne, String levelTwo) {
+    public static boolean parseBooleanJson(String journal, String levelOne, String levelTwo) {
         JSONParser parser = new JSONParser();
         try {
             return Boolean.parseBoolean(((JSONObject) parser.parse(((JSONObject) parser.parse(journal)).get(levelOne).toString())).get(levelTwo).toString());
@@ -106,7 +110,7 @@ public class Util {
         return false;
     }
 
-    public Long parseIdJson(String journal, String levelOne, String levelTwo) {
+    public static Long parseIdJson(String journal, String levelOne, String levelTwo) {
         JSONParser parser = new JSONParser();
         try {
             return (Long) ((JSONObject) parser.parse(((JSONObject) parser.parse(journal)).get(levelOne).toString())).get(levelTwo);
@@ -116,7 +120,7 @@ public class Util {
         return Long.valueOf(0);
     }
 
-    public String getIdByJson(JSONObject jsonObject, String levelOne, String levelTwo) {
+    public static String getIdByJson(JSONObject jsonObject, String levelOne, String levelTwo) {
         String id = "";
         if (jsonObject != null) {
             JSONObject object = (JSONObject) jsonObject;
@@ -140,7 +144,7 @@ public class Util {
         return id;
     }
 
-    public String getIdByJson(JSONObject jsonObject, String levelOne) {
+    public static String getIdByJson(JSONObject jsonObject, String levelOne) {
         String id = "";
         if (jsonObject != null) {
             JSONObject json = (JSONObject) jsonObject;
@@ -157,19 +161,19 @@ public class Util {
         return id;
     }
 
-    public String isNull(String a) {
+    public static String isNull(String a) {
         return a == null || a.trim() == "" ? "" : a.trim();
     }
 
-    public boolean isNullBool(String a) {
+    public static boolean isNullBool(String a) {
         return a == null || a == "";
     }
 
-    public String isNull(String a, String b) {
+    public static String isNull(String a, String b) {
         return a == null ? b : a;
     }
 
-    public String isNullIntegration(Object o) {
+    public static String isNullIntegration(Object o) {
         if (o != null) {
             String className = o.getClass().getName();
             if (className.equals(new SysUser().getClass().getName())) {
@@ -183,52 +187,50 @@ public class Util {
         return "";
     }
 
-
-    public boolean hasData(String a) {
+    public static boolean hasData(String a) {
         return a == null || a == "" ? false : true;
     }
 
-    public boolean hasData(Object a) {
+    public static boolean hasData(Object a) {
         return a == null || a == "" ? false : true;
     }
 
-    public Domain filterDomain(List<Domain> list, String filter) {
+    public static Domain filterDomain(List<Domain> list, String filter) {
         return list.stream()
                 .filter(x -> filter.equals(x.getIntegrationId()))
                 .findFirst()
                 .orElse(null);
     }
 
-    public SysGroup filterSysGroup(List<SysGroup> list, String filter) {
+    public static SysGroup filterSysGroup(List<SysGroup> list, String filter) {
         return list.stream()
                 .filter(x -> filter.equals(x.getIntegrationId()))
                 .findFirst()
                 .orElse(null);
     }
 
-    public Company filterCompany(List<Company> list, String filter) {
+    public static Company filterCompany(List<Company> list, String filter) {
         return list.stream()
                 .filter(x -> filter.equals(x.getIntegrationId()))
                 .findFirst()
                 .orElse(null);
     }
 
-    public SysUser filterSysUser(List<SysUser> list, String filter) {
+    public static SysUser filterSysUser(List<SysUser> list, String filter) {
         return list.stream()
                 .filter(x -> filter.equals(x.getIntegrationId()))
                 .findFirst()
                 .orElse(null);
     }
 
-    public CiService filterCiService(List<CiService> list, String filter) {
+    public static CiService filterCiService(List<CiService> list, String filter) {
         return list.stream()
                 .filter(x -> filter.equals(x.getIntegrationId()))
                 .findFirst()
                 .orElse(null);
     }
 
-
-    public ConfigurationItem filterConfigurationItem(List<ConfigurationItem> list, String filter) {
+    public static ConfigurationItem filterConfigurationItem(List<ConfigurationItem> list, String filter) {
         if (filter.contains("sicredi.net"))
             return null;
         return list.stream()
@@ -238,27 +240,27 @@ public class Util {
     }
 
 
-    public Location filterLocation(List<Location> list, String filter) {
+    public static Location filterLocation(List<Location> list, String filter) {
         return list.stream()
                 .filter(x -> filter.equals(x.getIntegrationId()))
                 .findFirst()
                 .orElse(null);
     }
 
-    public Department filterDepartments(List<Department> list, String filter) {
+    public static Department filterDepartments(List<Department> list, String filter) {
         return list.stream()
                 .filter(x -> filter.equals(x.getIntegrationId()))
                 .findFirst()
                 .orElse(null);
     }
 
-    public void printData(String tag, int count, String levelOne) {
+    public static void printData(String tag, int count, String levelOne) {
         System.out.print(tag);
         System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne));
     }
 
-    public void printData(String tag, int count, String levelOne, String levelTwo) {
+    public static void printData(String tag, int count, String levelOne, String levelTwo) {
         System.out.print(tag);
         System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne)
@@ -266,7 +268,7 @@ public class Util {
                 .concat(levelTwo));
     }
 
-    public void printData(String tag, int count, String levelOne, String levelTwo, String levelThree) {
+    public static void printData(String tag, int count, String levelOne, String levelTwo, String levelThree) {
         System.out.print(tag);
         System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne)
@@ -276,7 +278,7 @@ public class Util {
                 .concat(levelThree));
     }
 
-    public void printData(String tag, String levelOne, String levelTwo, String levelThree) {
+    public static void printData(String tag, String levelOne, String levelTwo, String levelThree) {
         System.out.print("\u001B[37m".concat(tag));
         System.out.println(String.valueOf(levelOne).concat(" ")
                 .concat(" ")
@@ -285,13 +287,13 @@ public class Util {
                 .concat(levelThree));
     }
 
-    public void printData(String tag, String levelOne) {
+    public static void printData(String tag, String levelOne) {
         System.out.print(tag);
         System.out.println("\u001B[37m(".concat(String.valueOf(levelOne)).concat(" "));
     }
 
 
-    public void printData(String tag, int count, String levelOne, String levelTwo, String levelThree, String levelFour) {
+    public static void printData(String tag, int count, String levelOne, String levelTwo, String levelThree, String levelFour) {
         System.out.print(tag);
         System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne)
@@ -303,80 +305,78 @@ public class Util {
                 .concat(levelFour));
     }
 
-    public String getFieldDisplay(SysAudit sysAudit) {
+    public static String getFieldDisplay(SysAudit sysAudit) {
         return sysAudit != null ? sysAudit.getDocumentkey() != "" ? sysAudit.getDocumentkey() : "SysAudit" : "SysAudit";
     }
 
-    public String getFieldDisplay(SysDocumentation sysDocumentation) {
+    public static String getFieldDisplay(SysDocumentation sysDocumentation) {
         return sysDocumentation != null ? sysDocumentation.getUniqueIdentifier() != "" ? sysDocumentation.getUniqueIdentifier() : "SysDocumentation" : "SysDocumentation";
     }
 
-    public String getFieldDisplay(SysGroup group) {
+    public static String getFieldDisplay(SysGroup group) {
         return group != null ? group.getName() != "" ? group.getName() : "SysGroup" : "SysGroup";
     }
 
-    public String getFieldDisplay(ScTask scTask) {
+    public static String getFieldDisplay(ScTask scTask) {
         return scTask != null ? scTask.getNumber() != "" ? scTask.getNumber() : "ScTask" : "ScTask";
     }
 
-    public String getFieldDisplay(TaskSla taskSla) {
+    public static String getFieldDisplay(TaskSla taskSla) {
         return taskSla != null ? getFieldDisplay(taskSla.getDomain()) : "TaskSlaByCompany";
     }
 
-    public String getFieldDisplay(Choice choice) {
+    public static String getFieldDisplay(Choice choice) {
         return choice != null ? choice.getName() != "" ? choice.getName() : "Choice" : "Choice";
     }
 
-    public String getFieldDisplay(ContractSla contractSla) {
+    public static String getFieldDisplay(ContractSla contractSla) {
         return contractSla != null ? contractSla.getName() != "" ? contractSla.getName() : App.ContractSla() : App.ContractSla();
     }
 
-
-    public String getFieldDisplay(CmnSchedule cmnSchedule) {
+    public static String getFieldDisplay(CmnSchedule cmnSchedule) {
         return cmnSchedule != null ? cmnSchedule.getName() != "" ? cmnSchedule.getName() : App.CmnSchedule() : App.CmnSchedule();
     }
 
-
-    public String getFieldDisplay(Incident incident) {
+    public static String getFieldDisplay(Incident incident) {
         return incident != null ? incident.getNumber() != "" ? incident.getNumber() : App.Incident() : App.Incident();
     }
 
-    public String getFieldDisplay(Attachment attachment) {
+    public static String getFieldDisplay(Attachment attachment) {
         return attachment != null ? attachment.getFileName() != "" ? attachment.getFileName() : "Attachment" : "Attachment";
     }
 
-    public String getFieldDisplay(SysUserGroup sysUserGroup) {
+    public static String getFieldDisplay(SysUserGroup sysUserGroup) {
         return sysUserGroup != null ? sysUserGroup.getSysGroup() != null ? isNull(sysUserGroup.getSysGroup().getName(), "SysUserGroup") : "SysUserGroup" : "SysUserGroup";
     }
 
-    public String getFieldDisplay(CatalogLine catalogLine) {
+    public static String getFieldDisplay(CatalogLine catalogLine) {
         return catalogLine != null ? catalogLine.getNumber() != "" ? catalogLine.getNumber() : App.CatalogLine() : App.CatalogLine();
     }
 
-    public String getFieldDisplay(ScRequest scRequest) {
+    public static String getFieldDisplay(ScRequest scRequest) {
         return scRequest != null ? scRequest.getNumber() != "" ? scRequest.getNumber() : App.ScRequest() : App.ScRequest();
     }
 
-    public String getFieldDisplay(ScRequestItem scRequestItem) {
+    public static String getFieldDisplay(ScRequestItem scRequestItem) {
         return scRequestItem != null ? scRequestItem.getNumber() != "" ? scRequestItem.getNumber() : App.ScRequestItem() : App.ScRequestItem();
     }
 
-    public String getFieldDisplay(Company company) {
+    public static String getFieldDisplay(Company company) {
         return company != null ? company.getName() != "" ? company.getName() : App.Company() : App.Company();
     }
 
-    public String getFieldDisplay(Domain domain) {
+    public static String getFieldDisplay(Domain domain) {
         return domain != null ? domain.getName() != "" ? domain.getName() : App.Domain() : App.Domain();
     }
 
-    public String getFieldDisplay(SysUser sysUser) {
+    public static String getFieldDisplay(SysUser sysUser) {
         return sysUser != null ? sysUser.getName() != "" ? sysUser.getName() : App.SysUser() : App.SysUser();
     }
 
     private static ZoneId UTC_ZONE = ZoneId.of("UTC");
     private static ZoneId LOCAL_ZONE = ZoneId.of("America/Santiago");
 
-    public LocalDateTime getLocalDateTime(String data) {
+    public static LocalDateTime getLocalDateTime(String data) {
         if (data != "" && data != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             LocalDateTime dateTime = LocalDateTime.parse(data, formatter);
@@ -385,7 +385,7 @@ public class Util {
         return null;
     }
 
-    public String LocalDateTimeToString(LocalDateTime dateTime) {
+    public static String LocalDateTimeToString(LocalDateTime dateTime) {
         if (dateTime != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             return dateTime.format(formatter);
@@ -393,39 +393,39 @@ public class Util {
             return "";
     }
 
-    public String getFieldDisplay(Location location) {
+    public static String getFieldDisplay(Location location) {
         return location != null ? location.getName() != "" ? location.getName() : App.Location() : App.Location();
     }
 
-    public String getFieldDisplay(Department department) {
+    public static String getFieldDisplay(Department department) {
         return department != null ? department.getName() != "" ? department.getName() : App.Department() : App.Department();
     }
 
-    public String getFieldDisplay(ConfigurationItem configurationItem) {
+    public static String getFieldDisplay(ConfigurationItem configurationItem) {
         return configurationItem != null ? configurationItem.getName() != "" ? configurationItem.getName() : App.ConfigurationItem() : App.ConfigurationItem();
     }
 
-    public String getFieldDisplay(CiService ciService) {
+    public static String getFieldDisplay(CiService ciService) {
         return ciService != null ? ciService.getName() != "" ? ciService.getName() : App.CiService() : App.CiService();
     }
 
-    public String getFieldDisplay(Journal journal) {
+    public static String getFieldDisplay(Journal journal) {
         return journal != null ? journal.getElement() != "" ? journal.getElement() : App.Journal() : App.Journal();
     }
 
-    public String[] offSets65000() {
+    public static String[] offSets65000() {
         return new String[]{"0", "5000", "10000", "15000", "20000", "25000", "30000", "35000", "40000", "45000", "50000", "55000", "60000", "65000"};
     }
 
-    public String[] offSets100000() {
+    public static String[] offSets100000() {
         return new String[]{"0", "5000", "10000", "15000", "20000", "25000", "30000", "35000", "40000", "45000", "50000", "55000", "60000", "65000", "70000", "75000", "80000", "85000", "90000", "95000", "100000"};
     }
 
-    public String[] offSets99000() {
+    public static String[] offSets99000() {
         return new String[]{"0", "3000", "6000", "9000", "12000", "15000", "18000", "21000", "24000", "27000", "30000", "33000", "36000", "39000", "42000", "45000", "48000", "51000", "54000", "57000", "60000", "63000", "66000", "69000", "72000", "75000", "78000", "81000", "84000", "87000", "90000", "93000", "96000", "99000"};
     }
 
-    public String[] offSets1500000() {
+    public static String[] offSets1500000() {
         int off = 1500000;
         ArrayList<String> offsets = new ArrayList<>();
         int size = Math.floorMod(off, 30000);
@@ -442,7 +442,7 @@ public class Util {
         return response;
     }
 
-    public String[] offSets7500000() {
+    public static String[] offSets7500000() {
         int off = 7500000;
         ArrayList<String> offsets = new ArrayList<>();
         int size = Math.floorMod(off, 30000);
@@ -459,11 +459,11 @@ public class Util {
         return response;
     }
 
-    public String[] offSets3000() {
+    public static String[] offSets3000() {
         return new String[]{"0", "3000"};
     }
 
-    public String[] offSets6000() {
+    public static String[] offSets6000() {
         int off = 6000;
         ArrayList<String> offsets = new ArrayList<>();
         int size = Math.floorMod(off, 6000);
@@ -480,7 +480,7 @@ public class Util {
         return response;
     }
 
-    public String[] offSets50000() {
+    public static String[] offSets50000() {
         int off = 50000;
         ArrayList<String> offsets = new ArrayList<>();
         int size = Math.floorMod(off, 50000);
@@ -497,7 +497,7 @@ public class Util {
         return response;
     }
 
-    public String[] offSets500000() {
+    public static String[] offSets500000() {
         int off = 500000;
         ArrayList<String> offsets = new ArrayList<>();
         int size = Math.floorMod(off, 30000);
@@ -521,18 +521,18 @@ public class Util {
          } else
              return null;
      }*/
-    public String removeImg(String content) {
+    public static String removeImg(String content) {
         Document document = Jsoup.parse(content);
         document.select("img").remove();
         return document.toString();
         //return Jsoup.parse(content).text();
     }
 
-    private String styleImg(String width, String height) {
+    private static String styleImg(String width, String height) {
         return "width: ".concat(width).concat("px !important").concat("; height: ").concat(height).concat("px !important").concat(";");
     }
 
-    public String reeplaceImg(String content) {
+    public static String reeplaceImg(String content) {
         try {
             if (content.toLowerCase().contains("img") && content.toLowerCase().contains("<html>")) {
                 //    content = "<html>".concat(content.split("<html>")[1]);
@@ -557,7 +557,7 @@ public class Util {
         }
     }
 
-    String getDigits(String value) {
+    static String getDigits(String value) {
         Matcher matcher = Pattern.compile("\\d+").matcher(value);
         String digits = "";
         while (matcher.find()) {

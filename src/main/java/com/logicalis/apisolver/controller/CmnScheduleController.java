@@ -34,7 +34,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class CmnScheduleController {
-
     @Autowired
     private ICmnScheduleService cmnScheduleService;
     @Autowired
@@ -43,9 +42,7 @@ public class CmnScheduleController {
     private IDomainService domainService;
     @Autowired
     private Rest rest;
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+
     @GetMapping("/cmnSchedules")
     public List<CmnSchedule> index() {
         return cmnScheduleService.findAll();
@@ -161,16 +158,15 @@ public class CmnScheduleController {
 
     @GetMapping("/cmnSchedulesSN")
     public List<CmnScheduleSolver> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<CmnScheduleSolver> snCmnSchedulesSolver = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[CmnSchedule] ";
         try {
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.CmnSchedule());
+            String result = rest.responseByEndPoint(EndPointSN.CmnSchedule());
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -203,17 +199,17 @@ public class CmnScheduleController {
                     cmnSchedule.setSysUpdateName(cmnScheduleSolver.getSys_update_name());
                     cmnSchedule.setName(cmnScheduleSolver.getName());
                     cmnSchedule.setIntegrationId(cmnScheduleSolver.getSys_id());
-                    Domain domain = getDomainByIntegrationId((JSONObject) cmnScheduleJson, SnTable.Domain.get(), app.Value());
+                    Domain domain = getDomainByIntegrationId((JSONObject) cmnScheduleJson, SnTable.Domain.get(), App.Value());
                     if (domain != null)
                         cmnSchedule.setDomain(domain);
                     CmnSchedule exists = cmnScheduleService.findByIntegrationId(cmnSchedule.getIntegrationId());
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     if (exists != null) {
                         cmnSchedule.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
 
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(cmnSchedule)), util.getFieldDisplay(cmnSchedule.getDomain()));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(cmnSchedule)), Util.getFieldDisplay(cmnSchedule.getDomain()));
                     cmnScheduleService.save(cmnSchedule);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
@@ -224,9 +220,9 @@ public class CmnScheduleController {
             apiResponse = mapper.readValue(result, APIResponse.class);
 
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Catalog());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Catalog());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -236,13 +232,13 @@ public class CmnScheduleController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snCmnSchedulesSolver;
     }
 
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;

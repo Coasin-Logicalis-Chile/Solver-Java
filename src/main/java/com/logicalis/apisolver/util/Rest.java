@@ -34,8 +34,7 @@ import java.nio.file.Paths;
 
 
 public class Rest {
-    public Util util = new Util();
-
+    //public Util util = new Util();
     @Autowired
     @Qualifier("solverRestTemplate")
     RestTemplate restTemplate;
@@ -43,7 +42,6 @@ public class Rest {
     public RestTemplate restTemplateServiceNow() {
         this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
         return restTemplate;
-
     }
 
     public String responseByEndPoint(final String endPoint) {
@@ -269,8 +267,8 @@ public class Rest {
         HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
         String json = restTemplate.postForObject(uri, httpEntity, String.class);
-        journal.setCreatedOn(util.parseJson(json, "result", "sys_created_on"));
-        journal.setIntegrationId(util.parseJson(json, "result", "sys_id"));
+        journal.setCreatedOn(Util.parseJson(json, "result", "sys_created_on"));
+        journal.setIntegrationId(Util.parseJson(json, "result", "sys_id"));
         return journal;
     }
 
@@ -285,15 +283,15 @@ public class Rest {
             e.printStackTrace();
         }
         JSONObject json = new JSONObject();
-        json.put("assignmentGroup", util.isNullIntegration(incident.getAssignmentGroup()));
-        json.put("assignedTo", util.isNullIntegration(incident.getAssignedTo()));
+        json.put("assignmentGroup", Util.isNullIntegration(incident.getAssignmentGroup()));
+        json.put("assignedTo", Util.isNullIntegration(incident.getAssignedTo()));
         json.put("integrationId", incident.getIntegrationId());
         json.put("description", incident.getDescription());
         json.put("shortDescription", incident.getShortDescription());
         json.put("closeNotes", incident.getCloseNotes());
         json.put("closeCode", incident.getCloseCode());
         json.put("resolvedAt", incident.getResolvedAt() != null && incident.getResolvedAt() != "" ? incident.getResolvedAt().replace("T", " ") : "");
-        json.put("resolvedBy", util.isNullIntegration(incident.getResolvedBy()));
+        json.put("resolvedBy", Util.isNullIntegration(incident.getResolvedBy()));
         json.put("state", incident.getState());
         json.put("incidentState", incident.getIncidentState());
         json.put("impact", incident.getImpact());
@@ -308,7 +306,7 @@ public class Rest {
         if (jsonResponse.toString().contains(search)) {
             String responseSplit = jsonResponse.toString().replaceAll(" ", "").split(search)[1];
             responseSplit = "{\"result\":".concat(responseSplit.split("}}")[0]).concat("}}");
-            incident.setState(util.parseJson(responseSplit, "result", "state"));
+            incident.setState(Util.parseJson(responseSplit, "result", "state"));
         }
         return incident;
     }
@@ -368,10 +366,10 @@ public class Rest {
         }
         JSONObject json = new JSONObject();
         json.put("solverId",scTask.getId());
-        json.put("assignmentGroup", util.isNullIntegration(scTask.getAssignmentGroup()));
-        json.put("assignedTo", util.isNullIntegration(scTask.getAssignedTo()));
-        json.put("scalingAssignmentGroup", util.isNullIntegration(scTask.getScalingAssignmentGroup()));
-        json.put("scalingAssignedTo", util.isNullIntegration(scTask.getScalingAssignedTo()));
+        json.put("assignmentGroup", Util.isNullIntegration(scTask.getAssignmentGroup()));
+        json.put("assignedTo", Util.isNullIntegration(scTask.getAssignedTo()));
+        json.put("scalingAssignmentGroup", Util.isNullIntegration(scTask.getScalingAssignmentGroup()));
+        json.put("scalingAssignedTo", Util.isNullIntegration(scTask.getScalingAssignedTo()));
         json.put("scaling", scTask.getScaling());
         json.put("integrationId", scTask.getIntegrationId());
         json.put("description", scTask.getDescription());
@@ -380,14 +378,14 @@ public class Rest {
         json.put("priority",scTask.getPriority());
         json.put("closeNotes", scTask.getCloseNotes());
         json.put("closedAt", scTask.getClosedAt() != null && scTask.getClosedAt() != "" ? scTask.getClosedAt().replace("T", " ") : "");
-        json.put("closedBy", util.isNullIntegration(scTask.getClosedBy()));
+        json.put("closedBy", Util.isNullIntegration(scTask.getClosedBy()));
         json.put("reasonPending", scTask.getReasonPending());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
         String tag = "[ScTask]";
         String tagAction = "(Update in ServiceNow)";
-        util.printData(tag, tagAction, util.getFieldDisplay(scTask), util.getFieldDisplay(scTask.getAssignedTo()));
+        Util.printData(tag, tagAction, Util.getFieldDisplay(scTask), Util.getFieldDisplay(scTask.getAssignedTo()));
         return scTask;
     }
 }

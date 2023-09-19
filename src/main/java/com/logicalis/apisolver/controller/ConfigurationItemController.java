@@ -28,9 +28,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class ConfigurationItemController {
-	Util util = new Util();
-	App app = new App();
-	EndPointSN endPointSN = new EndPointSN();
 	@Autowired
 	private IConfigurationItemService configurationItemService;
 	@Autowired
@@ -165,10 +162,10 @@ public class ConfigurationItemController {
 	@GetMapping("/configurationItemBySolverAndQuery")
 	public List<ConfigurationItem> show(String query, boolean flag) {
 
-		System.out.println(app.Start());
+		System.out.println(App.Start());
 		APIResponse apiResponse = null;
 		List<ConfigurationItem> configurationItems = new ArrayList<>();
-		String[] sparmOffSets = util.offSets50000();
+		String[] sparmOffSets = Util.offSets50000();
 		long startTime = 0;
 		long endTime = 0;
 		String tag = "[ConfigurationItem] ";
@@ -177,8 +174,8 @@ public class ConfigurationItemController {
 			startTime = System.currentTimeMillis();
 			final int[] count = {1};
 			for (String sparmOffSet : sparmOffSets) {
-				String result = rest.responseByEndPoint(endPointSN.ConfigurationItemByQuery().replace("QUERY", query).concat(sparmOffSet));
-				System.out.println(tag.concat("(".concat(endPointSN.ConfigurationItemByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+				String result = rest.responseByEndPoint(EndPointSN.ConfigurationItemByQuery().replace("QUERY", query).concat(sparmOffSet));
+				System.out.println(tag.concat("(".concat(EndPointSN.ConfigurationItemByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 
 				JSONParser parser = new JSONParser();
 				JSONObject resultJson = new JSONObject();
@@ -188,7 +185,7 @@ public class ConfigurationItemController {
 					ListSnConfigurationItemJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
 				ListSnConfigurationItemJson.stream().forEach(configurationItemSolverJson -> {
-					String tagAction = app.CreateConsole();
+					String tagAction = App.CreateConsole();
 					ConfigurationItemSolver configurationItemSolver = new ConfigurationItemSolver();
 					try {
 
@@ -200,7 +197,7 @@ public class ConfigurationItemController {
 
 						if (exists != null) {
 							configurationItem.setId(exists.getId());
-							tagAction = app.UpdateConsole();
+							tagAction = App.UpdateConsole();
 						}
 						configurationItem.setName(configurationItemSolver.getName());
 						configurationItem.setIntegrationId(configurationItemSolver.getSys_id());
@@ -225,48 +222,42 @@ public class ConfigurationItemController {
 						configurationItem.setSpecialInstruction(configurationItemSolver.getSpecial_instruction());
 						configurationItem.setSubcategory(configurationItemSolver.getSubcategory());
 						configurationItem.setUpdatedBy(configurationItemSolver.getSys_updated_by());
- 
 
-						Company company = companyService.findByIntegrationId(util.getIdByJson((JSONObject) configurationItemSolverJson, SnTable.Company.get(), app.Value()));
+						Company company = companyService.findByIntegrationId(Util.getIdByJson((JSONObject) configurationItemSolverJson, SnTable.Company.get(), App.Value()));
 						configurationItem.setCompany(company);
 						configurationItem.setDomain(company.getDomain());
 
-
-						Location location = locationService.findByIntegrationId(util.getIdByJson((JSONObject) configurationItemSolverJson, SnTable.Location.get(), app.Value()));
+						Location location = locationService.findByIntegrationId(Util.getIdByJson((JSONObject) configurationItemSolverJson, SnTable.Location.get(), App.Value()));
 						configurationItem.setLocation(location);
 
-						Company manufacturer = companyService.findByIntegrationId(util.getIdByJson((JSONObject) configurationItemSolverJson, "manufacturer", app.Value()));
+						Company manufacturer = companyService.findByIntegrationId(Util.getIdByJson((JSONObject) configurationItemSolverJson, "manufacturer", App.Value()));
 						configurationItem.setManufacturer(manufacturer);
 
 
-						SysUser assignedTo = sysUserService.findByIntegrationId(util.getIdByJson((JSONObject) configurationItemSolverJson, "assigned_to", app.Value()));
+						SysUser assignedTo = sysUserService.findByIntegrationId(Util.getIdByJson((JSONObject) configurationItemSolverJson, "assigned_to", App.Value()));
 						configurationItem.setAssignedTo(assignedTo);
 
-						SysUser ownedBy = sysUserService.findByIntegrationId(util.getIdByJson((JSONObject) configurationItemSolverJson, "owned_by", app.Value()));
+						SysUser ownedBy = sysUserService.findByIntegrationId(Util.getIdByJson((JSONObject) configurationItemSolverJson, "owned_by", App.Value()));
 						configurationItem.setOwnedBy(ownedBy);
 
-		  
-						SysGroup supportGroup = sysGroupService.findByIntegrationId(util.getIdByJson((JSONObject) configurationItemSolverJson, "support_group", app.Value()));
+						SysGroup supportGroup = sysGroupService.findByIntegrationId(Util.getIdByJson((JSONObject) configurationItemSolverJson, "support_group", App.Value()));
 						configurationItem.setSupportGroup(supportGroup);
-		 
-
 
 						configurationItemService.save(configurationItem);
 						configurationItems.add(configurationItem);
-						util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(configurationItem)), util.getFieldDisplay(company), util.getFieldDisplay(company.getDomain()));
+						Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(configurationItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(company.getDomain()));
 						count[0] = count[0] + 1;
 					} catch (Exception e) {
 						System.out.println(tag.concat("Exception (I) (").concat(String.valueOf(count[0])).concat(") ").concat(String.valueOf(e)));
 					}
 				});
-
 			}
 			ObjectMapper mapper = new ObjectMapper();
 			apiResponse = mapper.readValue("Ended process", APIResponse.class);
 			APIExecutionStatus status = new APIExecutionStatus();
-			status.setUri(endPointSN.Location());
-			status.setUserAPI(app.SNUser());
-			status.setPasswordAPI(app.SNPassword());
+			status.setUri(EndPointSN.Location());
+			status.setUserAPI(App.SNUser());
+			status.setPasswordAPI(App.SNPassword());
 			status.setError(apiResponse.getError());
 			status.setMessage(apiResponse.getMessage());
 			endTime = (System.currentTimeMillis() - startTime);
@@ -276,7 +267,7 @@ public class ConfigurationItemController {
 		} catch (Exception e) {
 			System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
 		}
-		System.out.println(app.End());
+		System.out.println(App.End());
 		return configurationItems;
 	}
 }

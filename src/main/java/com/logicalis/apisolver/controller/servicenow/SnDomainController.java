@@ -52,7 +52,6 @@ public class SnDomainController {
         System.out.println(app.Start());
         APIResponse apiResponse = null;
         List<SnDomain> snDomains = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Domain] ";
@@ -85,9 +84,7 @@ public class SnDomainController {
                         domain.setId(exists.getId());
                         tagAction = app.UpdateConsole();
                     }
-
-                    util.printData(tag, count[0], tagAction.concat(domain != null ? domain.getName() != "" ? domain.getName() : app.Name() : app.Name()));
-
+                    Util.printData(tag, count[0], tagAction.concat(domain != null ? domain.getName() != "" ? domain.getName() : app.Name() : app.Name()));
                     domainService.save(domain);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {

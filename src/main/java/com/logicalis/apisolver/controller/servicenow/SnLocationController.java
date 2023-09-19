@@ -45,20 +45,16 @@ public class SnLocationController {
     @Autowired
     private Rest rest;
 
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
     @GetMapping("/sn_locations")
     public List<SnLocation> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnLocation> snLocations = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
+        String[] sparmOffSets = Util.offSets500000();
 
         long startTime = 0;
         long endTime = 0;
         String tag = "[Location] ";
-        Util util = new Util();
         try {
             List<Domain> domains = domainService.findAll();
             System.out.println(tag.concat("(Get All Domains)"));
@@ -68,8 +64,8 @@ public class SnLocationController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.Location().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.Location().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.Location().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.Location().concat(sparmOffSet)).concat(")")));
 
                 endTime = (System.currentTimeMillis() - startTime);
                 ObjectMapper mapper = new ObjectMapper();
@@ -96,24 +92,24 @@ public class SnLocationController {
                         location.setLatitude(snLocation.getLatitude());
                         location.setLongitude(snLocation.getLongitude());
                         location.setIntegrationId(snLocation.getsys_id());
-                        String domainSysId = util.getIdByJson((JSONObject) snLocationJson, SnTable.Domain.get(), app.Value());
-                        Domain domain = util.filterDomain(domains, domainSysId);
+                        String domainSysId = Util.getIdByJson((JSONObject) snLocationJson, SnTable.Domain.get(), App.Value());
+                        Domain domain = Util.filterDomain(domains, domainSysId);
                         if (domain != null)
                             location.setDomain(domain);
 
-                        String companySysId = util.getIdByJson((JSONObject) snLocationJson, SnTable.Company.get(), app.Value());
-                        Company company = util.filterCompany(companies, companySysId);
+                        String companySysId = Util.getIdByJson((JSONObject) snLocationJson, SnTable.Company.get(), App.Value());
+                        Company company = Util.filterCompany(companies, companySysId);
                         if (company != null)
                             location.setCompany(company);
 
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         Location exists = locationService.findByIntegrationId(location.getIntegrationId());
                         if (exists != null) {
                             location.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
                         locationService.save(location);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(location)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(location)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
 
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
@@ -124,9 +120,9 @@ public class SnLocationController {
                 apiResponse = mapper.readValue(result, APIResponse.class);
 
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 status.setExecutionTime(endTime);
@@ -136,27 +132,26 @@ public class SnLocationController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snLocations;
     }
 
     @GetMapping("/sn_locationsSolverByQuery")
     public List<SnLocation> show(String query) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnLocation> snLocations = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
+        String[] sparmOffSets = Util.offSets500000();
 
         long startTime = 0;
         long endTime = 0;
         String tag = "[Location] ";
-        Util util = new Util();
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 
                 endTime = (System.currentTimeMillis() - startTime);
                 ObjectMapper mapper = new ObjectMapper();
@@ -186,22 +181,22 @@ public class SnLocationController {
                         location.setLatitude(snLocation.getLatitude());
                         location.setLongitude(snLocation.getLongitude());
                         location.setIntegrationId(snLocation.getsys_id());
-                        Domain domain = getDomainByIntegrationId((JSONObject) snLocationJson, SnTable.Domain.get(), app.Value());
+                        Domain domain = getDomainByIntegrationId((JSONObject) snLocationJson, SnTable.Domain.get(), App.Value());
                         if (domain != null)
                             location.setDomain(domain);
 
-                        Company company = getCompanyByIntegrationId((JSONObject) snLocationJson, SnTable.Company.get(), app.Value());
+                        Company company = getCompanyByIntegrationId((JSONObject) snLocationJson, SnTable.Company.get(), App.Value());
                         if (company != null)
                             location.setCompany(company);
 
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         Location exists = locationService.findByIntegrationId(location.getIntegrationId());
                         if (exists != null) {
                             location.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
                         locationService.save(location);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(location)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(location)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
 
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
@@ -212,9 +207,9 @@ public class SnLocationController {
                 apiResponse = mapper.readValue(result, APIResponse.class);
 
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 status.setExecutionTime(endTime);
@@ -224,21 +219,21 @@ public class SnLocationController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snLocations;
     }
 
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Company getCompanyByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return companyService.findByIntegrationId(integrationId);
         } else
             return null;

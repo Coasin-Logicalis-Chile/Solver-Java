@@ -28,10 +28,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class CiServiceController {
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @Autowired
     private ICiServiceService ciServiceService;
     @Autowired
@@ -166,10 +162,10 @@ public class CiServiceController {
     @GetMapping("/ciServiceBySolverAndQuery")
     public List<CiService> show(String query, boolean flag) {
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<CiService> ciServices = new ArrayList<>();
-        String[] sparmOffSets = util.offSets50000();
+        String[] sparmOffSets = Util.offSets50000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[CiService] ";
@@ -178,8 +174,8 @@ public class CiServiceController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.CiServiceByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.CiServiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.CiServiceByQuery().replace("QUERY", query).concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.CiServiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 
                 JSONParser parser = new JSONParser();
                 JSONObject resultJson = new JSONObject();
@@ -189,7 +185,7 @@ public class CiServiceController {
                     ListSnCiServiceJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnCiServiceJson.stream().forEach(ciServiceSolverJson -> {
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     CiServiceSolver ciServiceSolver;
                     try {
 
@@ -201,82 +197,67 @@ public class CiServiceController {
 
                         if (exists != null) {
                             ciService.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
-                        ciService.setName(util.isNull(ciServiceSolver.getName()));
-                        ciService.setIntegrationId(util.isNull(ciServiceSolver.getSys_id()));
-                        ciService.setShortDescription(util.isNull(ciServiceSolver.getShort_description()));
-                        ciService.setStatus(util.isNull(ciServiceSolver.getStatus()));
-                        ciService.setUpdated(util.isNull(ciServiceSolver.getUpdated()));
-                        ciService.setCreatedBy(util.isNull(ciServiceSolver.getCreated_by()));
-                        ciService.setAssetTag(util.isNull(ciServiceSolver.getAsset_tag()));
-                        ciService.setCategory(util.isNull(ciServiceSolver.getCategory()));
-                        ciService.setComments(util.isNull(ciServiceSolver.getComments()));
-                        ciService.setCorrelationId(util.isNull(ciServiceSolver.getCorrelation_id()));
-                        ciService.setCostCurrency(util.isNull(ciServiceSolver.getCost_cc()));
-                        ciService.setCreated(util.isNull(ciServiceSolver.getCreated()));
-                        ciService.setHostname(util.isNull(ciServiceSolver.getHostname()));
-                        ciService.setImpact(util.isNull(ciServiceSolver.getImpact()));
-                        ciService.setInstalled(util.isNull(ciServiceSolver.getInstalled()));
-                        ciService.setModelNumber(util.isNull(ciServiceSolver.getModel_number()));
-                        ciService.setMonitor(util.isNull(ciServiceSolver.getMonitor()));
-                        ciService.setOperationalStatus(util.isNull(ciServiceSolver.getOperational_status()));
-                        ciService.setSerialNumber(util.isNull(ciServiceSolver.getSerial_number()));
-                        ciService.setSpecialInstruction(util.isNull(ciServiceSolver.getSpecial_instruction()));
-                        ciService.setSubcategory(util.isNull(ciServiceSolver.getSubcategory()));
-                        ciService.setUpdatedBy(util.isNull(ciServiceSolver.getUpdated_by()));
+                        ciService.setName(Util.isNull(ciServiceSolver.getName()));
+                        ciService.setIntegrationId(Util.isNull(ciServiceSolver.getSys_id()));
+                        ciService.setShortDescription(Util.isNull(ciServiceSolver.getShort_description()));
+                        ciService.setStatus(Util.isNull(ciServiceSolver.getStatus()));
+                        ciService.setUpdated(Util.isNull(ciServiceSolver.getUpdated()));
+                        ciService.setCreatedBy(Util.isNull(ciServiceSolver.getCreated_by()));
+                        ciService.setAssetTag(Util.isNull(ciServiceSolver.getAsset_tag()));
+                        ciService.setCategory(Util.isNull(ciServiceSolver.getCategory()));
+                        ciService.setComments(Util.isNull(ciServiceSolver.getComments()));
+                        ciService.setCorrelationId(Util.isNull(ciServiceSolver.getCorrelation_id()));
+                        ciService.setCostCurrency(Util.isNull(ciServiceSolver.getCost_cc()));
+                        ciService.setCreated(Util.isNull(ciServiceSolver.getCreated()));
+                        ciService.setHostname(Util.isNull(ciServiceSolver.getHostname()));
+                        ciService.setImpact(Util.isNull(ciServiceSolver.getImpact()));
+                        ciService.setInstalled(Util.isNull(ciServiceSolver.getInstalled()));
+                        ciService.setModelNumber(Util.isNull(ciServiceSolver.getModel_number()));
+                        ciService.setMonitor(Util.isNull(ciServiceSolver.getMonitor()));
+                        ciService.setOperationalStatus(Util.isNull(ciServiceSolver.getOperational_status()));
+                        ciService.setSerialNumber(Util.isNull(ciServiceSolver.getSerial_number()));
+                        ciService.setSpecialInstruction(Util.isNull(ciServiceSolver.getSpecial_instruction()));
+                        ciService.setSubcategory(Util.isNull(ciServiceSolver.getSubcategory()));
+                        ciService.setUpdatedBy(Util.isNull(ciServiceSolver.getUpdated_by()));
 
-                        Company company = companyService.findByIntegrationId(util.getIdByJson((JSONObject) ciServiceSolverJson, SnTable.Company.get(), app.Value()));
+                        Company company = companyService.findByIntegrationId(Util.getIdByJson((JSONObject) ciServiceSolverJson, SnTable.Company.get(), App.Value()));
                         ciService.setCompany(company);
                         ciService.setDomain(company.getDomain());
 
 
-                        Location location = locationService.findByIntegrationId(util.getIdByJson((JSONObject) ciServiceSolverJson, SnTable.Location.get(), app.Value()));
+                        Location location = locationService.findByIntegrationId(Util.getIdByJson((JSONObject) ciServiceSolverJson, SnTable.Location.get(), App.Value()));
                         ciService.setLocation(location);
 
-                        Company manufacturer = companyService.findByIntegrationId(util.getIdByJson((JSONObject) ciServiceSolverJson, "manufacturer", app.Value()));
+                        Company manufacturer = companyService.findByIntegrationId(Util.getIdByJson((JSONObject) ciServiceSolverJson, "manufacturer", App.Value()));
                         ciService.setManufacturer(manufacturer);
 
-                        SysUser assignedTo = sysUserService.findByIntegrationId(util.getIdByJson((JSONObject) ciServiceSolverJson, "assigned_to", app.Value()));
+                        SysUser assignedTo = sysUserService.findByIntegrationId(Util.getIdByJson((JSONObject) ciServiceSolverJson, "assigned_to", App.Value()));
                         ciService.setAssignedTo(assignedTo);
 
-                        SysUser ownedBy = sysUserService.findByIntegrationId(util.getIdByJson((JSONObject) ciServiceSolverJson, "owned_by", app.Value()));
+                        SysUser ownedBy = sysUserService.findByIntegrationId(Util.getIdByJson((JSONObject) ciServiceSolverJson, "owned_by", App.Value()));
                         ciService.setOwnedBy(ownedBy);
 
 
-                        SysGroup supportGroup = sysGroupService.findByIntegrationId(util.getIdByJson((JSONObject) ciServiceSolverJson, "support_group", app.Value()));
+                        SysGroup supportGroup = sysGroupService.findByIntegrationId(Util.getIdByJson((JSONObject) ciServiceSolverJson, "support_group", App.Value()));
                         ciService.setSupportGroup(supportGroup);
 
                         ciServiceService.save(ciService);
                         ciServices.add(ciService);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(ciService)), util.getFieldDisplay(company), util.getFieldDisplay(company.getDomain()));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(ciService)), Util.getFieldDisplay(company), Util.getFieldDisplay(company.getDomain()));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) (").concat(String.valueOf(count[0])).concat(") ").concat(String.valueOf(e)));
                     }
                 });
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
             }
             ObjectMapper mapper = new ObjectMapper();
             apiResponse = mapper.readValue("Ended process", APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
@@ -286,7 +267,7 @@ public class CiServiceController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return ciServices;
     }
 }

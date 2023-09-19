@@ -43,17 +43,12 @@ public class SnChoiceController {
     @Autowired
     private Rest rest;
 
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sn_choices_incidents")
     public List<SnChoice> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnChoice> snChoices = new ArrayList<>();
         // String[] sparmOffSets = new String[]{"0", "5000", "10000", "15000", "20000", "25000", "30000", "35000", "40000", "45000", "50000", "55000", "60000", "65000"};
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Choice] ";
@@ -63,10 +58,10 @@ public class SnChoiceController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             //for (String sparmOffSet : sparmOffSets) {
-            // String result = rest.responseByEndPoint(endPointSN.Choice().concat(sparmOffSet));
-            // System.out.println(tag.concat("(".concat(endPointSN.Choice().concat(sparmOffSet)).concat(")")));
-            String result = rest.responseByEndPoint(endPointSN.ChoiceIncident());
-            System.out.println(tag.concat("(".concat(endPointSN.ChoiceIncident())));
+            // String result = rest.responseByEndPoint(EndPointSN.Choice().concat(sparmOffSet));
+            // System.out.println(tag.concat("(".concat(EndPointSN.Choice().concat(sparmOffSet)).concat(")")));
+            String result = rest.responseByEndPoint(EndPointSN.ChoiceIncident());
+            System.out.println(tag.concat("(".concat(EndPointSN.ChoiceIncident())));
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             JSONParser parser = new JSONParser();
@@ -96,19 +91,19 @@ public class SnChoiceController {
                     choice.setSolver(snChoice.getU_Solver());
                     choice.setSolverDependentValue(snChoice.getU_solver_dependent_value());
 
-                    String domainSysId = util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
+                    String domainSysId = Util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), App.Value());
+                    Domain domain = Util.filterDomain(domains, domainSysId);
                     if (domain != null)
                         choice.setDomain(domain);
 
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     Choice exists = choiceService.findByIntegrationId(choice.getIntegrationId());
                     if (exists != null) {
                         choice.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
                     choiceService.save(choice);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(choice)), util.getFieldDisplay(domain));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(choice)), Util.getFieldDisplay(domain));
                     count[0] = count[0] + 1;
                 } catch (Exception e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -117,9 +112,9 @@ public class SnChoiceController {
 
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
@@ -130,18 +125,17 @@ public class SnChoiceController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snChoices;
     }
 
     @GetMapping("/sn_choices_by_filter")
     public List<SnChoice> show(String query) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnChoice> snChoices = new ArrayList<>();
-        String[] sparmOffSets = util.offSets50000();
+        String[] sparmOffSets = Util.offSets50000();
         // String[] sparmOffSets = new String[]{"0", "5000", "10000", "15000", "20000", "25000", "30000", "35000", "40000", "45000", "50000", "55000", "60000", "65000"};
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Choice] ";
@@ -154,13 +148,13 @@ public class SnChoiceController {
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             //for (String sparmOffSet : sparmOffSets) {
-            // String result = rest.responseByEndPoint(endPointSN.Choice().concat(sparmOffSet));
-            // System.out.println(tag.concat("(".concat(endPointSN.Choice().concat(sparmOffSet)).concat(")")));
-            //String result = rest.responseByEndPoint(endPointSN.ChoiceIncident.get());
-            //System.out.println(tag.concat("(".concat(endPointSN.ChoiceIncident.get())));
+            // String result = rest.responseByEndPoint(EndPointSN.Choice().concat(sparmOffSet));
+            // System.out.println(tag.concat("(".concat(EndPointSN.Choice().concat(sparmOffSet)).concat(")")));
+            //String result = rest.responseByEndPoint(EndPointSN.ChoiceIncident.get());
+            //System.out.println(tag.concat("(".concat(EndPointSN.ChoiceIncident.get())));
             for (String sparmOffSet : sparmOffSets) {
-              result = rest.responseByEndPoint(endPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet));
-            System.out.println(tag.concat("(".concat(endPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+              result = rest.responseByEndPoint(EndPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet));
+            System.out.println(tag.concat("(".concat(EndPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 
             JSONParser parser = new JSONParser();
             JSONObject resultJson = new JSONObject();
@@ -189,19 +183,19 @@ public class SnChoiceController {
                     choice.setSolver(snChoice.getU_Solver());
                     choice.setSolverDependentValue(snChoice.getU_solver_dependent_value());
 
-                    String domainSysId = util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
+                    String domainSysId = Util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), App.Value());
+                    Domain domain = Util.filterDomain(domains, domainSysId);
                     if (domain != null)
                         choice.setDomain(domain);
 
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     Choice exists = choiceService.findByIntegrationId(choice.getIntegrationId());
                     if (exists != null) {
                         choice.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
                     choiceService.save(choice);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(choice)), util.getFieldDisplay(domain));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(choice)), Util.getFieldDisplay(domain));
                     count[0] = count[0] + 1;
                 } catch (Exception e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -210,9 +204,9 @@ public class SnChoiceController {
             };
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
@@ -223,15 +217,14 @@ public class SnChoiceController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snChoices;
     }
     /*@GetMapping("/sn_choices_by_filter")
     public List<SnChoice> show(@NotNull @RequestParam(value = "table", required = true, defaultValue = "incident") String table) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnChoice> snChoices = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Choice] ";
@@ -243,20 +236,20 @@ public class SnChoiceController {
             String result = "";
             switch (table) {
                 case "incident":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceIncident.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceIncident.get())));
+                    result = rest.responseByEndPoint(EndPointSN.ChoiceIncident.get());
+                    System.out.println(tag.concat("(".concat(EndPointSN.ChoiceIncident.get())));
                 case "request":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceRequest.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceRequest.get())));
+                    result = rest.responseByEndPoint(EndPointSN.ChoiceRequest.get());
+                    System.out.println(tag.concat("(".concat(EndPointSN.ChoiceRequest.get())));
                 case "sc_req_item":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceRequest.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceRequest.get())));
+                    result = rest.responseByEndPoint(EndPointSN.ChoiceRequest.get());
+                    System.out.println(tag.concat("(".concat(EndPointSN.ChoiceRequest.get())));
                 case "task_sla":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceTaskSla.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceTaskSla.get())));
+                    result = rest.responseByEndPoint(EndPointSN.ChoiceTaskSla.get());
+                    System.out.println(tag.concat("(".concat(EndPointSN.ChoiceTaskSla.get())));
                 case "task":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceTask.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceTaskSla.get())));
+                    result = rest.responseByEndPoint(EndPointSN.ChoiceTask.get());
+                    System.out.println(tag.concat("(".concat(EndPointSN.ChoiceTaskSla.get())));
             }
 
             ObjectMapper mapper = new ObjectMapper();
@@ -287,19 +280,19 @@ public class SnChoiceController {
                     choice.setName(snChoice.getName());
                     choice.setSolver(snChoice.getU_Solver());
                     choice.setSolverDependentValue(snChoice.getU_solver_dependent_value());
-                    String domainSysId = util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
+                    String domainSysId = Util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), App.Value());
+                    Domain domain = Util.filterDomain(domains, domainSysId);
                     if (domain != null)
                         choice.setDomain(domain);
 
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     Choice exists = choiceService.findByIntegrationId(choice.getIntegrationId());
                     if (exists != null) {
                         choice.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
                     choiceService.save(choice);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(choice)), util.getFieldDisplay(domain));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(choice)), Util.getFieldDisplay(domain));
 
                     count[0] = count[0] + 1;
                 } catch (Exception e) {
@@ -309,9 +302,9 @@ public class SnChoiceController {
 
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
@@ -322,7 +315,7 @@ public class SnChoiceController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snChoices;
     }*/
 

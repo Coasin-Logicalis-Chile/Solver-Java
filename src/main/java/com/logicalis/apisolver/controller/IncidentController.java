@@ -26,7 +26,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
@@ -76,10 +75,6 @@ public class IncidentController {
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private Rest rest;
-
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
 
     @GetMapping("/incidentsByFilter2")
     public ResponseEntity<Page<Incident>> incidentsByFilter() {
@@ -339,27 +334,27 @@ public class IncidentController {
 
         try {
             String levelOne = SnTable.Incident.get();
-            SysUser assignedTo = getSysUserByIntegrationId(util.parseJson(json, levelOne, Field.AssignedTo.get()));
+            SysUser assignedTo = getSysUserByIntegrationId(Util.parseJson(json, levelOne, Field.AssignedTo.get()));
             currentIncident.setAssignedTo(assignedTo);
-            SysGroup sysGroup = getSysGroupByIntegrationId(util.parseJson(json, levelOne, Field.AssignmentGroup.get()));
+            SysGroup sysGroup = getSysGroupByIntegrationId(Util.parseJson(json, levelOne, Field.AssignmentGroup.get()));
             currentIncident.setAssignmentGroup(sysGroup);
-            SysUser resolvedBy = getSysUserByIntegrationId(util.parseJson(json, levelOne, Field.ResolvedBy.get()));
+            SysUser resolvedBy = getSysUserByIntegrationId(Util.parseJson(json, levelOne, Field.ResolvedBy.get()));
             currentIncident.setResolvedBy(resolvedBy);
-            currentIncident.setCloseNotes(util.parseJson(json, levelOne, Field.CloseNotes.get()));
-            currentIncident.setCloseCode(util.parseJson(json, levelOne, Field.CloseCode.get()));
-            currentIncident.setResolvedAt(util.parseJson(json, levelOne, Field.ResolvedAt.get()));
-            currentIncident.setDescription(util.parseJson(json, levelOne, Field.Description.get()));
-            currentIncident.setShortDescription(util.parseJson(json, levelOne, Field.ShortDescription.get()));
-            currentIncident.setState(util.parseJson(json, levelOne, Field.State.get()));
-            currentIncident.setIncidentState(util.parseJson(json, levelOne, Field.IncidentState.get()));
-            currentIncident.setReasonPending(util.parseJson(json, levelOne, Field.ReasonPending.get()));
-            currentIncident.setImpact(util.parseJson(json, levelOne,Field.Impact.get()));
-            currentIncident.setUrgency(util.parseJson(json, levelOne,Field.Urgency.get()));
-            currentIncident.setPriority(util.parseJson(json, levelOne, Field.Priority.get()));
-            String knowledge = util.parseJson(json, levelOne, Field.Knowledge.get());
+            currentIncident.setCloseNotes(Util.parseJson(json, levelOne, Field.CloseNotes.get()));
+            currentIncident.setCloseCode(Util.parseJson(json, levelOne, Field.CloseCode.get()));
+            currentIncident.setResolvedAt(Util.parseJson(json, levelOne, Field.ResolvedAt.get()));
+            currentIncident.setDescription(Util.parseJson(json, levelOne, Field.Description.get()));
+            currentIncident.setShortDescription(Util.parseJson(json, levelOne, Field.ShortDescription.get()));
+            currentIncident.setState(Util.parseJson(json, levelOne, Field.State.get()));
+            currentIncident.setIncidentState(Util.parseJson(json, levelOne, Field.IncidentState.get()));
+            currentIncident.setReasonPending(Util.parseJson(json, levelOne, Field.ReasonPending.get()));
+            currentIncident.setImpact(Util.parseJson(json, levelOne,Field.Impact.get()));
+            currentIncident.setUrgency(Util.parseJson(json, levelOne,Field.Urgency.get()));
+            currentIncident.setPriority(Util.parseJson(json, levelOne, Field.Priority.get()));
+            String knowledge = Util.parseJson(json, levelOne, Field.Knowledge.get());
             currentIncident.setKnowledge(Boolean.parseBoolean(knowledge != null && knowledge != "" ? knowledge : "false"));
             incidentUpdated = incidentService.save(currentIncident);
-            Incident incidentServiceNow = rest.putIncident(endPointSN.PutIncident(), currentIncident);
+            Incident incidentServiceNow = rest.putIncident(EndPointSN.PutIncident(), currentIncident);
             //currentIncident.setState(addIncident.getState());
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
@@ -394,7 +389,7 @@ public class IncidentController {
 
 
                 incident.setSysUpdatedOn(incidentRequest.getSys_updated_on());
-                incident.setUpdatedOn(util.getLocalDateTime(util.isNull(incidentRequest.getSys_updated_on())));
+                incident.setUpdatedOn(Util.getLocalDateTime(Util.isNull(incidentRequest.getSys_updated_on())));
                 incident.setNumber(incidentRequest.getNumber());
                 incident.setState(incidentRequest.getState());
                 incident.setIncidentState(incidentRequest.getIncident_state());
@@ -413,7 +408,7 @@ public class IncidentController {
                 incident.setCorrelationId(incidentRequest.getCorrelation_id());
                 incident.setSysUpdatedBy(incidentRequest.getSys_updated_by());
                 incident.setSysCreatedOn(incidentRequest.getSys_created_on());
-                incident.setCreatedOn(util.getLocalDateTime(util.isNull(incidentRequest.getSys_created_on())));
+                incident.setCreatedOn(Util.getLocalDateTime(Util.isNull(incidentRequest.getSys_created_on())));
                 incident.setClosedAt(incidentRequest.getClosed_at());
                 incident.setOpenedAt(incidentRequest.getOpened_at());
                 incident.setReopenedTime(incidentRequest.getReopened_time());
@@ -454,95 +449,95 @@ public class IncidentController {
 
 
 
-                if (util.hasData(incidentRequest.getCaused_by())) {
+                if (Util.hasData(incidentRequest.getCaused_by())) {
                     incident.setCausedBy(sysUserService.findByIntegrationId(incidentRequest.getCaused_by()));
                 } else {
                     incident.setClosedBy(null);
                 }
 
-                if (util.hasData(incidentRequest.getClosed_by())) {
+                if (Util.hasData(incidentRequest.getClosed_by())) {
                     incident.setClosedBy(sysUserService.findByIntegrationId(incidentRequest.getClosed_by()));
                 } else {
                     incident.setClosedBy(null);
                 }
 
 
-                if (util.hasData(incidentRequest.getReopened_by())) {
+                if (Util.hasData(incidentRequest.getReopened_by())) {
                     incident.setReopenedBy(sysUserService.findByIntegrationId(incidentRequest.getReopened_by()));
                 } else {
                     incident.setReopenedBy(null);
                 }
 
-                if (util.hasData(incidentRequest.getAssigned_to())) {
+                if (Util.hasData(incidentRequest.getAssigned_to())) {
                     incident.setAssignedTo(sysUserService.findByIntegrationId(incidentRequest.getAssigned_to()));
                 } else {
                     incident.setAssignedTo(null);
                 }
 
 
-                if (util.hasData(incidentRequest.getU_solver_assigned_to())) {
+                if (Util.hasData(incidentRequest.getU_solver_assigned_to())) {
                     incident.setSolverAssignedTo(sysUserService.findByIntegrationId(incidentRequest.getU_solver_assigned_to()));
                 } else {
                     incident.setSolverAssignedTo(null);
                 }
 
 
-                if (util.hasData(incidentRequest.getU_solver_resolved_by())) {
+                if (Util.hasData(incidentRequest.getU_solver_resolved_by())) {
                     incident.setSolverResolvedBy(sysUserService.findByIntegrationId(incidentRequest.getU_solver_resolved_by()));
                 } else {
                     incident.setSolverResolvedBy(null);
                 }
 
 
-                if (util.hasData(incidentRequest.getOpened_by())) {
+                if (Util.hasData(incidentRequest.getOpened_by())) {
                     incident.setOpenedBy(sysUserService.findByIntegrationId(incidentRequest.getOpened_by()));
                 } else {
                     incident.setOpenedBy(null);
                 }
 
 
-                if (util.hasData(incidentRequest.getTask_for())) {
+                if (Util.hasData(incidentRequest.getTask_for())) {
                     incident.setTaskFor(sysUserService.findByIntegrationId(incidentRequest.getTask_for()));
                 } else {
                     incident.setTaskFor(null);
                 }
 
 
-                if (util.hasData(incidentRequest.getBusiness_service())) {
+                if (Util.hasData(incidentRequest.getBusiness_service())) {
                     incident.setBusinessService(ciServiceService.findByIntegrationId(incidentRequest.getBusiness_service()));
                 } else {
                     incident.setBusinessService(null);
                 }
 
-                if (util.hasData(incidentRequest.getCaller_id())) {
+                if (Util.hasData(incidentRequest.getCaller_id())) {
                     incident.setCaller(sysUserService.findByIntegrationId(incidentRequest.getCaller_id()));
                 } else {
                     incident.setCaller(null);
                 }
 
-                if (util.hasData(incidentRequest.getConfiguration_item())) {
+                if (Util.hasData(incidentRequest.getConfiguration_item())) {
                     incident.setConfigurationItem(configurationItemService.findByIntegrationId(incidentRequest.getConfiguration_item()));
                 } else {
                     incident.setConfigurationItem(null);
                 }
 
-                if (util.hasData(incidentRequest.getAssignment_group())) {
+                if (Util.hasData(incidentRequest.getAssignment_group())) {
                     incident.setAssignmentGroup(sysGroupService.findByIntegrationId(incidentRequest.getAssignment_group()));
                 } else {
                     incident.setAssignmentGroup(null);
                 }
 
-                if (util.hasData(incidentRequest.getLocation())) {
+                if (Util.hasData(incidentRequest.getLocation())) {
                     incident.setLocation(locationService.findByIntegrationId(incidentRequest.getLocation()));
                 } else {
                     incident.setLocation(null);
                 }
 
                 incidentService.save(incident);
-                util.printData(tag, tagAction.concat(util.getFieldDisplay(incident)), util.getFieldDisplay(incident.getCompany()), util.getFieldDisplay(incident.getDomain()));
+                Util.printData(tag, tagAction.concat(Util.getFieldDisplay(incident)), Util.getFieldDisplay(incident.getCompany()), Util.getFieldDisplay(incident.getDomain()));
 
-                if (util.hasData(incidentRequest.getIncident_parent()) || util.hasData(incidentRequest.getParent_incident())) {
-                    String incidentParent = util.hasData(incidentRequest.getIncident_parent()) ? incidentRequest.getIncident_parent() : incidentRequest.getParent_incident();
+                if (Util.hasData(incidentRequest.getIncident_parent()) || Util.hasData(incidentRequest.getParent_incident())) {
+                    String incidentParent = Util.hasData(incidentRequest.getIncident_parent()) ? incidentRequest.getIncident_parent() : incidentRequest.getParent_incident();
                     Incident master = incidentService.findByIntegrationId(incidentParent);
 
                     if (!master.getMaster()) {
@@ -571,7 +566,7 @@ public class IncidentController {
         Map<String, Object> response = new HashMap<>();
 
         try {
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             String tag = "[Incident] ";
 
             Incident exists = incidentService.findByIntegrationId(incidentRequest.getSys_id());
@@ -579,12 +574,12 @@ public class IncidentController {
                 incident.setId(exists.getId());
                 incident.setScRequestParent(exists.getScRequestParent());
                 incident.setMaster(exists.getMaster());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
 
 
             incident.setSysUpdatedOn(incidentRequest.getSys_updated_on());
-            incident.setUpdatedOn(util.getLocalDateTime(util.isNull(incidentRequest.getSys_updated_on())));
+            incident.setUpdatedOn(Util.getLocalDateTime(Util.isNull(incidentRequest.getSys_updated_on())));
             incident.setNumber(incidentRequest.getNumber());
             incident.setState(incidentRequest.getState());
             incident.setIncidentState(incidentRequest.getIncident_state());
@@ -603,7 +598,7 @@ public class IncidentController {
             incident.setCorrelationId(incidentRequest.getCorrelation_id());
             incident.setSysUpdatedBy(incidentRequest.getSys_updated_by());
             incident.setSysCreatedOn(incidentRequest.getSys_created_on());
-            incident.setCreatedOn(util.getLocalDateTime(util.isNull(incidentRequest.getSys_created_on())));
+            incident.setCreatedOn(Util.getLocalDateTime(Util.isNull(incidentRequest.getSys_created_on())));
             incident.setClosedAt(incidentRequest.getClosed_at());
             incident.setOpenedAt(incidentRequest.getOpened_at());
             incident.setReopenedTime(incidentRequest.getReopened_time());
@@ -641,8 +636,8 @@ public class IncidentController {
             incident.setDomain(company.getDomain());
 
 
-            if (util.hasData(incidentRequest.getIncident_parent()) || util.hasData(incidentRequest.getParent_incident())) {
-                String incidentParent = util.hasData(incidentRequest.getIncident_parent()) ? incidentRequest.getIncident_parent() : incidentRequest.getParent_incident();
+            if (Util.hasData(incidentRequest.getIncident_parent()) || Util.hasData(incidentRequest.getParent_incident())) {
+                String incidentParent = Util.hasData(incidentRequest.getIncident_parent()) ? incidentRequest.getIncident_parent() : incidentRequest.getParent_incident();
                 Incident master = incidentService.findByIntegrationId(incidentParent);
 
                 if (!master.getMaster()) {
@@ -652,86 +647,86 @@ public class IncidentController {
             }
 
 
-            if (util.hasData(incidentRequest.getCaused_by())) {
+            if (Util.hasData(incidentRequest.getCaused_by())) {
                 incident.setCausedBy(sysUserService.findByIntegrationId(incidentRequest.getCaused_by()));
             } else {
                 incident.setClosedBy(null);
             }
 
-            if (util.hasData(incidentRequest.getClosed_by())) {
+            if (Util.hasData(incidentRequest.getClosed_by())) {
                 incident.setClosedBy(sysUserService.findByIntegrationId(incidentRequest.getClosed_by()));
             } else {
                 incident.setClosedBy(null);
             }
 
 
-            if (util.hasData(incidentRequest.getReopened_by())) {
+            if (Util.hasData(incidentRequest.getReopened_by())) {
                 incident.setReopenedBy(sysUserService.findByIntegrationId(incidentRequest.getReopened_by()));
             } else {
                 incident.setReopenedBy(null);
             }
 
-            if (util.hasData(incidentRequest.getAssigned_to())) {
+            if (Util.hasData(incidentRequest.getAssigned_to())) {
                 incident.setAssignedTo(sysUserService.findByIntegrationId(incidentRequest.getAssigned_to()));
             } else {
                 incident.setAssignedTo(null);
             }
 
 
-            if (util.hasData(incidentRequest.getU_solver_assigned_to())) {
+            if (Util.hasData(incidentRequest.getU_solver_assigned_to())) {
                 incident.setSolverAssignedTo(sysUserService.findByIntegrationId(incidentRequest.getU_solver_assigned_to()));
             } else {
                 incident.setSolverAssignedTo(null);
             }
 
 
-            if (util.hasData(incidentRequest.getU_solver_resolved_by())) {
+            if (Util.hasData(incidentRequest.getU_solver_resolved_by())) {
                 incident.setSolverResolvedBy(sysUserService.findByIntegrationId(incidentRequest.getU_solver_resolved_by()));
             } else {
                 incident.setSolverResolvedBy(null);
             }
 
 
-            if (util.hasData(incidentRequest.getOpened_by())) {
+            if (Util.hasData(incidentRequest.getOpened_by())) {
                 incident.setOpenedBy(sysUserService.findByIntegrationId(incidentRequest.getOpened_by()));
             } else {
                 incident.setOpenedBy(null);
             }
 
 
-            if (util.hasData(incidentRequest.getTask_for())) {
+            if (Util.hasData(incidentRequest.getTask_for())) {
                 incident.setTaskFor(sysUserService.findByIntegrationId(incidentRequest.getTask_for()));
             } else {
                 incident.setTaskFor(null);
             }
 
 
-            if (util.hasData(incidentRequest.getBusiness_service())) {
+            if (Util.hasData(incidentRequest.getBusiness_service())) {
                 incident.setBusinessService(ciServiceService.findByIntegrationId(incidentRequest.getBusiness_service()));
             } else {
                 incident.setBusinessService(null);
             }
 
-            if (util.hasData(incidentRequest.getCaller_id())) {
+            if (Util.hasData(incidentRequest.getCaller_id())) {
                 incident.setCaller(sysUserService.findByIntegrationId(incidentRequest.getCaller_id()));
             } else {
                 incident.setCaller(null);
             }
 
-            if (util.hasData(incidentRequest.getConfiguration_item())) {
+            if (Util.hasData(incidentRequest.getConfiguration_item())) {
                 incident.setConfigurationItem(configurationItemService.findByIntegrationId(incidentRequest.getConfiguration_item()));
             } else {
                 incident.setConfigurationItem(null);
             }
 
 
-            if (util.hasData(incidentRequest.getAssignment_group())) {
+            if (Util.hasData(incidentRequest.getAssignment_group())) {
                 incident.setAssignmentGroup(sysGroupService.findByIntegrationId(incidentRequest.getAssignment_group()));
             } else {
                 incident.setAssignmentGroup(null);
             }
 
-            if (util.hasData(incidentRequest.getLocation())) {
+            if (Util.hasData(incidentRequest.getLocation())) {
                 incident.setLocation(locationService.findByIntegrationId(incidentRequest.getLocation()));
             } else {
                 incident.setLocation(null);
@@ -740,7 +735,7 @@ public class IncidentController {
 
             incidentService.save(incident);
 
-            util.printData(tag, tagAction.concat(util.getFieldDisplay(incident)), util.getFieldDisplay(incident.getCompany()), util.getFieldDisplay(incident.getDomain()));
+            Util.printData(tag, tagAction.concat(Util.getFieldDisplay(incident)), Util.getFieldDisplay(incident.getCompany()), Util.getFieldDisplay(incident.getDomain()));
 
 
         } catch (DataAccessException e) {
@@ -764,13 +759,13 @@ public class IncidentController {
             Incident incident = new Incident();
             try {
 
-                incident = incidentService.findByIntegrationId(util.parseJson(json, "sys_id"));
-                incident.setDescription(util.parseJson(json, "description"));
-                incident.setShortDescription(util.parseJson(json, "short_description"));
+                incident = incidentService.findByIntegrationId(Util.parseJson(json, "sys_id"));
+                incident.setDescription(Util.parseJson(json, "description"));
+                incident.setShortDescription(Util.parseJson(json, "short_description"));
                 Incident currentIncident = incidentService.save(incident);
                 String tag = "[Incident]";
                 String tagAction = "Update";
-                util.printData(tag, tagAction);
+                Util.printData(tag, tagAction);
 
             } catch (DataAccessException e) {
                 response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
@@ -785,8 +780,8 @@ public class IncidentController {
     */
     @PutMapping("/incidentDelete")
     public ResponseEntity<?> delete(String element, String integrationId) {
-        System.out.println("element: ".concat(util.isNull(element)));
-        System.out.println("integrationId: ".concat(util.isNull(integrationId)));
+        System.out.println("element: ".concat(Util.isNull(element)));
+        System.out.println("integrationId: ".concat(Util.isNull(integrationId)));
         Map<String, Object> response = new HashMap<>();
 
 
@@ -824,10 +819,10 @@ public class IncidentController {
 
     @GetMapping("/incidenBySolver")
     public List<Incident> findByCompany() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<Incident> incidents = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
+        String[] sparmOffSets = Util.offSets500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Incident] ";
@@ -835,8 +830,8 @@ public class IncidentController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.IncidentByCompany().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.IncidentByCompany().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.IncidentByCompany().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.IncidentByCompany().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 JSONParser parser = new JSONParser();
@@ -848,7 +843,7 @@ public class IncidentController {
                     ListSnIncidentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnIncidentJson.stream().forEach(snIncidentJson -> {
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     ObjectMapper objectMapper = new ObjectMapper();
                     objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
@@ -859,70 +854,70 @@ public class IncidentController {
                         incidentSolver = objectMapper.readValue(snIncidentJson.toString(), IncidentSolver.class);
 
                         Incident incident = new Incident();
-                        incident.setSysUpdatedOn(util.isNull(incidentSolver.getSys_updated_on()));
-                        incident.setUpdatedOn(util.getLocalDateTime(util.isNull(incidentSolver.getSys_updated_on())));
-                        incident.setNumber(util.isNull(incidentSolver.getNumber()));
-                        incident.setState(util.isNull(incidentSolver.getState()));
-                        incident.setSysCreatedBy(util.isNull(incidentSolver.getSys_created_by()));
-                        incident.setImpact(util.isNull(incidentSolver.getImpact()));
-                        incident.setReasonPending(util.isNull(incidentSolver.getU_sbk_pendiente()));
+                        incident.setSysUpdatedOn(Util.isNull(incidentSolver.getSys_updated_on()));
+                        incident.setUpdatedOn(Util.getLocalDateTime(Util.isNull(incidentSolver.getSys_updated_on())));
+                        incident.setNumber(Util.isNull(incidentSolver.getNumber()));
+                        incident.setState(Util.isNull(incidentSolver.getState()));
+                        incident.setSysCreatedBy(Util.isNull(incidentSolver.getSys_created_by()));
+                        incident.setImpact(Util.isNull(incidentSolver.getImpact()));
+                        incident.setReasonPending(Util.isNull(incidentSolver.getU_sbk_pendiente()));
                         incident.setActive(incidentSolver.isActive());
                         incident.setKnowledge(incidentSolver.getKnowledge());
-                        incident.setPriority(util.isNull(incidentSolver.getPriority()));
-                        incident.setBusinessDuration(util.isNull(incidentSolver.getBusiness_duration()));
-                        incident.setShortDescription(util.isNull(incidentSolver.getShort_description()));
-                        incident.setCorrelationDisplay(util.isNull(incidentSolver.getCorrelation_display()));
-                        incident.setNotify(util.isNull(incidentSolver.getNotify()));
-                        incident.setReassignmentCount(util.isNull(incidentSolver.getReassignment_count()));
-                        incident.setUponApproval(util.isNull(incidentSolver.getUpon_approval()));
-                        incident.setCorrelationId(util.isNull(incidentSolver.getCorrelation_id()));
+                        incident.setPriority(Util.isNull(incidentSolver.getPriority()));
+                        incident.setBusinessDuration(Util.isNull(incidentSolver.getBusiness_duration()));
+                        incident.setShortDescription(Util.isNull(incidentSolver.getShort_description()));
+                        incident.setCorrelationDisplay(Util.isNull(incidentSolver.getCorrelation_display()));
+                        incident.setNotify(Util.isNull(incidentSolver.getNotify()));
+                        incident.setReassignmentCount(Util.isNull(incidentSolver.getReassignment_count()));
+                        incident.setUponApproval(Util.isNull(incidentSolver.getUpon_approval()));
+                        incident.setCorrelationId(Util.isNull(incidentSolver.getCorrelation_id()));
                         incident.setMadeSla(incidentSolver.getMade_sla());
-                        incident.setSysUpdatedBy(util.isNull(incidentSolver.getSys_updated_by()));
-                        incident.setSysCreatedOn(util.isNull(incidentSolver.getSys_created_on()));
-                        incident.setCreatedOn(util.getLocalDateTime(util.isNull(incidentSolver.getSys_created_on())));
-                        incident.setClosedAt(util.isNull(incidentSolver.getClosed_at()));
-                        incident.setClosed(util.getLocalDateTime(util.isNull(incidentSolver.getClosed_at())));
-                        incident.setOpenedAt(util.isNull(incidentSolver.getOpened_at()));
-                        incident.setOpened(util.getLocalDateTime(util.isNull(incidentSolver.getOpened_at())));
-                        incident.setReopenedTime(util.isNull(incidentSolver.getReopened_time()));
-                        incident.setResolvedAt(util.isNull(incidentSolver.getResolved_at()));
-                        incident.setResolved(util.getLocalDateTime(util.isNull(incidentSolver.getResolved_at())));
-                        incident.setSubcategory(util.isNull(incidentSolver.getSubcategory()));
-                        incident.setCloseCode(util.isNull(incidentSolver.getClose_code()));
-                        incident.setDescription(util.isNull(incidentSolver.getDescription()));
-                        incident.setCalendarDuration(util.isNull(incidentSolver.getCalendar_duration()));
-                        incident.setCloseNotes(util.isNull(incidentSolver.getClose_notes()));
-                        incident.setIntegrationId(util.isNull(incidentSolver.getSys_id()));
-                        incident.setContactType(util.isNull(incidentSolver.getContact_type()));
-                        incident.setIncidentState(util.isNull(incidentSolver.getIncident_state()));
-                        incident.setUrgency(util.isNull(incidentSolver.getUrgency()));
-                        incident.setSeverity(util.isNull(incidentSolver.getSeverity()));
-                        incident.setApproval(util.isNull(incidentSolver.getApproval()));
-                        incident.setSysModCount(util.isNull(incidentSolver.getSys_mod_count()));
-                        incident.setReopenCount(util.isNull(incidentSolver.getReopen_count()));
-                        incident.setCategory(util.isNull(incidentSolver.getCategory()));
+                        incident.setSysUpdatedBy(Util.isNull(incidentSolver.getSys_updated_by()));
+                        incident.setSysCreatedOn(Util.isNull(incidentSolver.getSys_created_on()));
+                        incident.setCreatedOn(Util.getLocalDateTime(Util.isNull(incidentSolver.getSys_created_on())));
+                        incident.setClosedAt(Util.isNull(incidentSolver.getClosed_at()));
+                        incident.setClosed(Util.getLocalDateTime(Util.isNull(incidentSolver.getClosed_at())));
+                        incident.setOpenedAt(Util.isNull(incidentSolver.getOpened_at()));
+                        incident.setOpened(Util.getLocalDateTime(Util.isNull(incidentSolver.getOpened_at())));
+                        incident.setReopenedTime(Util.isNull(incidentSolver.getReopened_time()));
+                        incident.setResolvedAt(Util.isNull(incidentSolver.getResolved_at()));
+                        incident.setResolved(Util.getLocalDateTime(Util.isNull(incidentSolver.getResolved_at())));
+                        incident.setSubcategory(Util.isNull(incidentSolver.getSubcategory()));
+                        incident.setCloseCode(Util.isNull(incidentSolver.getClose_code()));
+                        incident.setDescription(Util.isNull(incidentSolver.getDescription()));
+                        incident.setCalendarDuration(Util.isNull(incidentSolver.getCalendar_duration()));
+                        incident.setCloseNotes(Util.isNull(incidentSolver.getClose_notes()));
+                        incident.setIntegrationId(Util.isNull(incidentSolver.getSys_id()));
+                        incident.setContactType(Util.isNull(incidentSolver.getContact_type()));
+                        incident.setIncidentState(Util.isNull(incidentSolver.getIncident_state()));
+                        incident.setUrgency(Util.isNull(incidentSolver.getUrgency()));
+                        incident.setSeverity(Util.isNull(incidentSolver.getSeverity()));
+                        incident.setApproval(Util.isNull(incidentSolver.getApproval()));
+                        incident.setSysModCount(Util.isNull(incidentSolver.getSys_mod_count()));
+                        incident.setReopenCount(Util.isNull(incidentSolver.getReopen_count()));
+                        incident.setCategory(Util.isNull(incidentSolver.getCategory()));
                         Choice category = choiceService.findByValueAndElementAndName(incident.getCategory(), Field.Category.get(), SnTable.Incident.get());
                         if (category != null) {
                             incident.setCategory(category.getLabel());
                         }
-                        incident.setServiceLevel(util.isNull(incidentSolver.getU_service()));
-                        incident.setAmbiteLevel(util.isNull(incidentSolver.getU_ambite()));
-                        incident.setPlatformLevel(util.isNull(incidentSolver.getU_platform()));
-                        incident.setSpecificationLevel(util.isNull(incidentSolver.getU_specification()));
-                        incident.setIncidentParent(util.getIdByJson((JSONObject) snIncidentJson, "parent_incident", app.Value()));
+                        incident.setServiceLevel(Util.isNull(incidentSolver.getU_service()));
+                        incident.setAmbiteLevel(Util.isNull(incidentSolver.getU_ambite()));
+                        incident.setPlatformLevel(Util.isNull(incidentSolver.getU_platform()));
+                        incident.setSpecificationLevel(Util.isNull(incidentSolver.getU_specification()));
+                        incident.setIncidentParent(Util.getIdByJson((JSONObject) snIncidentJson, "parent_incident", App.Value()));
 
                         incident.setSolverFlagAssignedTo(incidentSolver.getU_solver_flag_assigned_to());
                         incident.setSolverFlagResolvedBy(incidentSolver.getU_solver_flag_resolved_by());
                         incident.setDelete(false);
 
-                        if (util.hasData(incident.getIncidentParent())) {
+                        if (Util.hasData(incident.getIncidentParent())) {
                             Incident master = incidentService.findByIntegrationId(incident.getIncidentParent());
                             if (!master.getMaster()) {
                                 master.setMaster(true);
                                 incidentService.save(master);
                             }
                         }
-                        String element = util.getIdByJson((JSONObject) snIncidentJson, "parent", app.Value());
+                        String element = Util.getIdByJson((JSONObject) snIncidentJson, "parent", App.Value());
                         if (element != "") {
                             ScRequest scRequest = scRequestService.findByIntegrationId(element);
                             if (scRequest != null)
@@ -934,68 +929,68 @@ public class IncidentController {
                             }
                         }
 
-                        Domain domain = getDomainByIntegrationId((JSONObject) snIncidentJson, SnTable.Domain.get(), app.Value());
+                        Domain domain = getDomainByIntegrationId((JSONObject) snIncidentJson, SnTable.Domain.get(), App.Value());
                         //if (domain != null)
                         incident.setDomain(domain);
 
-                        Company company = getCompanyByIntegrationId((JSONObject) snIncidentJson, SnTable.Company.get(), app.Value());
+                        Company company = getCompanyByIntegrationId((JSONObject) snIncidentJson, SnTable.Company.get(), App.Value());
                         //if (company != null)
                         incident.setCompany(company);
 
-                        SysUser causedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caused_by", app.Value());
+                        SysUser causedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caused_by", App.Value());
                         //if (causedBy != null)
                         incident.setCausedBy(causedBy);
 
-                        SysUser closedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "closed_by", app.Value());
+                        SysUser closedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "closed_by", App.Value());
                         // if (closedBy != null)
                         incident.setClosedBy(closedBy);
 
-                        SysUser reopenedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "reopened_by", app.Value());
+                        SysUser reopenedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "reopened_by", App.Value());
                         // if (reopenedBy != null)
                         incident.setReopenedBy(reopenedBy);
 
-                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", app.Value());
+                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", App.Value());
                         //if (assignedTo != null)
                         incident.setAssignedTo(assignedTo);
 
-                        SysUser solverAssignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", app.Value());
+                        SysUser solverAssignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", App.Value());
                         //if (solverAssignedTo != null)
                         incident.setSolverAssignedTo(solverAssignedTo);
 
-                        SysUser resolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "resolved_by", app.Value());
+                        SysUser resolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "resolved_by", App.Value());
                         //if (resolvedBy != null)
                         incident.setResolvedBy(resolvedBy);
 
-                        SysUser solverResolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_resolved_by", app.Value());
+                        SysUser solverResolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_resolved_by", App.Value());
                         //if (solverResolvedBy != null)
                         incident.setSolverResolvedBy(solverResolvedBy);
 
-                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "opened_by", app.Value());
+                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "opened_by", App.Value());
                         //if (openedBy != null)
                         incident.setOpenedBy(openedBy);
 
-                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snIncidentJson, "task_for", app.Value());
+                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snIncidentJson, "task_for", App.Value());
                         //if (taskFor != null)
                         incident.setTaskFor(taskFor);
 
-                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snIncidentJson, "business_service", app.Value());
+                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snIncidentJson, "business_service", App.Value());
                         //if (businessService != null)
                         incident.setBusinessService(businessService);
 
-                        SysUser caller = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caller_id", app.Value());
+                        SysUser caller = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caller_id", App.Value());
                         //if (caller != null)
                         incident.setCaller(caller);
 
-                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snIncidentJson, "cmdb_ci", app.Value());
+                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snIncidentJson, "cmdb_ci", App.Value());
                         //if (configurationItem != null)
                         incident.setConfigurationItem(configurationItem);
 
-                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snIncidentJson, "assignment_group", app.Value());
+                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snIncidentJson, "assignment_group", App.Value());
                         //if (sysGroup != null)
                         incident.setAssignmentGroup(sysGroup);
 
 
-                        Location location = getLocationByIntegrationId((JSONObject) snIncidentJson, "location", app.Value());
+                        Location location = getLocationByIntegrationId((JSONObject) snIncidentJson, "location", App.Value());
                         incident.setLocation(location);
 
                         Incident exists = incidentService.findByIntegrationId(incident.getIntegrationId());
@@ -1003,12 +998,12 @@ public class IncidentController {
                             incident.setId(exists.getId());
                             incident.setScRequestParent(exists.getScRequestParent());
                             incident.setMaster(exists.getMaster());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
 
 
                         incidents.add(incidentService.save(incident));
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(incident)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(incident)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
                         //  }
 
                         count[0] = count[0] + 1;
@@ -1019,9 +1014,9 @@ public class IncidentController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -1032,17 +1027,17 @@ public class IncidentController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return incidents;
     }
 
     @GetMapping("/incidenBySolverAndQuery")
     public List<Incident> findByCompany(String query) {
         //String pass = passwordEncoder.encode("Josemora#01");
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<Incident> incidents = new ArrayList<>();
-        String[] sparmOffSets = util.offSets50000();
+        String[] sparmOffSets = Util.offSets50000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Incident] ";
@@ -1053,8 +1048,8 @@ public class IncidentController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 
                 JSONParser parser = new JSONParser();
                 JSONObject resultJson = new JSONObject();
@@ -1065,7 +1060,7 @@ public class IncidentController {
                     ListSnIncidentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnIncidentJson.stream().forEach(snIncidentJson -> {
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
 
                     //objectMapper = objectMapper.configure(JsonParser.Feature.ALLOW_BACKSLASH_ESCAPING_ANY_CHARACTER, true);
 
@@ -1081,74 +1076,74 @@ public class IncidentController {
                         //incidentSolver = objectMapper.readValue(snIncidentJson.toString(), IncidentSolver.class);
                         //incidentSolver = mapper.reader().forType(IncidentSolver.class).readValue(snIncidentJson.toString());
                         Incident incident = new Incident();
-                        incident.setSysUpdatedOn(util.isNull(incidentSolver.getSys_updated_on()));
-                        incident.setUpdatedOn(util.getLocalDateTime(util.isNull(incidentSolver.getSys_updated_on())));
-                        incident.setNumber(util.isNull(incidentSolver.getNumber()));
-                        incident.setState(util.isNull(incidentSolver.getState()));
-                        incident.setSysCreatedBy(util.isNull(incidentSolver.getSys_created_by()));
-                        incident.setImpact(util.isNull(incidentSolver.getImpact()));
+                        incident.setSysUpdatedOn(Util.isNull(incidentSolver.getSys_updated_on()));
+                        incident.setUpdatedOn(Util.getLocalDateTime(Util.isNull(incidentSolver.getSys_updated_on())));
+                        incident.setNumber(Util.isNull(incidentSolver.getNumber()));
+                        incident.setState(Util.isNull(incidentSolver.getState()));
+                        incident.setSysCreatedBy(Util.isNull(incidentSolver.getSys_created_by()));
+                        incident.setImpact(Util.isNull(incidentSolver.getImpact()));
                         incident.setActive(incidentSolver.isActive());
                         incident.setKnowledge(incidentSolver.getKnowledge());
-                        incident.setPriority(util.isNull(incidentSolver.getPriority()));
-                        incident.setBusinessDuration(util.isNull(incidentSolver.getBusiness_duration()));
-                        incident.setShortDescription(util.isNull(incidentSolver.getShort_description()));
-                        incident.setCorrelationDisplay(util.isNull(incidentSolver.getCorrelation_display()));
-                        incident.setNotify(util.isNull(incidentSolver.getNotify()));
-                        incident.setReassignmentCount(util.isNull(incidentSolver.getReassignment_count()));
-                        incident.setUponApproval(util.isNull(incidentSolver.getUpon_approval()));
-                        incident.setCorrelationId(util.isNull(incidentSolver.getCorrelation_id()));
+                        incident.setPriority(Util.isNull(incidentSolver.getPriority()));
+                        incident.setBusinessDuration(Util.isNull(incidentSolver.getBusiness_duration()));
+                        incident.setShortDescription(Util.isNull(incidentSolver.getShort_description()));
+                        incident.setCorrelationDisplay(Util.isNull(incidentSolver.getCorrelation_display()));
+                        incident.setNotify(Util.isNull(incidentSolver.getNotify()));
+                        incident.setReassignmentCount(Util.isNull(incidentSolver.getReassignment_count()));
+                        incident.setUponApproval(Util.isNull(incidentSolver.getUpon_approval()));
+                        incident.setCorrelationId(Util.isNull(incidentSolver.getCorrelation_id()));
                         incident.setMadeSla(incidentSolver.getMade_sla());
-                        incident.setSysUpdatedBy(util.isNull(incidentSolver.getSys_updated_by()));
-                        incident.setSysCreatedOn(util.isNull(incidentSolver.getSys_created_on()));
-                        if (!util.isNull(incidentSolver.getSys_created_on()).equals(""))
-                            incident.setCreatedOn(util.getLocalDateTime(util.isNull(incidentSolver.getSys_created_on())));
-                        incident.setClosedAt(util.isNull(incidentSolver.getClosed_at()));
-                        if (!util.isNull(incidentSolver.getClosed_at()).equals(""))
-                            incident.setClosed(util.getLocalDateTime(util.isNull(incidentSolver.getClosed_at())));
-                        incident.setOpenedAt(util.isNull(incidentSolver.getOpened_at()));
-                        if (!util.isNull(incidentSolver.getOpened_at()).equals(""))
-                            incident.setOpened(util.getLocalDateTime(util.isNull(incidentSolver.getOpened_at())));
-                        incident.setReopenedTime(util.isNull(incidentSolver.getReopened_time()));
-                        incident.setResolvedAt(util.isNull(incidentSolver.getResolved_at()));
-                        if (!util.isNull(incidentSolver.getResolved_at()).equals(""))
-                            incident.setResolved(util.getLocalDateTime(util.isNull(incidentSolver.getResolved_at())));
-                        incident.setSubcategory(util.isNull(incidentSolver.getSubcategory()));
-                        incident.setCloseCode(util.isNull(incidentSolver.getClose_code()));
-                        incident.setDescription(util.isNull(incidentSolver.getDescription()));
-                        incident.setCalendarDuration(util.isNull(incidentSolver.getCalendar_duration()));
-                        incident.setCloseNotes(util.isNull(incidentSolver.getClose_notes()));
-                        incident.setIntegrationId(util.isNull(incidentSolver.getSys_id()));
-                        incident.setContactType(util.isNull(incidentSolver.getContact_type()));
-                        incident.setIncidentState(util.isNull(incidentSolver.getIncident_state()));
-                        incident.setUrgency(util.isNull(incidentSolver.getUrgency()));
-                        incident.setSeverity(util.isNull(incidentSolver.getSeverity()));
-                        incident.setApproval(util.isNull(incidentSolver.getApproval()));
-                        incident.setSysModCount(util.isNull(incidentSolver.getSys_mod_count()));
-                        incident.setReopenCount(util.isNull(incidentSolver.getReopen_count()));
-                        incident.setCategory(util.isNull(incidentSolver.getCategory()));
+                        incident.setSysUpdatedBy(Util.isNull(incidentSolver.getSys_updated_by()));
+                        incident.setSysCreatedOn(Util.isNull(incidentSolver.getSys_created_on()));
+                        if (!Util.isNull(incidentSolver.getSys_created_on()).equals(""))
+                            incident.setCreatedOn(Util.getLocalDateTime(Util.isNull(incidentSolver.getSys_created_on())));
+                        incident.setClosedAt(Util.isNull(incidentSolver.getClosed_at()));
+                        if (!Util.isNull(incidentSolver.getClosed_at()).equals(""))
+                            incident.setClosed(Util.getLocalDateTime(Util.isNull(incidentSolver.getClosed_at())));
+                        incident.setOpenedAt(Util.isNull(incidentSolver.getOpened_at()));
+                        if (!Util.isNull(incidentSolver.getOpened_at()).equals(""))
+                            incident.setOpened(Util.getLocalDateTime(Util.isNull(incidentSolver.getOpened_at())));
+                        incident.setReopenedTime(Util.isNull(incidentSolver.getReopened_time()));
+                        incident.setResolvedAt(Util.isNull(incidentSolver.getResolved_at()));
+                        if (!Util.isNull(incidentSolver.getResolved_at()).equals(""))
+                            incident.setResolved(Util.getLocalDateTime(Util.isNull(incidentSolver.getResolved_at())));
+                        incident.setSubcategory(Util.isNull(incidentSolver.getSubcategory()));
+                        incident.setCloseCode(Util.isNull(incidentSolver.getClose_code()));
+                        incident.setDescription(Util.isNull(incidentSolver.getDescription()));
+                        incident.setCalendarDuration(Util.isNull(incidentSolver.getCalendar_duration()));
+                        incident.setCloseNotes(Util.isNull(incidentSolver.getClose_notes()));
+                        incident.setIntegrationId(Util.isNull(incidentSolver.getSys_id()));
+                        incident.setContactType(Util.isNull(incidentSolver.getContact_type()));
+                        incident.setIncidentState(Util.isNull(incidentSolver.getIncident_state()));
+                        incident.setUrgency(Util.isNull(incidentSolver.getUrgency()));
+                        incident.setSeverity(Util.isNull(incidentSolver.getSeverity()));
+                        incident.setApproval(Util.isNull(incidentSolver.getApproval()));
+                        incident.setSysModCount(Util.isNull(incidentSolver.getSys_mod_count()));
+                        incident.setReopenCount(Util.isNull(incidentSolver.getReopen_count()));
+                        incident.setCategory(Util.isNull(incidentSolver.getCategory()));
                         Choice category = choiceService.findByValueAndElementAndName(incident.getCategory(), Field.Category.get(), SnTable.Incident.get());
                         if (category != null) {
                             incident.setCategory(category.getLabel());
                         }
-                        incident.setServiceLevel(util.isNull(incidentSolver.getU_service()));
-                        incident.setAmbiteLevel(util.isNull(incidentSolver.getU_ambite()));
-                        incident.setPlatformLevel(util.isNull(incidentSolver.getU_platform()));
-                        incident.setSpecificationLevel(util.isNull(incidentSolver.getU_specification()));
-                        incident.setIncidentParent(util.getIdByJson((JSONObject) snIncidentJson, "parent_incident", app.Value()));
+                        incident.setServiceLevel(Util.isNull(incidentSolver.getU_service()));
+                        incident.setAmbiteLevel(Util.isNull(incidentSolver.getU_ambite()));
+                        incident.setPlatformLevel(Util.isNull(incidentSolver.getU_platform()));
+                        incident.setSpecificationLevel(Util.isNull(incidentSolver.getU_specification()));
+                        incident.setIncidentParent(Util.getIdByJson((JSONObject) snIncidentJson, "parent_incident", App.Value()));
 
                         incident.setSolverFlagAssignedTo(incidentSolver.getU_solver_flag_assigned_to());
                         incident.setSolverFlagResolvedBy(incidentSolver.getU_solver_flag_resolved_by());
-                        incident.setReasonPending(util.isNull(incidentSolver.getU_sbk_pendiente()));
+                        incident.setReasonPending(Util.isNull(incidentSolver.getU_sbk_pendiente()));
                         incident.setDelete(false);
 
-                        if (util.hasData(incident.getIncidentParent())) {
+                        if (Util.hasData(incident.getIncidentParent())) {
                             Incident master = incidentService.findByIntegrationId(incident.getIncidentParent());
                             if (!master.getMaster()) {
                                 master.setMaster(true);
                                 incidentService.save(master);
                             }
                         }
-                        String element = util.getIdByJson((JSONObject) snIncidentJson, "parent", app.Value());
+                        String element = Util.getIdByJson((JSONObject) snIncidentJson, "parent", App.Value());
                         if (element != "") {
                             ScRequest scRequest = scRequestService.findByIntegrationId(element);
                             if (scRequest != null)
@@ -1160,68 +1155,68 @@ public class IncidentController {
                             }
                         }
 
-                        Domain domain = getDomainByIntegrationId((JSONObject) snIncidentJson, SnTable.Domain.get(), app.Value());
+                        Domain domain = getDomainByIntegrationId((JSONObject) snIncidentJson, SnTable.Domain.get(), App.Value());
                         //if (domain != null)
                         incident.setDomain(domain);
 
-                        Company company = getCompanyByIntegrationId((JSONObject) snIncidentJson, SnTable.Company.get(), app.Value());
+                        Company company = getCompanyByIntegrationId((JSONObject) snIncidentJson, SnTable.Company.get(), App.Value());
                         //if (company != null)
                         incident.setCompany(company);
 
-                        SysUser causedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caused_by", app.Value());
+                        SysUser causedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caused_by", App.Value());
                         //if (causedBy != null)
                         incident.setCausedBy(causedBy);
 
-                        SysUser closedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "closed_by", app.Value());
+                        SysUser closedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "closed_by", App.Value());
                         // if (closedBy != null)
                         incident.setClosedBy(closedBy);
 
-                        SysUser reopenedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "reopened_by", app.Value());
+                        SysUser reopenedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "reopened_by", App.Value());
                         // if (reopenedBy != null)
                         incident.setReopenedBy(reopenedBy);
 
-                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", app.Value());
+                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", App.Value());
                         //if (assignedTo != null)
                         incident.setAssignedTo(assignedTo);
 
-                        SysUser solverAssignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", app.Value());
+                        SysUser solverAssignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", App.Value());
                         //if (solverAssignedTo != null)
                         incident.setSolverAssignedTo(solverAssignedTo);
 
-                        SysUser resolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "resolved_by", app.Value());
+                        SysUser resolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "resolved_by", App.Value());
                         //if (resolvedBy != null)
                         incident.setResolvedBy(resolvedBy);
 
-                        SysUser solverResolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_resolved_by", app.Value());
+                        SysUser solverResolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_resolved_by", App.Value());
                         //if (solverResolvedBy != null)
                         incident.setSolverResolvedBy(solverResolvedBy);
 
-                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "opened_by", app.Value());
+                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "opened_by", App.Value());
                         //if (openedBy != null)
                         incident.setOpenedBy(openedBy);
 
-                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snIncidentJson, "task_for", app.Value());
+                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snIncidentJson, "task_for", App.Value());
                         //if (taskFor != null)
                         incident.setTaskFor(taskFor);
 
-                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snIncidentJson, "business_service", app.Value());
+                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snIncidentJson, "business_service", App.Value());
                         //if (businessService != null)
                         incident.setBusinessService(businessService);
 
-                        SysUser caller = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caller_id", app.Value());
+                        SysUser caller = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caller_id", App.Value());
                         //if (caller != null)
                         incident.setCaller(caller);
 
-                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snIncidentJson, "cmdb_ci", app.Value());
+                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snIncidentJson, "cmdb_ci", App.Value());
                         //if (configurationItem != null)
                         incident.setConfigurationItem(configurationItem);
 
-                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snIncidentJson, "assignment_group", app.Value());
+                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snIncidentJson, "assignment_group", App.Value());
                         //if (sysGroup != null)
                         incident.setAssignmentGroup(sysGroup);
 
 
-                        Location location = getLocationByIntegrationId((JSONObject) snIncidentJson, "location", app.Value());
+                        Location location = getLocationByIntegrationId((JSONObject) snIncidentJson, "location", App.Value());
                         incident.setLocation(location);
 
                         Incident exists = incidentService.findByIntegrationId(incident.getIntegrationId());
@@ -1229,12 +1224,12 @@ public class IncidentController {
                             incident.setId(exists.getId());
                             incident.setScRequestParent(exists.getScRequestParent());
                             incident.setMaster(exists.getMaster());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
 
 
                         incidents.add(incidentService.save(incident));
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(incident)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(incident)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
                         //  }
 
                         count[0] = count[0] + 1;
@@ -1247,9 +1242,9 @@ public class IncidentController {
             ObjectMapper mapper = new ObjectMapper();
             apiResponse = mapper.readValue("Ended process", APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
@@ -1259,16 +1254,16 @@ public class IncidentController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return incidents;
     }
 
     @GetMapping("/incidenBySolverAndQueryCreate")
     public List<Incident> findByCompany(String query, boolean flagCreate) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<Incident> incidents = new ArrayList<>();
-        String[] sparmOffSets = util.offSets50000();
+        String[] sparmOffSets = Util.offSets50000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Incident] ";
@@ -1277,8 +1272,8 @@ public class IncidentController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.IncidentByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 
                 JSONParser parser = new JSONParser();
                 JSONObject resultJson;
@@ -1289,7 +1284,7 @@ public class IncidentController {
                     ListSnIncidentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnIncidentJson.stream().forEach(snIncidentJson -> {
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     IncidentSolver incidentSolver;
                     try {
                         Gson gson = new Gson();
@@ -1301,78 +1296,78 @@ public class IncidentController {
                             incident.setId(exists.getId());
                             incident.setScRequestParent(exists.getScRequestParent());
                             incident.setMaster(exists.getMaster());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         } else {
 
 
-                            incident.setSysUpdatedOn(util.isNull(incidentSolver.getSys_updated_on()));
-                            incident.setUpdatedOn(util.getLocalDateTime(util.isNull(incidentSolver.getSys_updated_on())));
-                            incident.setNumber(util.isNull(incidentSolver.getNumber()));
-                            incident.setState(util.isNull(incidentSolver.getState()));
-                            incident.setSysCreatedBy(util.isNull(incidentSolver.getSys_created_by()));
-                            incident.setImpact(util.isNull(incidentSolver.getImpact()));
+                            incident.setSysUpdatedOn(Util.isNull(incidentSolver.getSys_updated_on()));
+                            incident.setUpdatedOn(Util.getLocalDateTime(Util.isNull(incidentSolver.getSys_updated_on())));
+                            incident.setNumber(Util.isNull(incidentSolver.getNumber()));
+                            incident.setState(Util.isNull(incidentSolver.getState()));
+                            incident.setSysCreatedBy(Util.isNull(incidentSolver.getSys_created_by()));
+                            incident.setImpact(Util.isNull(incidentSolver.getImpact()));
                             incident.setActive(incidentSolver.isActive());
                             incident.setKnowledge(incidentSolver.getKnowledge());
-                            incident.setPriority(util.isNull(incidentSolver.getPriority()));
-                            incident.setBusinessDuration(util.isNull(incidentSolver.getBusiness_duration()));
-                            incident.setShortDescription(util.isNull(incidentSolver.getShort_description()));
-                            incident.setCorrelationDisplay(util.isNull(incidentSolver.getCorrelation_display()));
-                            incident.setNotify(util.isNull(incidentSolver.getNotify()));
-                            incident.setReassignmentCount(util.isNull(incidentSolver.getReassignment_count()));
-                            incident.setUponApproval(util.isNull(incidentSolver.getUpon_approval()));
-                            incident.setCorrelationId(util.isNull(incidentSolver.getCorrelation_id()));
+                            incident.setPriority(Util.isNull(incidentSolver.getPriority()));
+                            incident.setBusinessDuration(Util.isNull(incidentSolver.getBusiness_duration()));
+                            incident.setShortDescription(Util.isNull(incidentSolver.getShort_description()));
+                            incident.setCorrelationDisplay(Util.isNull(incidentSolver.getCorrelation_display()));
+                            incident.setNotify(Util.isNull(incidentSolver.getNotify()));
+                            incident.setReassignmentCount(Util.isNull(incidentSolver.getReassignment_count()));
+                            incident.setUponApproval(Util.isNull(incidentSolver.getUpon_approval()));
+                            incident.setCorrelationId(Util.isNull(incidentSolver.getCorrelation_id()));
                             incident.setMadeSla(incidentSolver.getMade_sla());
-                            incident.setSysUpdatedBy(util.isNull(incidentSolver.getSys_updated_by()));
-                            incident.setSysCreatedOn(util.isNull(incidentSolver.getSys_created_on()));
-                            if (!util.isNull(incidentSolver.getSys_created_on()).equals(""))
-                                incident.setCreatedOn(util.getLocalDateTime(util.isNull(incidentSolver.getSys_created_on())));
-                            incident.setClosedAt(util.isNull(incidentSolver.getClosed_at()));
-                            if (!util.isNull(incidentSolver.getClosed_at()).equals(""))
-                                incident.setClosed(util.getLocalDateTime(util.isNull(incidentSolver.getClosed_at())));
-                            incident.setOpenedAt(util.isNull(incidentSolver.getOpened_at()));
-                            if (!util.isNull(incidentSolver.getOpened_at()).equals(""))
-                                incident.setOpened(util.getLocalDateTime(util.isNull(incidentSolver.getOpened_at())));
-                            incident.setReopenedTime(util.isNull(incidentSolver.getReopened_time()));
-                            incident.setResolvedAt(util.isNull(incidentSolver.getResolved_at()));
-                            if (!util.isNull(incidentSolver.getResolved_at()).equals(""))
-                                incident.setResolved(util.getLocalDateTime(util.isNull(incidentSolver.getResolved_at())));
-                            incident.setSubcategory(util.isNull(incidentSolver.getSubcategory()));
-                            incident.setCloseCode(util.isNull(incidentSolver.getClose_code()));
-                            incident.setDescription(util.isNull(incidentSolver.getDescription()));
-                            incident.setCalendarDuration(util.isNull(incidentSolver.getCalendar_duration()));
-                            incident.setCloseNotes(util.isNull(incidentSolver.getClose_notes()));
-                            incident.setIntegrationId(util.isNull(incidentSolver.getSys_id()));
-                            incident.setContactType(util.isNull(incidentSolver.getContact_type()));
-                            incident.setIncidentState(util.isNull(incidentSolver.getIncident_state()));
-                            incident.setUrgency(util.isNull(incidentSolver.getUrgency()));
-                            incident.setSeverity(util.isNull(incidentSolver.getSeverity()));
-                            incident.setApproval(util.isNull(incidentSolver.getApproval()));
-                            incident.setSysModCount(util.isNull(incidentSolver.getSys_mod_count()));
-                            incident.setReopenCount(util.isNull(incidentSolver.getReopen_count()));
-                            incident.setCategory(util.isNull(incidentSolver.getCategory()));
+                            incident.setSysUpdatedBy(Util.isNull(incidentSolver.getSys_updated_by()));
+                            incident.setSysCreatedOn(Util.isNull(incidentSolver.getSys_created_on()));
+                            if (!Util.isNull(incidentSolver.getSys_created_on()).equals(""))
+                                incident.setCreatedOn(Util.getLocalDateTime(Util.isNull(incidentSolver.getSys_created_on())));
+                            incident.setClosedAt(Util.isNull(incidentSolver.getClosed_at()));
+                            if (!Util.isNull(incidentSolver.getClosed_at()).equals(""))
+                                incident.setClosed(Util.getLocalDateTime(Util.isNull(incidentSolver.getClosed_at())));
+                            incident.setOpenedAt(Util.isNull(incidentSolver.getOpened_at()));
+                            if (!Util.isNull(incidentSolver.getOpened_at()).equals(""))
+                                incident.setOpened(Util.getLocalDateTime(Util.isNull(incidentSolver.getOpened_at())));
+                            incident.setReopenedTime(Util.isNull(incidentSolver.getReopened_time()));
+                            incident.setResolvedAt(Util.isNull(incidentSolver.getResolved_at()));
+                            if (!Util.isNull(incidentSolver.getResolved_at()).equals(""))
+                                incident.setResolved(Util.getLocalDateTime(Util.isNull(incidentSolver.getResolved_at())));
+                            incident.setSubcategory(Util.isNull(incidentSolver.getSubcategory()));
+                            incident.setCloseCode(Util.isNull(incidentSolver.getClose_code()));
+                            incident.setDescription(Util.isNull(incidentSolver.getDescription()));
+                            incident.setCalendarDuration(Util.isNull(incidentSolver.getCalendar_duration()));
+                            incident.setCloseNotes(Util.isNull(incidentSolver.getClose_notes()));
+                            incident.setIntegrationId(Util.isNull(incidentSolver.getSys_id()));
+                            incident.setContactType(Util.isNull(incidentSolver.getContact_type()));
+                            incident.setIncidentState(Util.isNull(incidentSolver.getIncident_state()));
+                            incident.setUrgency(Util.isNull(incidentSolver.getUrgency()));
+                            incident.setSeverity(Util.isNull(incidentSolver.getSeverity()));
+                            incident.setApproval(Util.isNull(incidentSolver.getApproval()));
+                            incident.setSysModCount(Util.isNull(incidentSolver.getSys_mod_count()));
+                            incident.setReopenCount(Util.isNull(incidentSolver.getReopen_count()));
+                            incident.setCategory(Util.isNull(incidentSolver.getCategory()));
                             Choice category = choiceService.findByValueAndElementAndName(incident.getCategory(), Field.Category.get(), SnTable.Incident.get());
                             if (category != null) {
                                 incident.setCategory(category.getLabel());
                             }
-                            incident.setServiceLevel(util.isNull(incidentSolver.getU_service()));
-                            incident.setAmbiteLevel(util.isNull(incidentSolver.getU_ambite()));
-                            incident.setPlatformLevel(util.isNull(incidentSolver.getU_platform()));
-                            incident.setSpecificationLevel(util.isNull(incidentSolver.getU_specification()));
-                            incident.setIncidentParent(util.getIdByJson((JSONObject) snIncidentJson, "parent_incident", app.Value()));
+                            incident.setServiceLevel(Util.isNull(incidentSolver.getU_service()));
+                            incident.setAmbiteLevel(Util.isNull(incidentSolver.getU_ambite()));
+                            incident.setPlatformLevel(Util.isNull(incidentSolver.getU_platform()));
+                            incident.setSpecificationLevel(Util.isNull(incidentSolver.getU_specification()));
+                            incident.setIncidentParent(Util.getIdByJson((JSONObject) snIncidentJson, "parent_incident", App.Value()));
 
                             incident.setSolverFlagAssignedTo(incidentSolver.getU_solver_flag_assigned_to());
                             incident.setSolverFlagResolvedBy(incidentSolver.getU_solver_flag_resolved_by());
-                            incident.setReasonPending(util.isNull(incidentSolver.getU_sbk_pendiente()));
+                            incident.setReasonPending(Util.isNull(incidentSolver.getU_sbk_pendiente()));
                             incident.setDelete(false);
 
-                            if (util.hasData(incident.getIncidentParent())) {
+                            if (Util.hasData(incident.getIncidentParent())) {
                                 Incident master = incidentService.findByIntegrationId(incident.getIncidentParent());
                                 if (!master.getMaster()) {
                                     master.setMaster(true);
                                     incidentService.save(master);
                                 }
                             }
-                            String element = util.getIdByJson((JSONObject) snIncidentJson, "parent", app.Value());
+                            String element = Util.getIdByJson((JSONObject) snIncidentJson, "parent", App.Value());
                             if (element != "") {
                                 ScRequest scRequest = scRequestService.findByIntegrationId(element);
                                 if (scRequest != null)
@@ -1384,72 +1379,72 @@ public class IncidentController {
                                 }
                             }
 
-                            Domain domain = getDomainByIntegrationId((JSONObject) snIncidentJson, SnTable.Domain.get(), app.Value());
+                            Domain domain = getDomainByIntegrationId((JSONObject) snIncidentJson, SnTable.Domain.get(), App.Value());
 
                             incident.setDomain(domain);
 
-                            Company company = getCompanyByIntegrationId((JSONObject) snIncidentJson, SnTable.Company.get(), app.Value());
+                            Company company = getCompanyByIntegrationId((JSONObject) snIncidentJson, SnTable.Company.get(), App.Value());
 
                             incident.setCompany(company);
 
-                            SysUser causedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caused_by", app.Value());
+                            SysUser causedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caused_by", App.Value());
 
                             incident.setCausedBy(causedBy);
 
-                            SysUser closedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "closed_by", app.Value());
+                            SysUser closedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "closed_by", App.Value());
 
                             incident.setClosedBy(closedBy);
 
-                            SysUser reopenedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "reopened_by", app.Value());
+                            SysUser reopenedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "reopened_by", App.Value());
 
                             incident.setReopenedBy(reopenedBy);
 
-                            SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", app.Value());
+                            SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", App.Value());
 
                             incident.setAssignedTo(assignedTo);
 
-                            SysUser solverAssignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", app.Value());
+                            SysUser solverAssignedTo = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_assigned_to", App.Value());
                             incident.setSolverAssignedTo(solverAssignedTo);
 
-                            SysUser resolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "resolved_by", app.Value());
+                            SysUser resolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "resolved_by", App.Value());
 
                             incident.setResolvedBy(resolvedBy);
 
-                            SysUser solverResolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_resolved_by", app.Value());
+                            SysUser solverResolvedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "u_solver_resolved_by", App.Value());
 
                             incident.setSolverResolvedBy(solverResolvedBy);
 
-                            SysUser openedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "opened_by", app.Value());
+                            SysUser openedBy = getSysUserByIntegrationId((JSONObject) snIncidentJson, "opened_by", App.Value());
 
                             incident.setOpenedBy(openedBy);
 
-                            SysUser taskFor = getSysUserByIntegrationId((JSONObject) snIncidentJson, "task_for", app.Value());
+                            SysUser taskFor = getSysUserByIntegrationId((JSONObject) snIncidentJson, "task_for", App.Value());
 
                             incident.setTaskFor(taskFor);
 
-                            CiService businessService = getCiServiceByIntegrationId((JSONObject) snIncidentJson, "business_service", app.Value());
+                            CiService businessService = getCiServiceByIntegrationId((JSONObject) snIncidentJson, "business_service", App.Value());
 
                             incident.setBusinessService(businessService);
 
-                            SysUser caller = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caller_id", app.Value());
+                            SysUser caller = getSysUserByIntegrationId((JSONObject) snIncidentJson, "caller_id", App.Value());
 
                             incident.setCaller(caller);
 
-                            ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snIncidentJson, "cmdb_ci", app.Value());
+                            ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snIncidentJson, "cmdb_ci", App.Value());
 
                             incident.setConfigurationItem(configurationItem);
 
-                            SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snIncidentJson, "assignment_group", app.Value());
+                            SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snIncidentJson, "assignment_group", App.Value());
 
                             incident.setAssignmentGroup(sysGroup);
 
 
-                            Location location = getLocationByIntegrationId((JSONObject) snIncidentJson, "location", app.Value());
+                            Location location = getLocationByIntegrationId((JSONObject) snIncidentJson, "location", App.Value());
                             incident.setLocation(location);
 
 
                             incidents.add(incidentService.save(incident));
-                            util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(incident)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(incident)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
                         }
 
                         count[0] = count[0] + 1;
@@ -1462,9 +1457,9 @@ public class IncidentController {
             ObjectMapper mapper = new ObjectMapper();
             apiResponse = mapper.readValue("Ended process", APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
@@ -1474,77 +1469,77 @@ public class IncidentController {
         } catch (Exception e) {
             //     System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return incidents;
     }
 
     public SysUser getSysUserByIntegrationId(String integrationId) {
-        //String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        //String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public SysGroup getSysGroupByIntegrationId(String integrationId) {
-        //String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        //String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysGroupService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public CiService getCiServiceByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return ciServiceService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Company getCompanyByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return companyService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public ConfigurationItem getConfigurationItemByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return configurationItemService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public SysGroup getSysGroupByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysGroupService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Location getLocationByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return locationService.findByIntegrationId(integrationId);
         } else
             return null;

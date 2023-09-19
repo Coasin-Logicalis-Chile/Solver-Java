@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.core.JsonParser;
@@ -55,14 +54,9 @@ public class SnAttachmentController {
     @Autowired
     private Rest rest;
 
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
-
     @GetMapping("/snAttachment/{id}")
     public Object show(@PathVariable Long id) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         long startTime = 0;
         long endTime = 0;
@@ -77,7 +71,7 @@ public class SnAttachmentController {
             // mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
             try {
                 File downloadFile;
-                if (!util.isNullBool(attachment.getDownloadLink())) {
+                if (!Util.isNullBool(attachment.getDownloadLink())) {
                     downloadFile = new File(attachment.getDownloadLink());
                     System.out.println("LINUX");
                     System.out.println(downloadFile.getAbsolutePath());
@@ -109,9 +103,9 @@ public class SnAttachmentController {
             //apiResponse = mapper.readValue(String.valueOf(attachment.getDownloadLink()), APIResponse.class);
             apiResponse = mapper.readValue(attachment.getFileName(), APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Attachment().concat(attachment.getIntegrationId()));
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Attachment().concat(attachment.getIntegrationId()));
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -124,7 +118,7 @@ public class SnAttachmentController {
 
     @GetMapping("/findAttachmentByIntegration/{integration_id}")
     public Object findAttachmentByIntegration(@PathVariable String integration_id) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         long startTime = 0;
         long endTime = 0;
@@ -138,7 +132,7 @@ public class SnAttachmentController {
             // mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
             try {
                 File downloadFile;
-                if (!util.isNullBool(attachment.getDownloadLink())) {
+                if (!Util.isNullBool(attachment.getDownloadLink())) {
                     downloadFile = new File(attachment.getDownloadLink());
                     System.out.println("LINUX");
                     System.out.println(downloadFile.getAbsolutePath());
@@ -171,9 +165,9 @@ public class SnAttachmentController {
             //apiResponse = mapper.readValue(String.valueOf(attachment.getDownloadLink()), APIResponse.class);
             apiResponse = mapper.readValue("End process", APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Attachment().concat(attachment.getIntegrationId()));
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Attachment().concat(attachment.getIntegrationId()));
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -187,10 +181,9 @@ public class SnAttachmentController {
 
   /*  @GetMapping("/snAttachment/{id}")
     public Object show(@PathVariable Long id) {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnAttachment> snAttachments = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Attachment] ";
@@ -216,7 +209,7 @@ public class SnAttachmentController {
                 try {
                     SnAttachment snAttachment = objectMapper.readValue(snAttachmentJson.toString(), SnAttachment.class);
                     File downloadFile = rest.responseFileByEndPointSO(snAttachment, restTemplate, environment.getProperty("setting.attachments.dir"));
-                    // NO APLICA util.uploadFile(downloadFile,snAttachment);
+                    // NO APLICA Util.uploadFile(downloadFile,snAttachment);
                     byte[] fileByte = Files.readAllBytes(downloadFile.toPath());
                     ByteArrayInputStream inputStream = new ByteArrayInputStream(fileByte);
                     attachmentResource[0] = new InputStreamResource(inputStream);
@@ -236,8 +229,8 @@ public class SnAttachmentController {
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(endPointSN.Attachment().concat(attachment.getIntegrationId()));
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -249,11 +242,10 @@ public class SnAttachmentController {
     }*/
     /*public Object show(@PathVariable Long id) {
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnAttachment> snAttachments = new ArrayList<>();
         final InputStreamResource[] attachment = {null};
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Attachment] ";
@@ -295,8 +287,8 @@ public class SnAttachmentController {
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(endPointSN.Incident());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -311,18 +303,17 @@ public class SnAttachmentController {
     @GetMapping("/attachments/{integrationId}")
     public List<Attachment> show(@PathVariable String integrationId) {
 
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnAttachment> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Attachment] ";
         try {
             RestTemplate restTemplate = rest.restTemplateServiceNow();
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Attachment().concat(integrationId));
+            String result = rest.responseByEndPoint(EndPointSN.Attachment().concat(integrationId));
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -333,7 +324,7 @@ public class SnAttachmentController {
                 ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                String tagAction = app.CreateConsole();
+                String tagAction = App.CreateConsole();
                 ObjectMapper objectMapper = new ObjectMapper();
                 objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
@@ -352,7 +343,7 @@ public class SnAttachmentController {
                     attachment.setSysUpdatedBy(snAttachment.getSys_updated_by());
                     attachment.setSysUpdatedOn(snAttachment.getSys_updated_on());
 
-                    Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), app.Value());
+                    Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
                     if (domain != null)
                         attachment.setDomain(domain);
 
@@ -379,10 +370,10 @@ public class SnAttachmentController {
                     Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
                     if (exists != null) {
                         attachment.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
                     attachmentService.save(attachment);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(attachment)), util.getFieldDisplay(domain));
+                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain));
 
 
                     count[0] = count[0] + 1;
@@ -400,9 +391,9 @@ public class SnAttachmentController {
             //return ResponseEntity.ok().headers(headers).body(attachments);
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Incident());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Incident());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -414,8 +405,8 @@ public class SnAttachmentController {
     }
 
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;

@@ -52,10 +52,6 @@ public class SysUserController {
     @Autowired
     private Rest rest;
 
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sysUsers")
     public List<SysUser> index() {
         return sysUserService.findAll();
@@ -153,14 +149,14 @@ public class SysUserController {
 
         Map<String, Object> response = new HashMap<>();
         try {
-            currentSysUser = sysUserService.findById(util.parseIdJson(sysUserSolver.toString(), "params", "id"));
-            // currentSysUser.setPassword(Base64.getEncoder().encodeToString(util.parseJson(sysUserSolver.toString(), "params", "password").getBytes()));
-            if(passwordEncoder.matches(util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
+            currentSysUser = sysUserService.findById(Util.parseIdJson(sysUserSolver.toString(), "params", "id"));
+            // currentSysUser.setPassword(Base64.getEncoder().encodeToString(Util.parseJson(sysUserSolver.toString(), "params", "password").getBytes()));
+            if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
                  response.put("mensaje", Messages.PasswordFailed.get());
                  response.put("repetida", true);
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
             }else{
-                currentSysUser.setPassword(passwordEncoder.encode(util.parseJson(sysUserSolver.toString(), "params", "password")));
+                currentSysUser.setPassword(passwordEncoder.encode(Util.parseJson(sysUserSolver.toString(), "params", "password")));
                 currentSysUser = sysUserService.save(currentSysUser);
                 response.put("mensaje", Messages.createOK.get());
                 response.put("repetida", false);
@@ -189,7 +185,7 @@ public class SysUserController {
 
         try {
             SysUser sysUser = new SysUser();
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             String tag = "[SysUser] ";
             sysUser.setActive(sysUserRequest.getActive());
             sysUser.setEmail(sysUserRequest.getEmail().toLowerCase(Locale.ROOT));
@@ -211,7 +207,7 @@ public class SysUserController {
             sysUser.setCompany(company);
             sysUser.setDomain(company.getDomain());
 
-          /*if (util.hasData(sysUserRequest.getSys_domain())) {
+          /*if (Util.hasData(sysUserRequest.getSys_domain())) {
                 Domain domain = domainService.findByIntegrationId(sysUserRequest.getSys_domain());
                 if (domain != null)
                     sysUser.setDomain(domain);
@@ -219,21 +215,21 @@ public class SysUserController {
                 sysUser.setDomain(null);
             }*/
 
-            if (util.hasData(sysUserRequest.getManager())) {
+            if (Util.hasData(sysUserRequest.getManager())) {
                 SysUser manager = sysUserService.findByIntegrationId(sysUserRequest.getManager());
                 sysUser.setManager(manager.getIntegrationId());
             } else {
                 sysUser.setManager(null);
             }
 
-            /*if (util.hasData(sysUserRequest.getCompany())) {
+            /*if (Util.hasData(sysUserRequest.getCompany())) {
                 Company company = companyService.findByIntegrationId(sysUserRequest.getCompany());
                 if (company != null)
                     sysUser.setCompany(company);
             } else {
                 sysUser.setCompany(null);
             }]*/
-            if (util.hasData(sysUserRequest.getDepartment())) {
+            if (Util.hasData(sysUserRequest.getDepartment())) {
                 Department department = departmentService.findByIntegrationId(sysUserRequest.getDepartment());
                 if (department != null)
                     sysUser.setDepartment(department);
@@ -241,7 +237,7 @@ public class SysUserController {
                 sysUser.setDepartment(null);
             }
 
-            if (util.hasData(sysUserRequest.getLocation())) {
+            if (Util.hasData(sysUserRequest.getLocation())) {
                 Location location = locationService.findByIntegrationId(sysUserRequest.getLocation());
                 if (location != null)
                     sysUser.setLocation(location);
@@ -253,11 +249,11 @@ public class SysUserController {
             SysUser exists = sysUserService.findByIntegrationId(sysUser.getIntegrationId());
             if (exists != null) {
                 sysUser.setId(exists.getId());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
 
             sysUserUpdated = sysUserService.save(sysUser);
-            util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(sysUser.getCompany()), util.getFieldDisplay(sysUser.getDomain()));
+            Util.printData(tag, tagAction.concat(Util.getFieldDisplay(sysUser)), Util.getFieldDisplay(sysUser.getCompany()), Util.getFieldDisplay(sysUser.getDomain()));
 
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
@@ -286,7 +282,7 @@ public class SysUserController {
             String code = String.valueOf(new Random().nextInt(9999999));
             sysUserCurrent.setCode(code);
             sysUserUpdated = sysUserService.save(sysUserCurrent);
-            //util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(sysUser.getCompany()), util.getFieldDisplay(sysUser.getDomain()));
+            //Util.printData(tag, tagAction.concat(Util.getFieldDisplay(sysUser)), Util.getFieldDisplay(sysUser.getCompany()), Util.getFieldDisplay(sysUser.getDomain()));
 
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
@@ -311,7 +307,7 @@ public class SysUserController {
 
         try {
             sysUserCurrent = sysUserService.findById(id);
-            rest.putSysUser(endPointSN.PutSysUser(), sysUserCurrent);
+            rest.putSysUser(EndPointSN.PutSysUser(), sysUserCurrent);
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
@@ -448,8 +444,8 @@ public class SysUserController {
     }
 
     public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;

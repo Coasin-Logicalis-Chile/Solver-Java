@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -41,22 +40,17 @@ public class SnCatalogController {
     @Autowired
     private Rest rest;
 
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sn_catalogs")
     public List<SnCatalog> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnCatalog> snCatalogs = new ArrayList<>();
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Catalog] ";
         try {
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Catalog());
+            String result = rest.responseByEndPoint(EndPointSN.Catalog());
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -79,12 +73,12 @@ public class SnCatalogController {
                     catalog.setIntegrationId(snCatalog.getSys_id());
 
                     Catalog exists = catalogService.findByIntegrationId(catalog.getIntegrationId());
-                    String tagAction = app.CreateConsole();
+                    String tagAction = App.CreateConsole();
                     if (exists != null) {
                         catalog.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                        tagAction = App.UpdateConsole();
                     }
-                    util.printData(tag, count[0], tagAction.concat(catalog != null ? catalog.getTitle() != "" ? catalog.getTitle() : app.Title() : app.Title()));
+                    Util.printData(tag, count[0], tagAction.concat(catalog != null ? catalog.getTitle() != "" ? catalog.getTitle() : App.Title() : App.Title()));
 
                     catalogService.save(catalog);
                     count[0] = count[0] + 1;
@@ -96,9 +90,9 @@ public class SnCatalogController {
             apiResponse = mapper.readValue(result, APIResponse.class);
 
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Catalog());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Catalog());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
@@ -108,7 +102,7 @@ public class SnCatalogController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snCatalogs;
     }
 }

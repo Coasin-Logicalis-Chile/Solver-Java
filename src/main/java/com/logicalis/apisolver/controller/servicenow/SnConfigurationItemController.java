@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -28,7 +27,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnConfigurationItemController {
-
     @Autowired
     private ISnConfigurationItemService snConfigurationItemService;
     @Autowired
@@ -50,17 +48,12 @@ public class SnConfigurationItemController {
     @Autowired
     private Rest rest;
 
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sn_configuration_items")
     public List<SnConfigurationItem> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnConfigurationItem> snConfigurationItems = new ArrayList<>();
-        String[] sparmOffSets = util.offSets99000();
-        Util util = new Util();
+        String[] sparmOffSets = Util.offSets99000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[ConfigurationItem] ";
@@ -78,8 +71,8 @@ public class SnConfigurationItemController {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.ConfigurationItem().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.ConfigurationItem().concat(sparmOffSet)).concat(")")));
+                String result = rest.responseByEndPoint(EndPointSN.ConfigurationItem().concat(sparmOffSet));
+                System.out.println(tag.concat("(".concat(EndPointSN.ConfigurationItem().concat(sparmOffSet)).concat(")")));
                 ObjectMapper mapper = new ObjectMapper();
                 mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 JSONParser parser = new JSONParser();
@@ -122,36 +115,36 @@ public class SnConfigurationItemController {
                         configurationItem.setSubcategory(snConfigurationItem.getSubcategory());
                         configurationItem.setUpdatedBy(snConfigurationItem.getSys_updated_by());
 
-                        Company company = util.filterCompany(companies, util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Company.get(), app.Value()));
+                        Company company = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Company.get(), App.Value()));
                         if (company != null) configurationItem.setCompany(company);
 
-                        Location location = util.filterLocation(locations, util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Location.get(), app.Value()));
+                        Location location = Util.filterLocation(locations, Util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Location.get(), App.Value()));
                         if (location != null) configurationItem.setLocation(location);
 
-                        Company manufacturer = util.filterCompany(companies, util.getIdByJson((JSONObject) snConfigurationItemJson, "manufacturer", app.Value()));
+                        Company manufacturer = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snConfigurationItemJson, "manufacturer", App.Value()));
                         if (manufacturer != null) configurationItem.setManufacturer(manufacturer);
 
-                        SysUser assignedTo = util.filterSysUser(sysUsers, util.getIdByJson((JSONObject) snConfigurationItemJson, "assigned_to", app.Value()));
+                        SysUser assignedTo = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snConfigurationItemJson, "assigned_to", App.Value()));
                         if (assignedTo != null) configurationItem.setAssignedTo(assignedTo);
 
-                        SysUser ownedBy = util.filterSysUser(sysUsers, util.getIdByJson((JSONObject) snConfigurationItemJson, "owned_by", app.Value()));
+                        SysUser ownedBy = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snConfigurationItemJson, "owned_by", App.Value()));
                         if (ownedBy != null) configurationItem.setOwnedBy(ownedBy);
 
-                        Domain domain = util.filterDomain(domains, util.getIdByJson((JSONObject) snConfigurationItemJson, "sys_domain", app.Value()));
+                        Domain domain = Util.filterDomain(domains, Util.getIdByJson((JSONObject) snConfigurationItemJson, "sys_domain", App.Value()));
                         if (domain != null)
                             configurationItem.setDomain(domain);
 
-                        SysGroup supportGroup = util.filterSysGroup(sysGroups, util.getIdByJson((JSONObject) snConfigurationItemJson, "support_group", app.Value()));
+                        SysGroup supportGroup = Util.filterSysGroup(sysGroups, Util.getIdByJson((JSONObject) snConfigurationItemJson, "support_group", App.Value()));
                         if (supportGroup != null)
                             configurationItem.setSupportGroup(supportGroup);
-                        String tagAction = app.CreateConsole();
+                        String tagAction = App.CreateConsole();
                         ConfigurationItem exists = configurationItemService.findByIntegrationId(configurationItem.getIntegrationId());
                         if (exists != null) {
                             configurationItem.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                            tagAction = App.UpdateConsole();
                         }
                         configurationItemService.save(configurationItem);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(configurationItem)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
+                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(configurationItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
 
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
@@ -161,9 +154,9 @@ public class SnConfigurationItemController {
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
                 APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
@@ -174,7 +167,7 @@ public class SnConfigurationItemController {
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snConfigurationItems;
     }
 

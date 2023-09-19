@@ -41,10 +41,6 @@ public class SysGroupController {
     @Autowired
     private IAPIExecutionStatusService statusService;
 
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
-
     @GetMapping("/sysGroups")
     public List<SysGroup> index() {
         return sysGroupService.findAll();
@@ -212,7 +208,7 @@ public class SysGroupController {
 
         try {
             SysGroup sysGroup = new SysGroup();
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             String tag = "[SysGroup] ";
             sysGroup.setActive(sysGroupRequest.getActive());
             sysGroup.setName(sysGroupRequest.getName());
@@ -235,7 +231,7 @@ public class SysGroupController {
             SysGroup exists = sysGroupService.findByIntegrationId(sysGroup.getIntegrationId());
             if (exists != null) {
                 sysGroup.setId(exists.getId());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
 
             sysGroupUpdated = sysGroupService.save(sysGroup);
