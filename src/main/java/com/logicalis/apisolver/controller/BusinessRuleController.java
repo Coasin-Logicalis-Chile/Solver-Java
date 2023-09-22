@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.BusinessRule;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class BusinessRuleController {
-
 	@Autowired
 	private IBusinessRuleService businessRuleService;
 	
@@ -47,7 +45,6 @@ public class BusinessRuleController {
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<BusinessRule>(businessRule, HttpStatus.OK);
 	}
 

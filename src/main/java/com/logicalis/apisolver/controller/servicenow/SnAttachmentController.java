@@ -1,6 +1,5 @@
 package com.logicalis.apisolver.controller.servicenow;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -10,7 +9,6 @@ import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.enums.SnTable;
 import com.logicalis.apisolver.model.servicenow.SnAttachment;
 import com.logicalis.apisolver.services.*;
-import com.logicalis.apisolver.services.servicenow.ISnAttachmentService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import org.json.simple.JSONArray;
@@ -34,9 +32,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnAttachmentController {
-
-    @Autowired
-    private ISnAttachmentService snAttachmentService;
     @Autowired
     private IAttachmentService attachmentService;
     @Autowired
@@ -66,9 +61,6 @@ public class SnAttachmentController {
             startTime = System.currentTimeMillis();
             Attachment attachment = attachmentService.findById(id);
             ObjectMapper mapper = new ObjectMapper();
-            //mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            //mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-            // mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
             try {
                 File downloadFile;
                 if (!Util.isNullBool(attachment.getDownloadLink())) {
@@ -100,7 +92,6 @@ public class SnAttachmentController {
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Disposition", "attachmentResource");
 
-            //apiResponse = mapper.readValue(String.valueOf(attachment.getDownloadLink()), APIResponse.class);
             apiResponse = mapper.readValue(attachment.getFileName(), APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Attachment().concat(attachment.getIntegrationId()));
@@ -127,9 +118,6 @@ public class SnAttachmentController {
         try {
             startTime = System.currentTimeMillis();
             Attachment attachment = attachmentService.findByIntegrationId(integration_id);
-        // mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            //mapper.configure(DeserializationFeature.ACCEPT_SINGLE_VALUE_AS_ARRAY, true);
-            // mapper.configure(JsonParser.Feature.ALLOW_COMMENTS, true);
             try {
                 File downloadFile;
                 if (!Util.isNullBool(attachment.getDownloadLink())) {
@@ -162,7 +150,6 @@ public class SnAttachmentController {
             headers.add("Content-Disposition", "attachmentResource");
 
             ObjectMapper mapper = new ObjectMapper();
-            //apiResponse = mapper.readValue(String.valueOf(attachment.getDownloadLink()), APIResponse.class);
             apiResponse = mapper.readValue("End process", APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Attachment().concat(attachment.getIntegrationId()));
@@ -178,128 +165,6 @@ public class SnAttachmentController {
         return attachmentResource[0];
     }
 
-
-  /*  @GetMapping("/snAttachment/{id}")
-    public Object show(@PathVariable Long id) {
-        System.out.println(App.Start());
-        APIResponse apiResponse = null;
-        List<SnAttachment> snAttachments = new ArrayList<>();
-        long startTime = 0;
-        long endTime = 0;
-        String tag = "[Attachment] ";
-        final InputStreamResource[] attachmentResource = {null};
-        try {
-            RestTemplate restTemplate = rest.restTemplateServiceNow();
-            startTime = System.currentTimeMillis();
-            Attachment attachment = attachmentService.findById(id);
-            //String result = rest.responseByEndPoint(endPointSN.AttachmentBySysId().concat(attachment.getIntegrationId()));
-            String result = rest.responseByEndPoint(endPointSN.AttachmentBySysId().concat(attachment.getIntegrationId()));
-            endTime = (System.currentTimeMillis() - startTime);
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JSONParser parser = new JSONParser();
-            JSONObject resultJson = (JSONObject) parser.parse(result);
-            JSONArray ListSnAttachmentJson = new JSONArray();
-            if (resultJson.get("result") != null)
-                ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-            final int[] count = {1};
-            ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                try {
-                    SnAttachment snAttachment = objectMapper.readValue(snAttachmentJson.toString(), SnAttachment.class);
-                    File downloadFile = rest.responseFileByEndPointSO(snAttachment, restTemplate, environment.getProperty("setting.attachments.dir"));
-                    // NO APLICA Util.uploadFile(downloadFile,snAttachment);
-                    byte[] fileByte = Files.readAllBytes(downloadFile.toPath());
-                    ByteArrayInputStream inputStream = new ByteArrayInputStream(fileByte);
-                    attachmentResource[0] = new InputStreamResource(inputStream);
-                    snAttachments.add(snAttachment);
-                    count[0] = count[0] + 1;
-                } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
-                } catch (IOException e) {
-                    System.out.println(tag.concat("IOException (I) : ").concat(String.valueOf(e)));
-                    e.printStackTrace();
-                }
-            });
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachmentResource");
-
-            apiResponse = mapper.readValue(result, APIResponse.class);
-            APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Attachment().concat(attachment.getIntegrationId()));
-            status.setUserAPI(App.SNUser());
-            status.setPasswordAPI(App.SNPassword());
-            status.setError(apiResponse.getError());
-            status.setMessage(apiResponse.getMessage());
-            status.setExecutionTime(endTime);
-            statusService.save(status);
-        } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
-        }
-        return attachmentResource[0];
-    }*/
-    /*public Object show(@PathVariable Long id) {
-
-        System.out.println(App.Start());
-        APIResponse apiResponse = null;
-        List<SnAttachment> snAttachments = new ArrayList<>();
-        final InputStreamResource[] attachment = {null};
-        long startTime = 0;
-        long endTime = 0;
-        String tag = "[Attachment] ";
-        try {
-            RestTemplate restTemplate = rest.restTemplate();
-            startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Attachment().concat("b4cf1be897c01150061c73400153afee"));
-            endTime = (System.currentTimeMillis() - startTime);
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JSONParser parser = new JSONParser();
-            JSONObject resultJson = (JSONObject) parser.parse(result);
-            JSONArray ListSnAttachmentJson = new JSONArray();
-            if (resultJson.get("result") != null)
-                ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-            final int[] count = {1};
-            ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                try {
-                    SnAttachment snAttachment = objectMapper.readValue(snAttachmentJson.toString(), SnAttachment.class);
-                    File downloadFile = rest.responseFileByEndPoint(snAttachment, restTemplate);
-                    byte[] fileByte = Files.readAllBytes(downloadFile.toPath());
-                    ByteArrayInputStream inputStream = new ByteArrayInputStream(fileByte);
-                    attachment[0] = new InputStreamResource(inputStream);
-                    snAttachments.add(snAttachment);
-                    count[0] = count[0] + 1;
-                } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            });
-
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachments");
-
-            //return ResponseEntity.ok().headers(headers).body(attachments);
-            apiResponse = mapper.readValue(result, APIResponse.class);
-            APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Incident());
-            status.setUserAPI(App.SNUser());
-            status.setPasswordAPI(App.SNPassword());
-            status.setError(apiResponse.getError());
-            status.setMessage(apiResponse.getMessage());
-            status.setExecutionTime(endTime);
-            statusService.save(status);
-        } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
-        }
-        return attachment[0];
-    }*/
-
-
     @GetMapping("/attachments/{integrationId}")
     public List<Attachment> show(@PathVariable String integrationId) {
 
@@ -310,6 +175,8 @@ public class SnAttachmentController {
         long startTime = 0;
         long endTime = 0;
         String tag = "[Attachment] ";
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachments");
         try {
             RestTemplate restTemplate = rest.restTemplateServiceNow();
             startTime = System.currentTimeMillis();
@@ -385,10 +252,6 @@ public class SnAttachmentController {
                 }
             });
 
-            HttpHeaders headers = new HttpHeaders();
-            headers.add("Content-Disposition", "attachments");
-
-            //return ResponseEntity.ok().headers(headers).body(attachments);
             apiResponse = mapper.readValue(result, APIResponse.class);
             APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Incident());
@@ -411,6 +274,5 @@ public class SnAttachmentController {
         } else
             return null;
     }
-
 }
 

@@ -517,7 +517,6 @@ public class JournalController {
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
                     ListSnJournalJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
                 ListSnJournalJson.stream().forEach(snJournalJson -> {
                     flag[0] = false;
                     try {
@@ -549,7 +548,6 @@ public class JournalController {
                                 element[0] = Util.getFieldDisplay(scRequest[0]);
                             }
                         }
-
                         if (flag[0]) {
                             journalRequests.add(journalRequest[0]);
                             journal.setOrigin(journalRequest[0].getElement());
@@ -665,7 +663,6 @@ public class JournalController {
                                     element[0] = Util.getFieldDisplay(scRequest[0]);
                                 }
                             }
-
                             if (flag[0]) {
                                 journalRequests.add(journalRequest[0]);
                                 journal.setOrigin(journalRequest[0].getElement());
@@ -858,4 +855,3 @@ public class JournalController {
         return new ResponseEntity<Journal>(journal, HttpStatus.OK);
     }
 }
-

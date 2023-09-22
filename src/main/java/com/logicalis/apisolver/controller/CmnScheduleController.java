@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -50,10 +49,8 @@ public class CmnScheduleController {
 
     @GetMapping("/cmnSchedule/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         CmnSchedule cmnSchedule = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             cmnSchedule = cmnScheduleService.findById(id);
         } catch (DataAccessException e) {
@@ -66,7 +63,6 @@ public class CmnScheduleController {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<CmnSchedule>(cmnSchedule, HttpStatus.OK);
     }
 
@@ -74,7 +70,6 @@ public class CmnScheduleController {
     @PostMapping("/cmnSchedule")
     public ResponseEntity<?> create(@RequestBody CmnSchedule cmnSchedule) {
         CmnSchedule newCmnSchedule = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
             newCmnSchedule = cmnScheduleService.save(cmnSchedule);
@@ -85,24 +80,19 @@ public class CmnScheduleController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("cmnSchedule", newCmnSchedule);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/cmnSchedule/{id}")
     public ResponseEntity<?> update(@RequestBody CmnSchedule cmnSchedule, @PathVariable Long id) {
-
         CmnSchedule currentCmnSchedule = cmnScheduleService.findById(id);
         CmnSchedule cmnScheduleUpdated = null;
-
         Map<String, Object> response = new HashMap<>();
-
         if (currentCmnSchedule == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             currentCmnSchedule.setName(cmnSchedule.getName());
             cmnScheduleUpdated = cmnScheduleService.save(currentCmnSchedule);
@@ -114,14 +104,12 @@ public class CmnScheduleController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("cmnSchedule", cmnScheduleUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/cmnSchedule/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             cmnScheduleService.delete(id);
@@ -136,10 +124,8 @@ public class CmnScheduleController {
 
     @GetMapping("/cmnSchedule/{integrationId}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {
-
         CmnSchedule cmnSchedule = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             cmnSchedule = cmnScheduleService.findByIntegrationId(integrationId);
         } catch (DataAccessException e) {
@@ -152,7 +138,6 @@ public class CmnScheduleController {
             response.put("mensaje", Messages.notExist.get(integrationId.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<CmnSchedule>(cmnSchedule, HttpStatus.OK);
     }
 
@@ -173,53 +158,55 @@ public class CmnScheduleController {
             JSONParser parser = new JSONParser();
             JSONObject resultJson = (JSONObject) parser.parse(result);
             JSONArray ListCmnScheduleJson = new JSONArray();
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            CmnSchedule cmnSchedule = new CmnSchedule();
+            final Domain[] domain = new Domain[1];
+            final CmnSchedule[] exists = new CmnSchedule[1];
+            final String[] tagAction = new String[1];
+            final CmnScheduleSolver[] cmnScheduleSolver = new CmnScheduleSolver[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             if (resultJson.get("result") != null)
                 ListCmnScheduleJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListCmnScheduleJson.forEach(cmnScheduleJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    CmnScheduleSolver cmnScheduleSolver = objectMapper.readValue(cmnScheduleJson.toString(), CmnScheduleSolver.class);
-                    snCmnSchedulesSolver.add(cmnScheduleSolver);
-                    CmnSchedule cmnSchedule = new CmnSchedule();
-                    cmnSchedule.setParent(cmnScheduleSolver.getParent());
-                    cmnSchedule.setDocument(cmnScheduleSolver.getDocument());
-                    cmnSchedule.setDescription(cmnScheduleSolver.getDescription());
-                    cmnSchedule.setSysUpdatedOn(cmnScheduleSolver.getSys_updated_on());
-                    cmnSchedule.setType(cmnScheduleSolver.getType());
-                    cmnSchedule.setDocumentKey(cmnScheduleSolver.getDocument_key());
-                    cmnSchedule.setSysUpdatedBy(cmnScheduleSolver.getSys_updated_by());
-                    cmnSchedule.setSysCreatedOn(cmnScheduleSolver.getSys_created_on());
-                    cmnSchedule.setSysName(cmnScheduleSolver.getSys_name());
-                    cmnSchedule.setSysCreatedBy(cmnScheduleSolver.getSys_created_by());
-                    cmnSchedule.setLabel(cmnScheduleSolver.getLabel());
-                    cmnSchedule.setCalendarName(cmnScheduleSolver.getCalendar_name());
-                    cmnSchedule.setTimeZone(cmnScheduleSolver.getTime_zone());
-                    cmnSchedule.setSysUpdateName(cmnScheduleSolver.getSys_update_name());
-                    cmnSchedule.setName(cmnScheduleSolver.getName());
-                    cmnSchedule.setIntegrationId(cmnScheduleSolver.getSys_id());
-                    Domain domain = getDomainByIntegrationId((JSONObject) cmnScheduleJson, SnTable.Domain.get(), App.Value());
-                    if (domain != null)
-                        cmnSchedule.setDomain(domain);
-                    CmnSchedule exists = cmnScheduleService.findByIntegrationId(cmnSchedule.getIntegrationId());
-                    String tagAction = App.CreateConsole();
-                    if (exists != null) {
-                        cmnSchedule.setId(exists.getId());
-                        tagAction = App.UpdateConsole();
+                    cmnScheduleSolver[0] = objectMapper.readValue(cmnScheduleJson.toString(), CmnScheduleSolver.class);
+                    snCmnSchedulesSolver.add(cmnScheduleSolver[0]);
+                    cmnSchedule.setParent(cmnScheduleSolver[0].getParent());
+                    cmnSchedule.setDocument(cmnScheduleSolver[0].getDocument());
+                    cmnSchedule.setDescription(cmnScheduleSolver[0].getDescription());
+                    cmnSchedule.setSysUpdatedOn(cmnScheduleSolver[0].getSys_updated_on());
+                    cmnSchedule.setType(cmnScheduleSolver[0].getType());
+                    cmnSchedule.setDocumentKey(cmnScheduleSolver[0].getDocument_key());
+                    cmnSchedule.setSysUpdatedBy(cmnScheduleSolver[0].getSys_updated_by());
+                    cmnSchedule.setSysCreatedOn(cmnScheduleSolver[0].getSys_created_on());
+                    cmnSchedule.setSysName(cmnScheduleSolver[0].getSys_name());
+                    cmnSchedule.setSysCreatedBy(cmnScheduleSolver[0].getSys_created_by());
+                    cmnSchedule.setLabel(cmnScheduleSolver[0].getLabel());
+                    cmnSchedule.setCalendarName(cmnScheduleSolver[0].getCalendar_name());
+                    cmnSchedule.setTimeZone(cmnScheduleSolver[0].getTime_zone());
+                    cmnSchedule.setSysUpdateName(cmnScheduleSolver[0].getSys_update_name());
+                    cmnSchedule.setName(cmnScheduleSolver[0].getName());
+                    cmnSchedule.setIntegrationId(cmnScheduleSolver[0].getSys_id());
+                    domain[0] = getDomainByIntegrationId((JSONObject) cmnScheduleJson, SnTable.Domain.get(), App.Value());
+                    if (domain[0] != null)
+                        cmnSchedule.setDomain(domain[0]);
+                    exists[0] = cmnScheduleService.findByIntegrationId(cmnSchedule.getIntegrationId());
+                    tagAction[0] = App.CreateConsole();
+                    if (exists[0] != null) {
+                        cmnSchedule.setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
 
-                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(cmnSchedule)), Util.getFieldDisplay(cmnSchedule.getDomain()));
+                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(cmnSchedule)), Util.getFieldDisplay(cmnSchedule.getDomain()));
                     cmnScheduleService.save(cmnSchedule);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
-
             apiResponse = mapper.readValue(result, APIResponse.class);
-
-            APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Catalog());
             status.setUserAPI(App.SNUser());
             status.setPasswordAPI(App.SNPassword());
@@ -227,8 +214,6 @@ public class CmnScheduleController {
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
             statusService.save(status);
-
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }

@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -52,10 +51,8 @@ public class CiServiceController {
 
     @GetMapping("/ciService/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         CiService ciService = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             ciService = ciServiceService.findById(id);
         } catch (DataAccessException e) {
@@ -68,16 +65,13 @@ public class CiServiceController {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<CiService>(ciService, HttpStatus.OK);
     }
 
     @GetMapping("/ci_service/{integrationId}")
     public ResponseEntity<?> show(@PathVariable String integrationId) {
-
         CiService ciService = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             ciService = ciServiceService.findByIntegrationId(integrationId);
         } catch (DataAccessException e) {
@@ -90,7 +84,6 @@ public class CiServiceController {
             response.put("mensaje", Messages.notExist.get(integrationId));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<CiService>(ciService, HttpStatus.OK);
     }
 
@@ -98,7 +91,6 @@ public class CiServiceController {
     @PostMapping("/ciService")
     public ResponseEntity<?> create(@RequestBody CiService ciService) {
         CiService newCiService = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
             newCiService = ciServiceService.save(ciService);
@@ -109,24 +101,19 @@ public class CiServiceController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("ciService", newCiService);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/ciService/{id}")
     public ResponseEntity<?> update(@RequestBody CiService ciService, @PathVariable Long id) {
-
         CiService currentCiService = ciServiceService.findById(id);
         CiService ciServiceUpdated = null;
-
         Map<String, Object> response = new HashMap<>();
-
         if (currentCiService == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             currentCiService.setName(ciService.getName());
             ciServiceUpdated = ciServiceService.save(currentCiService);
@@ -138,14 +125,12 @@ public class CiServiceController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("ciService", ciServiceUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/ciService/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             ciServiceService.delete(id);
@@ -161,7 +146,6 @@ public class CiServiceController {
 
     @GetMapping("/ciServiceBySolverAndQuery")
     public List<CiService> show(String query, boolean flag) {
-
         System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<CiService> ciServices = new ArrayList<>();
@@ -169,7 +153,6 @@ public class CiServiceController {
         long startTime = 0;
         long endTime = 0;
         String tag = "[CiService] ";
-
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
@@ -263,7 +246,6 @@ public class CiServiceController {
             endTime = (System.currentTimeMillis() - startTime);
             status.setExecutionTime(endTime);
             statusService.save(status);
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }

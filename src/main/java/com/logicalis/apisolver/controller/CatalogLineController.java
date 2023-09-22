@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.CatalogLine;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class CatalogLineController {
-
 	@Autowired
 	private ICatalogLineService catalogLineService;
 	
@@ -31,7 +29,6 @@ public class CatalogLineController {
 	
 	@GetMapping("/catalogLine/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		CatalogLine catalogLine = null;
 		Map<String, Object> response = new HashMap<>();
 		
@@ -47,7 +44,6 @@ public class CatalogLineController {
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<CatalogLine>(catalogLine, HttpStatus.OK);
 	}
 
@@ -73,12 +69,9 @@ public class CatalogLineController {
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/catalogLine/{id}")
 	public ResponseEntity<?> update(@RequestBody CatalogLine catalogLine, @PathVariable Long id) {
-
 		CatalogLine currentCatalogLine = catalogLineService.findById(id);
 		CatalogLine catalogLineUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentCatalogLine == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -95,14 +88,12 @@ public class CatalogLineController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("catalogLine", catalogLineUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/catalogLine/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			catalogLineService.delete(id);

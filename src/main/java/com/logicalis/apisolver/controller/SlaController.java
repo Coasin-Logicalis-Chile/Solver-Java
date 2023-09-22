@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.Sla;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class SlaController {
-
 	@Autowired
 	private ISlaService slaService;
 	
@@ -31,10 +29,8 @@ public class SlaController {
 	
 	@GetMapping("/sla/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		Sla sla = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			sla = slaService.findById(id);
 		} catch(DataAccessException e){
@@ -42,12 +38,10 @@ public class SlaController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(sla == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<Sla>(sla, HttpStatus.OK);
 	}
 
@@ -55,7 +49,6 @@ public class SlaController {
 	@PostMapping("/sla")
 	public ResponseEntity<?> create(@RequestBody Sla sla) {
 		Sla newSla = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newSla = slaService.save(sla);
@@ -66,28 +59,22 @@ public class SlaController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("sla", newSla);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/sla/{id}")
 	public ResponseEntity<?> update(@RequestBody Sla sla, @PathVariable Long id) {
-
 		Sla currentSla = slaService.findById(id);
 		Sla slaUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentSla == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentSla.setName(sla.getName());
 			slaUpdated = slaService.save(currentSla);
-
 		} catch (DataAccessException e) {
 			response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -95,14 +82,12 @@ public class SlaController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("sla", slaUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/sla/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			slaService.delete(id);

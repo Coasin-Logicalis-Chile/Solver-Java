@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -9,7 +8,6 @@ import com.logicalis.apisolver.model.enums.*;
 import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
-import com.logicalis.apisolver.view.ScTaskRequest;
 import com.logicalis.apisolver.view.TaskSlaRequest;
 import com.logicalis.apisolver.view.TaskSlaSolver;
 import org.json.simple.JSONArray;
@@ -31,7 +29,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class TaskSlaController {
-
     @Autowired
     private ITaskSlaService taskSlaService;
     @Autowired
@@ -60,10 +57,8 @@ public class TaskSlaController {
 
     @GetMapping("/taskSla/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         TaskSla taskSla = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             taskSla = taskSlaService.findById(id);
         } catch (DataAccessException e) {
@@ -71,12 +66,10 @@ public class TaskSlaController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (taskSla == null) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<TaskSla>(taskSla, HttpStatus.OK);
     }
 
@@ -84,7 +77,6 @@ public class TaskSlaController {
     @PostMapping("/taskSla")
     public ResponseEntity<?> create(@RequestBody TaskSla taskSla) {
         TaskSla newTaskSla = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
             newTaskSla = taskSlaService.save(taskSla);
@@ -95,24 +87,19 @@ public class TaskSlaController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("taskSla", newTaskSla);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/taskSla/{id}")
     public ResponseEntity<?> update(@RequestBody TaskSla taskSla, @PathVariable Long id) {
-
         TaskSla currentTaskSla = taskSlaService.findById(id);
         TaskSla taskSlaUpdated = null;
-
         Map<String, Object> response = new HashMap<>();
-
         if (currentTaskSla == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             currentTaskSla.setStage(taskSla.getStage());
             taskSlaUpdated = taskSlaService.save(currentTaskSla);
@@ -124,14 +111,12 @@ public class TaskSlaController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("taskSla", taskSlaUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/taskSla/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             taskSlaService.delete(id);
@@ -144,13 +129,10 @@ public class TaskSlaController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-
     @GetMapping("/taskSla/{integrationId}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {
-
         TaskSla taskSla = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             taskSla = taskSlaService.findByIntegrationId(integrationId);
         } catch (DataAccessException e) {
@@ -158,15 +140,12 @@ public class TaskSlaController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (taskSla == null) {
             response.put("mensaje", Messages.notExist.get(integrationId.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<TaskSla>(taskSla, HttpStatus.OK);
     }
-
 
     @GetMapping("/taskSlasBySolver")
     public List<TaskSlaSolver> show() {
@@ -177,144 +156,109 @@ public class TaskSlaController {
         long startTime = 0;
         long endTime = 0;
         String tag = "[TaskSla] ";
+        String result;
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JSONParser parser = new JSONParser();
+        JSONObject resultJson = new JSONObject();
+        JSONArray ListTaskSlasJson = new JSONArray();
+        final String[] element = new String[1];
+        final Incident[] incident = {new Incident()};
+        final ScRequestItem[] scRequestItem = {new ScRequestItem()};
+        final ScTask[] scTask = {new ScTask()};
+        final TaskSlaSolver[] taskSlaSolver = new TaskSlaSolver[1];
+        TaskSla taskSla = new TaskSla();
+        final String[] table = new String[1];
+        final String[] tagAction = new String[1];
+        final Domain[] domain = new Domain[1];
+        final ContractSla[] sla = new ContractSla[1];
+        final CmnSchedule[] schedule = new CmnSchedule[1];
+        final TaskSla[] exists = new TaskSla[1];
+        APIExecutionStatus status = new APIExecutionStatus();
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(EndPointSN.TaskSlaByCompany().concat(sparmOffSet));
+                result = rest.responseByEndPoint(EndPointSN.TaskSlaByCompany().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.TaskSlaByCompany().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListTaskSlasJson = new JSONArray();
-
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
                     ListTaskSlasJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
                 ListTaskSlasJson.stream().forEach(taskSlaJson -> {
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     try {
-                        String element = Util.getIdByJson((JSONObject) taskSlaJson, "task", App.Value());
-                        Incident incident = new Incident();
-                        ScRequestItem scRequestItem = new ScRequestItem();
-                        ScTask scTask = new ScTask();
-
-                        incident = getIncidentByIntegrationId(element);
-                        if (incident == null)
-                            scRequestItem = getScRequestItemByIntegrationId(element);
-                        if (incident == null && scRequestItem == null)
-                            scTask = getScTaskByIntegrationId(element);
-
-                        TaskSlaSolver taskSlaSolver = objectMapper.readValue(taskSlaJson.toString(), TaskSlaSolver.class);
-                        TaskSla taskSla = new TaskSla();
-                        String table = "";
-
-
-                        if (incident != null) {
-                            taskSla.setIncident(incident);
-                            table = Util.getFieldDisplay(incident);
-                        } else if (scRequestItem != null) {
-                            taskSla.setScRequestItem(scRequestItem);
-                            table = Util.getFieldDisplay(scRequestItem);
-                        } else if (scTask != null) {
-                            taskSla.setScTask(scTask);
-                            table = Util.getFieldDisplay(scTask);
+                        element[0] = Util.getIdByJson((JSONObject) taskSlaJson, "task", App.Value());
+                        incident[0] = getIncidentByIntegrationId(element[0]);
+                        if (incident[0] == null)
+                            scRequestItem[0] = getScRequestItemByIntegrationId(element[0]);
+                        if (incident[0] == null && scRequestItem[0] == null)
+                            scTask[0] = getScTaskByIntegrationId(element[0]);
+                        taskSlaSolver[0] = mapper.readValue(taskSlaJson.toString(), TaskSlaSolver.class);
+                        table[0] = "";
+                        if (incident[0] != null) {
+                            taskSla.setIncident(incident[0]);
+                            table[0] = Util.getFieldDisplay(incident[0]);
+                        } else if (scRequestItem[0] != null) {
+                            taskSla.setScRequestItem(scRequestItem[0]);
+                            table[0] = Util.getFieldDisplay(scRequestItem[0]);
+                        } else if (scTask[0] != null) {
+                            taskSla.setScTask(scTask[0]);
+                            table[0] = Util.getFieldDisplay(scTask[0]);
                         }
-                        String tagAction = "(Not Exist) ";
-                        if (table != "") {
-                            snTaskSlasSolver.add(taskSlaSolver);
-                            /*System.out.println("taskSlaSolver.getPause_duration: ".concat(String.valueOf(taskSlaSolver.getPause_duration().length())));
-                            System.out.println("taskSlaSolver.getPause_time: ".concat(String.valueOf(taskSlaSolver.getPause_time().length())));
-                            System.out.println("taskSlaSolver.getTimezone: ".concat(String.valueOf(taskSlaSolver.getTimezone().length())));
-                            System.out.println("taskSlaSolver.getSys_updated_on: ".concat(String.valueOf(taskSlaSolver.getSys_updated_on().length())));
-                            System.out.println("taskSlaSolver.getBusiness_time_left: ".concat(String.valueOf(taskSlaSolver.getBusiness_time_left().length())));
-                            System.out.println("taskSlaSolver.getDuration: ".concat(String.valueOf(taskSlaSolver.getDuration().length())));
-                            System.out.println("taskSlaSolver.getTime_left: ".concat(String.valueOf(taskSlaSolver.getTime_left().length())));
-                            System.out.println("taskSlaSolver.getSys_updated_by: ".concat(String.valueOf(taskSlaSolver.getSys_updated_by().length())));
-                            System.out.println("taskSlaSolver.getSys_created_on: ".concat(String.valueOf(taskSlaSolver.getSys_created_on().length())));
-                            System.out.println("taskSlaSolver.getPercentage: ".concat(String.valueOf(taskSlaSolver.getPercentage().length())));
-                            System.out.println("taskSlaSolver.getOriginal_breach_time: ".concat(String.valueOf(taskSlaSolver.getOriginal_breach_time().length())));
-                            System.out.println("taskSlaSolver.getSys_created_by: ".concat(String.valueOf(taskSlaSolver.getSys_created_by().length())));
-                            System.out.println("taskSlaSolver.getBusiness_percentage: ".concat(String.valueOf(taskSlaSolver.getBusiness_percentage().length())));
-                            System.out.println("taskSlaSolver.getEnd_time: ".concat(String.valueOf(taskSlaSolver.getEnd_time().length())));
-                            System.out.println("taskSlaSolver.getSys_mod_count: ".concat(String.valueOf(taskSlaSolver.getSys_mod_count().length())));
-                            System.out.println("taskSlaSolver.getBusiness_pause_duration: ".concat(String.valueOf(taskSlaSolver.getBusiness_pause_duration().length())));
-                            System.out.println("taskSlaSolver.getStart_time: ".concat(String.valueOf(taskSlaSolver.getStart_time().length())));
-                            System.out.println("taskSlaSolver.getBusiness_duration: ".concat(String.valueOf(taskSlaSolver.getBusiness_duration().length())));
-                            System.out.println("taskSlaSolver.getStage: ".concat(String.valueOf(taskSlaSolver.getStage().length())));
-                            System.out.println("taskSlaSolver.getPlanned_end_time: ".concat(String.valueOf(taskSlaSolver.getPlanned_end_time().length())));
-                            System.out.println("taskSlaSolver.getHas_breached: ".concat(String.valueOf(taskSlaSolver.getHas_breached().length())));*/
-                            taskSla.setPauseDuration(Util.isNull(taskSlaSolver.getPause_duration()));
-                            taskSla.setPauseTime(Util.isNull(taskSlaSolver.getPause_time()));
-                            taskSla.setTimezone(Util.isNull(taskSlaSolver.getTimezone()));
-                            taskSla.setSysUpdatedOn(Util.isNull(taskSlaSolver.getSys_updated_on()));
-                            taskSla.setBusinessTimeLeft(Util.isNull(taskSlaSolver.getBusiness_time_left()));
-                            taskSla.setDuration(Util.isNull(taskSlaSolver.getDuration()));
-                            taskSla.setTimeLeft(Util.isNull(taskSlaSolver.getTime_left()));
-                            taskSla.setSysUpdatedBy(Util.isNull(taskSlaSolver.getSys_updated_by()));
-                            taskSla.setSysCreatedOn(Util.isNull(taskSlaSolver.getSys_created_on()));
-                            taskSla.setPercentage(Util.isNull(taskSlaSolver.getPercentage()));
-                            taskSla.setOriginalBreachTime(Util.isNull(taskSlaSolver.getOriginal_breach_time()));
-                            taskSla.setSysCreatedBy(Util.isNull(taskSlaSolver.getSys_created_by()));
-                            taskSla.setBusinessPercentage(Util.isNull(taskSlaSolver.getBusiness_percentage()));
-                            taskSla.setEndTime(Util.isNull(taskSlaSolver.getEnd_time()));
-                            taskSla.setSysModCount(Util.isNull(taskSlaSolver.getSys_mod_count()));
+                        tagAction[0] = "(Not Exist) ";
+                        if (table[0] != "") {
+                            snTaskSlasSolver.add(taskSlaSolver[0]);
+                            taskSla.setPauseDuration(Util.isNull(taskSlaSolver[0].getPause_duration()));
+                            taskSla.setPauseTime(Util.isNull(taskSlaSolver[0].getPause_time()));
+                            taskSla.setTimezone(Util.isNull(taskSlaSolver[0].getTimezone()));
+                            taskSla.setSysUpdatedOn(Util.isNull(taskSlaSolver[0].getSys_updated_on()));
+                            taskSla.setBusinessTimeLeft(Util.isNull(taskSlaSolver[0].getBusiness_time_left()));
+                            taskSla.setDuration(Util.isNull(taskSlaSolver[0].getDuration()));
+                            taskSla.setTimeLeft(Util.isNull(taskSlaSolver[0].getTime_left()));
+                            taskSla.setSysUpdatedBy(Util.isNull(taskSlaSolver[0].getSys_updated_by()));
+                            taskSla.setSysCreatedOn(Util.isNull(taskSlaSolver[0].getSys_created_on()));
+                            taskSla.setPercentage(Util.isNull(taskSlaSolver[0].getPercentage()));
+                            taskSla.setOriginalBreachTime(Util.isNull(taskSlaSolver[0].getOriginal_breach_time()));
+                            taskSla.setSysCreatedBy(Util.isNull(taskSlaSolver[0].getSys_created_by()));
+                            taskSla.setBusinessPercentage(Util.isNull(taskSlaSolver[0].getBusiness_percentage()));
+                            taskSla.setEndTime(Util.isNull(taskSlaSolver[0].getEnd_time()));
+                            taskSla.setSysModCount(Util.isNull(taskSlaSolver[0].getSys_mod_count()));
                             taskSla.setActive(true);
-                            taskSla.setBusinessPauseDuration(Util.isNull(taskSlaSolver.getBusiness_pause_duration()));
-                            taskSla.setStartTime(Util.isNull(taskSlaSolver.getStart_time()));
-                            taskSla.setBusinessDuration(Util.isNull(taskSlaSolver.getBusiness_duration()));
-                            taskSla.setStage(Util.isNull(taskSlaSolver.getStage()));
-                            taskSla.setPlannedEndTime(Util.isNull(taskSlaSolver.getPlanned_end_time()));
-                            //taskSla.setHasBreached(Util.isNull(taskSlaSolver.getHas_breached()));
-                            //taskSla.setTimezone(taskSlaSolver.getTimezone_source());
-                            //taskSla.setType(taskSlaSolver.getType());
-                            //taskSla.setVendor(taskSlaSolver.getVendor());
-//sysGroupService.fin
-
-                            if (!Util.isNullBool(taskSlaSolver.getU_trigger_group()))
-                                taskSla.setAssignmentGroup(sysGroupService.findByActiveAndName(true, taskSlaSolver.getU_trigger_group()));
-
-                            taskSla.setIntegrationId(taskSlaSolver.getSys_id());
-
-                            Domain domain = getDomainByIntegrationId((JSONObject) taskSlaJson, SnTable.Domain.get(), App.Value());
-                            if (domain != null)
-                                taskSla.setDomain(domain);
-
-                            ContractSla sla = getContractSlaByIntegrationId((JSONObject) taskSlaJson, "sla", App.Value());
-                            if (sla != null) {
-                                taskSla.setSla(sla);
+                            taskSla.setBusinessPauseDuration(Util.isNull(taskSlaSolver[0].getBusiness_pause_duration()));
+                            taskSla.setStartTime(Util.isNull(taskSlaSolver[0].getStart_time()));
+                            taskSla.setBusinessDuration(Util.isNull(taskSlaSolver[0].getBusiness_duration()));
+                            taskSla.setStage(Util.isNull(taskSlaSolver[0].getStage()));
+                            taskSla.setPlannedEndTime(Util.isNull(taskSlaSolver[0].getPlanned_end_time()));
+                            if (!Util.isNullBool(taskSlaSolver[0].getU_trigger_group()))
+                                taskSla.setAssignmentGroup(sysGroupService.findByActiveAndName(true, taskSlaSolver[0].getU_trigger_group()));
+                            taskSla.setIntegrationId(taskSlaSolver[0].getSys_id());
+                            domain[0] = getDomainByIntegrationId((JSONObject) taskSlaJson, SnTable.Domain.get(), App.Value());
+                            if (domain[0] != null)
+                                taskSla.setDomain(domain[0]);
+                            sla[0] = getContractSlaByIntegrationId((JSONObject) taskSlaJson, "sla", App.Value());
+                            if (sla[0] != null) {
+                                taskSla.setSla(sla[0]);
                             }
-
-                            CmnSchedule schedule = getCmnScheduleByIntegrationId((JSONObject) taskSlaJson, "schedule", App.Value());
-                            if (schedule != null) {
-                                taskSla.setSchedule(schedule);
+                            schedule[0] = getCmnScheduleByIntegrationId((JSONObject) taskSlaJson, "schedule", App.Value());
+                            if (schedule[0] != null) {
+                                taskSla.setSchedule(schedule[0]);
                             }
-
-                            TaskSla exists = taskSlaService.findByIntegrationId(taskSla.getIntegrationId());
-                            tagAction = App.CreateConsole();
-                            if (exists != null) {
-                                taskSla.setId(exists.getId());
-                                tagAction = App.UpdateConsole();
+                            exists[0] = taskSlaService.findByIntegrationId(taskSla.getIntegrationId());
+                            tagAction[0] = App.CreateConsole();
+                            if (exists[0] != null) {
+                                taskSla.setId(exists[0].getId());
+                                tagAction[0] = App.UpdateConsole();
                             }
-                            Util.printData(tag, count[0], tagAction.concat(table), Util.getFieldDisplay(taskSla));
-
+                            Util.printData(tag, count[0], tagAction[0].concat(table[0]), Util.getFieldDisplay(taskSla));
                             taskSlaService.save(taskSla);
                         } else {
-                            Util.printData(tag, count[0], tagAction.concat(element));
+                            Util.printData(tag, count[0], tagAction[0].concat(element[0]));
                         }
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-
-                APIExecutionStatus status = new APIExecutionStatus();
                 status.setUri(EndPointSN.Catalog());
                 status.setUserAPI(App.SNUser());
                 status.setPasswordAPI(App.SNPassword());
@@ -323,8 +267,6 @@ public class TaskSlaController {
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
@@ -341,147 +283,114 @@ public class TaskSlaController {
         long startTime = 0;
         long endTime = 0;
         String tag = "[TaskSla] ";
+        String result;
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JSONParser parser = new JSONParser();
+        JSONObject resultJson = new JSONObject();
+        JSONArray ListTaskSlasJson = new JSONArray();
+        final String[] element = new String[1];
+        final Incident[] incident = {new Incident()};
+        final ScRequestItem[] scRequestItem = {new ScRequestItem()};
+        final ScTask[] scTask = {new ScTask()};
+        Gson gson = new Gson();
+        final TaskSlaSolver[] taskSlaSolver = new TaskSlaSolver[1];
+        TaskSla taskSla = new TaskSla();
+        final String[] table = new String[1];
+        final String[] tagAction = new String[1];
+        final Domain[] domain = new Domain[1];
+        final ContractSla[] sla = new ContractSla[1];
+        final CmnSchedule[] schedule = new CmnSchedule[1];
+        final TaskSla[] exists = new TaskSla[1];
+        APIExecutionStatus status = new APIExecutionStatus();
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(EndPointSN.TaskSlaByQuery().replace("QUERY", query).concat(sparmOffSet));
+                result = rest.responseByEndPoint(EndPointSN.TaskSlaByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.TaskSlaByQuery().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListTaskSlasJson = new JSONArray();
-
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
                     ListTaskSlasJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
                 ListTaskSlasJson.stream().forEach(taskSlaJson -> {
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                     try {
-                        String element = Util.getIdByJson((JSONObject) taskSlaJson, "task", App.Value());
-                        Incident incident = new Incident();
-                        ScRequestItem scRequestItem = new ScRequestItem();
-                        ScTask scTask = new ScTask();
-
-                        incident = getIncidentByIntegrationId(element);
-                        if (incident == null)
-                            scRequestItem = getScRequestItemByIntegrationId(element);
-                        if (incident == null && scRequestItem == null)
-                            scTask = getScTaskByIntegrationId(element);
-
-                        //TaskSlaSolver taskSlaSolver = objectMapper.readValue(taskSlaJson.toString(), TaskSlaSolver.class);
-
-                        Gson gson = new Gson();
-                        TaskSlaSolver taskSlaSolver = gson.fromJson(taskSlaJson.toString(), TaskSlaSolver.class);
-
-                        TaskSla taskSla = new TaskSla();
-                        String table = "";
-                        if (incident != null) {
-                            taskSla.setIncident(incident);
-                            table = Util.getFieldDisplay(incident);
-                        } else if (scRequestItem != null) {
-                            taskSla.setScRequestItem(scRequestItem);
-                            table = Util.getFieldDisplay(scRequestItem);
-                        } else if (scTask != null) {
-                            taskSla.setScTask(scTask);
-                            table = Util.getFieldDisplay(scTask);
+                        element[0] = Util.getIdByJson((JSONObject) taskSlaJson, "task", App.Value());
+                        incident[0] = getIncidentByIntegrationId(element[0]);
+                        if (incident[0] == null)
+                            scRequestItem[0] = getScRequestItemByIntegrationId(element[0]);
+                        if (incident[0] == null && scRequestItem[0] == null)
+                            scTask[0] = getScTaskByIntegrationId(element[0]);
+                        taskSlaSolver[0] = gson.fromJson(taskSlaJson.toString(), TaskSlaSolver.class);
+                        table[0] = "";
+                        if (incident[0] != null) {
+                            taskSla.setIncident(incident[0]);
+                            table[0] = Util.getFieldDisplay(incident[0]);
+                        } else if (scRequestItem[0] != null) {
+                            taskSla.setScRequestItem(scRequestItem[0]);
+                            table[0] = Util.getFieldDisplay(scRequestItem[0]);
+                        } else if (scTask[0] != null) {
+                            taskSla.setScTask(scTask[0]);
+                            table[0] = Util.getFieldDisplay(scTask[0]);
                         }
-                        String tagAction = "(Not Exist) ";
-                        if (table != "") {
-                            snTaskSlasSolver.add(taskSlaSolver);
-                            /*System.out.println("taskSlaSolver.getPause_duration: ".concat(String.valueOf(taskSlaSolver.getPause_duration().length())));
-                            System.out.println("taskSlaSolver.getPause_time: ".concat(String.valueOf(taskSlaSolver.getPause_time().length())));
-                            System.out.println("taskSlaSolver.getTimezone: ".concat(String.valueOf(taskSlaSolver.getTimezone().length())));
-                            System.out.println("taskSlaSolver.getSys_updated_on: ".concat(String.valueOf(taskSlaSolver.getSys_updated_on().length())));
-                            System.out.println("taskSlaSolver.getBusiness_time_left: ".concat(String.valueOf(taskSlaSolver.getBusiness_time_left().length())));
-                            System.out.println("taskSlaSolver.getDuration: ".concat(String.valueOf(taskSlaSolver.getDuration().length())));
-                            System.out.println("taskSlaSolver.getTime_left: ".concat(String.valueOf(taskSlaSolver.getTime_left().length())));
-                            System.out.println("taskSlaSolver.getSys_updated_by: ".concat(String.valueOf(taskSlaSolver.getSys_updated_by().length())));
-                            System.out.println("taskSlaSolver.getSys_created_on: ".concat(String.valueOf(taskSlaSolver.getSys_created_on().length())));
-                            System.out.println("taskSlaSolver.getPercentage: ".concat(String.valueOf(taskSlaSolver.getPercentage().length())));
-                            System.out.println("taskSlaSolver.getOriginal_breach_time: ".concat(String.valueOf(taskSlaSolver.getOriginal_breach_time().length())));
-                            System.out.println("taskSlaSolver.getSys_created_by: ".concat(String.valueOf(taskSlaSolver.getSys_created_by().length())));
-                            System.out.println("taskSlaSolver.getBusiness_percentage: ".concat(String.valueOf(taskSlaSolver.getBusiness_percentage().length())));
-                            System.out.println("taskSlaSolver.getEnd_time: ".concat(String.valueOf(taskSlaSolver.getEnd_time().length())));
-                            System.out.println("taskSlaSolver.getSys_mod_count: ".concat(String.valueOf(taskSlaSolver.getSys_mod_count().length())));
-                            System.out.println("taskSlaSolver.getBusiness_pause_duration: ".concat(String.valueOf(taskSlaSolver.getBusiness_pause_duration().length())));
-                            System.out.println("taskSlaSolver.getStart_time: ".concat(String.valueOf(taskSlaSolver.getStart_time().length())));
-                            System.out.println("taskSlaSolver.getBusiness_duration: ".concat(String.valueOf(taskSlaSolver.getBusiness_duration().length())));
-                            System.out.println("taskSlaSolver.getStage: ".concat(String.valueOf(taskSlaSolver.getStage().length())));
-                            System.out.println("taskSlaSolver.getPlanned_end_time: ".concat(String.valueOf(taskSlaSolver.getPlanned_end_time().length())));
-                            System.out.println("taskSlaSolver.getHas_breached: ".concat(String.valueOf(taskSlaSolver.getHas_breached().length())));*/
-                            taskSla.setPauseDuration(Util.isNull(taskSlaSolver.getPause_duration()));
-                            taskSla.setPauseTime(Util.isNull(taskSlaSolver.getPause_time()));
-                            taskSla.setTimezone(Util.isNull(taskSlaSolver.getTimezone()));
-                            taskSla.setSysUpdatedOn(Util.isNull(taskSlaSolver.getSys_updated_on()));
-                            taskSla.setBusinessTimeLeft(Util.isNull(taskSlaSolver.getBusiness_time_left()));
-                            taskSla.setDuration(Util.isNull(taskSlaSolver.getDuration()));
-                            taskSla.setTimeLeft(Util.isNull(taskSlaSolver.getTime_left()));
-                            taskSla.setSysUpdatedBy(Util.isNull(taskSlaSolver.getSys_updated_by()));
-                            taskSla.setSysCreatedOn(Util.isNull(taskSlaSolver.getSys_created_on()));
-                            taskSla.setPercentage(Util.isNull(taskSlaSolver.getPercentage()));
-                            taskSla.setOriginalBreachTime(Util.isNull(taskSlaSolver.getOriginal_breach_time()));
-                            taskSla.setSysCreatedBy(Util.isNull(taskSlaSolver.getSys_created_by()));
-                            taskSla.setBusinessPercentage(Util.isNull(taskSlaSolver.getBusiness_percentage()));
-                            taskSla.setEndTime(Util.isNull(taskSlaSolver.getEnd_time()));
-                            taskSla.setSysModCount(Util.isNull(taskSlaSolver.getSys_mod_count()));
+                        tagAction[0] = "(Not Exist) ";
+                        if (table[0] != "") {
+                            snTaskSlasSolver.add(taskSlaSolver[0]);
+                            taskSla.setPauseDuration(Util.isNull(taskSlaSolver[0].getPause_duration()));
+                            taskSla.setPauseTime(Util.isNull(taskSlaSolver[0].getPause_time()));
+                            taskSla.setTimezone(Util.isNull(taskSlaSolver[0].getTimezone()));
+                            taskSla.setSysUpdatedOn(Util.isNull(taskSlaSolver[0].getSys_updated_on()));
+                            taskSla.setBusinessTimeLeft(Util.isNull(taskSlaSolver[0].getBusiness_time_left()));
+                            taskSla.setDuration(Util.isNull(taskSlaSolver[0].getDuration()));
+                            taskSla.setTimeLeft(Util.isNull(taskSlaSolver[0].getTime_left()));
+                            taskSla.setSysUpdatedBy(Util.isNull(taskSlaSolver[0].getSys_updated_by()));
+                            taskSla.setSysCreatedOn(Util.isNull(taskSlaSolver[0].getSys_created_on()));
+                            taskSla.setPercentage(Util.isNull(taskSlaSolver[0].getPercentage()));
+                            taskSla.setOriginalBreachTime(Util.isNull(taskSlaSolver[0].getOriginal_breach_time()));
+                            taskSla.setSysCreatedBy(Util.isNull(taskSlaSolver[0].getSys_created_by()));
+                            taskSla.setBusinessPercentage(Util.isNull(taskSlaSolver[0].getBusiness_percentage()));
+                            taskSla.setEndTime(Util.isNull(taskSlaSolver[0].getEnd_time()));
+                            taskSla.setSysModCount(Util.isNull(taskSlaSolver[0].getSys_mod_count()));
                             taskSla.setActive(true);
-                            taskSla.setBusinessPauseDuration(Util.isNull(taskSlaSolver.getBusiness_pause_duration()));
-                            taskSla.setStartTime(Util.isNull(taskSlaSolver.getStart_time()));
-                            taskSla.setBusinessDuration(Util.isNull(taskSlaSolver.getBusiness_duration()));
-                            taskSla.setStage(Util.isNull(taskSlaSolver.getStage()));
-                            taskSla.setPlannedEndTime(Util.isNull(taskSlaSolver.getPlanned_end_time()));
-                            //taskSla.setHasBreached(Util.isNull(taskSlaSolver.getHas_breached()));
-                            //taskSla.setTimezone(taskSlaSolver.getTimezone_source());
-                            //taskSla.setType(taskSlaSolver.getType());
-                            //taskSla.setVendor(taskSlaSolver.getVendor());
-                            taskSla.setIntegrationId(taskSlaSolver.getSys_id());
-
-                            Domain domain = getDomainByIntegrationId((JSONObject) taskSlaJson, SnTable.Domain.get(), App.Value());
-                            if (domain != null)
-                                taskSla.setDomain(domain);
-
-                            ContractSla sla = getContractSlaByIntegrationId((JSONObject) taskSlaJson, "sla", App.Value());
-                            if (sla != null) {
-                                taskSla.setSla(sla);
+                            taskSla.setBusinessPauseDuration(Util.isNull(taskSlaSolver[0].getBusiness_pause_duration()));
+                            taskSla.setStartTime(Util.isNull(taskSlaSolver[0].getStart_time()));
+                            taskSla.setBusinessDuration(Util.isNull(taskSlaSolver[0].getBusiness_duration()));
+                            taskSla.setStage(Util.isNull(taskSlaSolver[0].getStage()));
+                            taskSla.setPlannedEndTime(Util.isNull(taskSlaSolver[0].getPlanned_end_time()));
+                            taskSla.setIntegrationId(taskSlaSolver[0].getSys_id());
+                            domain[0] = getDomainByIntegrationId((JSONObject) taskSlaJson, SnTable.Domain.get(), App.Value());
+                            if (domain[0] != null)
+                                taskSla.setDomain(domain[0]);
+                            sla[0] = getContractSlaByIntegrationId((JSONObject) taskSlaJson, "sla", App.Value());
+                            if (sla[0] != null) {
+                                taskSla.setSla(sla[0]);
                             }
-
-                            CmnSchedule schedule = getCmnScheduleByIntegrationId((JSONObject) taskSlaJson, "schedule", App.Value());
-                            if (schedule != null) {
-                                taskSla.setSchedule(schedule);
+                            schedule[0] = getCmnScheduleByIntegrationId((JSONObject) taskSlaJson, "schedule", App.Value());
+                            if (schedule[0] != null) {
+                                taskSla.setSchedule(schedule[0]);
                             }
-
-                            TaskSla exists = taskSlaService.findByIntegrationId(taskSla.getIntegrationId());
-                            tagAction = App.CreateConsole();
-                            if (exists != null) {
-                                taskSla.setId(exists.getId());
+                            exists[0] = taskSlaService.findByIntegrationId(taskSla.getIntegrationId());
+                            tagAction[0] = App.CreateConsole();
+                            if (exists[0] != null) {
+                                taskSla.setId(exists[0].getId());
                                 if (taskSla.getIncident() == null)
-                                    taskSla.setIncident(exists.getIncident());
+                                    taskSla.setIncident(exists[0].getIncident());
                                 if (taskSla.getScRequestItem() == null)
-                                    taskSla.setScRequestItem(exists.getScRequestItem());
+                                    taskSla.setScRequestItem(exists[0].getScRequestItem());
                                 if (taskSla.getScTask() == null)
-                                    taskSla.setScTask(exists.getScTask());
-                                tagAction = App.UpdateConsole();
+                                    taskSla.setScTask(exists[0].getScTask());
+                                tagAction[0] = App.UpdateConsole();
                             }
-                            Util.printData(tag, count[0], tagAction.concat(table), Util.getFieldDisplay(taskSla));
-
+                            Util.printData(tag, count[0], tagAction[0].concat(table[0]), Util.getFieldDisplay(taskSla));
                             taskSlaService.save(taskSla);
                         } else {
-                            Util.printData(tag, count[0], tagAction.concat(element));
+                            Util.printData(tag, count[0], tagAction[0].concat(element[0]));
                         }
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-
-                APIExecutionStatus status = new APIExecutionStatus();
                 status.setUri(EndPointSN.Catalog());
                 status.setUserAPI(App.SNUser());
                 status.setPasswordAPI(App.SNPassword());
@@ -490,8 +399,6 @@ public class TaskSlaController {
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
@@ -519,50 +426,13 @@ public class TaskSlaController {
         TaskSla currentTaskSla = new TaskSla();
         TaskSla taskSlaUpdated = null;
         Map<String, Object> response = new HashMap<>();
-
         String tagAction = "Create";
         String tag = "[TaskSla] ";
-
         if (currentTaskSla == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(taskSlaRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
-           /* System.out.println("taskSlaRequest.getActive()) : ".concat(Util.isNull(String.valueOf(taskSlaRequest.getActive()))));
-            System.out.println("taskSlaRequest.getBusiness_duration()) : ".concat(Util.isNull(taskSlaRequest.getBusiness_duration())));
-            System.out.println("taskSlaRequest.getBusiness_pause_duration()) : ".concat(Util.isNull(taskSlaRequest.getBusiness_pause_duration())));
-            System.out.println("taskSlaRequest.getBusiness_percentage()) : ".concat(Util.isNull(taskSlaRequest.getBusiness_percentage())));
-            System.out.println("taskSlaRequest.getBusiness_time_left()) : ".concat(Util.isNull(taskSlaRequest.getBusiness_time_left())));
-            System.out.println("taskSlaRequest.getDuration()) : ".concat(Util.isNull(taskSlaRequest.getDuration())));
-            System.out.println("taskSlaRequest.getEnd_time()) : ".concat(Util.isNull(taskSlaRequest.getEnd_time())));
-            System.out.println("taskSlaRequest.getHas_breached()) : ".concat(Util.isNull(taskSlaRequest.getHas_breached())));
-            System.out.println("taskSlaRequest.getOriginal_breach_time()) : ".concat(Util.isNull(taskSlaRequest.getOriginal_breach_time())));
-            System.out.println("taskSlaRequest.getPause_duration()) : ".concat(Util.isNull(taskSlaRequest.getPause_duration())));
-            System.out.println("taskSlaRequest.getPause_time()) : ".concat(Util.isNull(taskSlaRequest.getPause_time())));
-            System.out.println("taskSlaRequest.getPercentage()) : ".concat(Util.isNull(taskSlaRequest.getPercentage())));
-            System.out.println("taskSlaRequest.getPlanned_end_time()) : ".concat(Util.isNull(taskSlaRequest.getPlanned_end_time())));
-            System.out.println("taskSlaRequest.getSchedule()) : ".concat(Util.isNull(taskSlaRequest.getSchedule())));
-            System.out.println("taskSlaRequest.getSla()) : ".concat(Util.isNull(taskSlaRequest.getSla())));
-            System.out.println("taskSlaRequest.getStage()) : ".concat(Util.isNull(taskSlaRequest.getStage())));
-            System.out.println("taskSlaRequest.getStart_time()) : ".concat(Util.isNull(taskSlaRequest.getStart_time())));
-            System.out.println("taskSlaRequest.getSys_created_by()) : ".concat(Util.isNull(taskSlaRequest.getSys_created_by())));
-            System.out.println("taskSlaRequest.getSys_created_on()) : ".concat(Util.isNull(taskSlaRequest.getSys_created_on())));
-            System.out.println("taskSlaRequest.getSys_domain()) : ".concat(Util.isNull(taskSlaRequest.getSys_domain())));
-            System.out.println("taskSlaRequest.getSys_domain_path()) : ".concat(Util.isNull(taskSlaRequest.getSys_domain_path())));
-            System.out.println("taskSlaRequest.getSys_id()) : ".concat(Util.isNull(taskSlaRequest.getSys_id())));
-            System.out.println("taskSlaRequest.getSys_mod_count()) : ".concat(Util.isNull(taskSlaRequest.getSys_mod_count())));
-            System.out.println("taskSlaRequest.getSys_tags()) : ".concat(Util.isNull(taskSlaRequest.getSys_tags())));
-            System.out.println("taskSlaRequest.getSys_updated_by()) : ".concat(Util.isNull(taskSlaRequest.getSys_updated_by())));
-            System.out.println("taskSlaRequest.getSys_updated_on()) : ".concat(Util.isNull(taskSlaRequest.getSys_updated_on())));
-            System.out.println("taskSlaRequest.getTask()) : ".concat(Util.isNull(taskSlaRequest.getTask())));
-            System.out.println("taskSlaRequest.getTime_left()) : ".concat(Util.isNull(taskSlaRequest.getTime_left())));
-            System.out.println("taskSlaRequest.getTimezone()) : ".concat(Util.isNull(taskSlaRequest.getTimezone())));
-            System.out.println("taskSlaRequest.getU_invalid_breach()) : ".concat(Util.isNull(taskSlaRequest.getU_invalid_breach())));
-            System.out.println("taskSlaRequest.getU_invalid_code()) : ".concat(Util.isNull(taskSlaRequest.getU_invalid_code())));
-            System.out.println("taskSlaRequest.getU_invalid_reason()) : ".concat(Util.isNull(taskSlaRequest.getU_invalid_reason())));
-            System.out.println("taskSlaRequest.getU_measurable()) : ".concat(Util.isNull(taskSlaRequest.getU_measurable())));
-            System.out.println("taskSlaRequest.getU_trigger_group()) : ".concat(Util.isNull(taskSlaRequest.getU_trigger_group())));*/
             TaskSla taskSla = new TaskSla();
             taskSla.setActive(taskSlaRequest.getActive());
             taskSla.setBusinessDuration(taskSlaRequest.getBusiness_duration());
@@ -571,54 +441,40 @@ public class TaskSlaController {
             taskSla.setBusinessTimeLeft(taskSlaRequest.getBusiness_time_left());
             taskSla.setDuration(taskSlaRequest.getDuration());
             taskSla.setEndTime(taskSlaRequest.getEnd_time());
-            // taskSla.setHasBreached(taskSlaRequest.getHas_breached());
             taskSla.setOriginalBreachTime(taskSlaRequest.getOriginal_breach_time());
             taskSla.setPauseDuration(taskSlaRequest.getPause_duration());
             taskSla.setPauseTime(taskSlaRequest.getPause_time());
             taskSla.setPercentage(taskSlaRequest.getPercentage());
             taskSla.setPlannedEndTime(taskSlaRequest.getPlanned_end_time());
-            //taskSla.setSchedule(taskSlaRequest.getSchedule());
-            //taskSla.setSla(taskSlaRequest.getSla());
             taskSla.setStage(taskSlaRequest.getStage());
             taskSla.setStartTime(taskSlaRequest.getStart_time());
             taskSla.setSysCreatedBy(taskSlaRequest.getSys_created_by());
             taskSla.setSysCreatedOn(taskSlaRequest.getSys_created_on());
-            // taskSla.setDomain(taskSlaRequest.getSys_domain());
             taskSla.setIntegrationId(taskSlaRequest.getSys_id());
             taskSla.setSysModCount(taskSlaRequest.getSys_mod_count());
             taskSla.setSysUpdatedBy(taskSlaRequest.getSys_updated_by());
             taskSla.setSysUpdatedOn(taskSlaRequest.getSys_updated_on());
-            //taskSla.setTask(taskSlaRequest.getTask());
             taskSla.setTimeLeft(taskSlaRequest.getTime_left());
             taskSla.setTimezone(taskSlaRequest.getTimezone());
-            //taskSla.setUInvalidBreach(taskSlaRequest.getU_invalid_breach());
-            //taskSla.setUInvalidCode(taskSlaRequest.getU_invalid_code());
-            //taskSla.setUInvalidReason(taskSlaRequest.getU_invalid_reason());
-            //taskSla.setUMeasurable(taskSlaRequest.getU_measurable());
-            //taskSla.setUTriggerGroup(taskSlaRequest.getU_trigger_group());
             if (Util.hasData(taskSlaRequest.getSys_domain())) {
                 Domain domain = domainService.findByIntegrationId(taskSlaRequest.getSys_domain());
                 if (domain != null)
                     taskSla.setDomain(domain);
             }
-            String element = "";
             if (taskSlaRequest.getElement().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(taskSlaRequest.getTask());
                 if (incident != null) {
                     taskSla.setIncident(incident);
-                    element = Util.getFieldDisplay(incident);
                 }
             } else if (taskSlaRequest.getElement().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(taskSlaRequest.getTask());
                 if (scRequestItem != null) {
                     taskSla.setScRequestItem(scRequestItem);
-                    element = Util.getFieldDisplay(scRequestItem);
                 }
             } else if (taskSlaRequest.getElement().equals(SnTable.ScTask.get())) {
                 ScTask scTask = scTaskService.findByIntegrationId(taskSlaRequest.getTask());
                 if (scTask != null) {
                     taskSla.setScTask(scTask);
-                    element = Util.getFieldDisplay(scTask);
                 }
             }
             if (Util.hasData(taskSlaRequest.getSla())) {
@@ -627,20 +483,16 @@ public class TaskSlaController {
                     taskSla.setSla(sla);
                 }
             }
-
             if (Util.hasData(taskSlaRequest.getSchedule())) {
                 CmnSchedule schedule = cmnScheduleService.findByIntegrationId(taskSlaRequest.getSchedule());
                 if (schedule != null) {
                     taskSla.setSchedule(schedule);
                 }
             }
-
             TaskSla exists = taskSlaService.findByIntegrationId(taskSla.getIntegrationId());
             if (exists != null) {
                 taskSla.setId(exists.getId());
-                tagAction = "Update";
             }
-            //Util.printData(tag, tagAction, Util.getFieldDisplay(taskSla), element);
             taskSlaUpdated = taskSlaService.save(taskSla);
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
@@ -650,7 +502,6 @@ public class TaskSlaController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("taskSla", taskSlaUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 

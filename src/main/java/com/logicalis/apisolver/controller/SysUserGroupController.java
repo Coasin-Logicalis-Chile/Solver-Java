@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.SysGroup;
@@ -6,13 +5,11 @@ import com.logicalis.apisolver.model.SysUser;
 import com.logicalis.apisolver.model.SysUserGroup;
 import com.logicalis.apisolver.model.SysUserGroupFields;
 import com.logicalis.apisolver.model.enums.App;
-import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.enums.Errors;
 import com.logicalis.apisolver.model.enums.Messages;
 import com.logicalis.apisolver.services.ISysGroupService;
 import com.logicalis.apisolver.services.ISysUserGroupService;
 import com.logicalis.apisolver.services.ISysUserService;
-import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.SysUserGroupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -45,10 +42,8 @@ public class SysUserGroupController {
 
     @GetMapping("/sysUserGroup/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         SysUserGroup sysUserGroup = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysUserGroup = sysUserGroupService.findById(id);
         } catch (DataAccessException e) {
@@ -56,12 +51,10 @@ public class SysUserGroupController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (sysUserGroup == null) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysUserGroup>(sysUserGroup, HttpStatus.OK);
     }
 
@@ -69,7 +62,6 @@ public class SysUserGroupController {
     @PostMapping("/sysUserGroup")
     public ResponseEntity<?> create(@RequestBody SysUserGroup sysUserGroup) {
         SysUserGroup newSysUserGroup = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
             newSysUserGroup = sysUserGroupService.save(sysUserGroup);
@@ -80,7 +72,6 @@ public class SysUserGroupController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("sysUserGroup", newSysUserGroup);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
@@ -93,7 +84,6 @@ public class SysUserGroupController {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             SysUserGroup sysUserGroup = new SysUserGroup();
             String tagAction = App.CreateConsole();
@@ -113,10 +103,8 @@ public class SysUserGroupController {
             SysUserGroup exists = sysUserGroupService.findByIntegrationId(sysUserGroup.getIntegrationId());
             if (exists != null) {
                 sysUserGroup.setId(exists.getId());
-                tagAction = App.UpdateConsole();
             }
             sysUserGroupUpdated = sysUserGroupService.save(sysUserGroup);
-            //util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUserGroup)));
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
@@ -125,25 +113,19 @@ public class SysUserGroupController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUserGroup", sysUserGroupUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
-
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/sysUserGroup/{id}")
     public ResponseEntity<?> update(@RequestBody SysUserGroup sysUserGroup, @PathVariable Long id) {
-
         SysUserGroup currentSysUserGroup = sysUserGroupService.findById(id);
         SysUserGroup sysUserGroupUpdated = null;
-
         Map<String, Object> response = new HashMap<>();
-
         if (currentSysUserGroup == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             currentSysUserGroup.setSysGroup(sysUserGroup.getSysGroup());
             sysUserGroupUpdated = sysUserGroupService.save(currentSysUserGroup);
@@ -155,14 +137,12 @@ public class SysUserGroupController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUserGroup", sysUserGroupUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/sysUserGroup/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             sysUserGroupService.delete(id);
@@ -175,13 +155,10 @@ public class SysUserGroupController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-
     @GetMapping("/sysUserGroup/{integrationId}")
     public ResponseEntity<?> show(@PathVariable String integrationId) {
-
         SysUserGroup sysUserGroup = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysUserGroup = sysUserGroupService.findByIntegrationId(integrationId);
         } catch (DataAccessException e) {
@@ -189,12 +166,10 @@ public class SysUserGroupController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (sysUserGroup == null) {
             response.put("mensaje", Messages.notExist.get(integrationId));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysUserGroup>(sysUserGroup, HttpStatus.OK);
     }
 
@@ -204,6 +179,5 @@ public class SysUserGroupController {
         ResponseEntity<List<SysUserGroupFields>> pageResponseEntity = new ResponseEntity<>(sysUserGroupsFields, HttpStatus.OK);
         return pageResponseEntity;
     }
-
 }
 

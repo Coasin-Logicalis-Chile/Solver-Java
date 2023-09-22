@@ -114,7 +114,6 @@ public class AttachmentController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("attachment", newAttachment);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
@@ -123,15 +122,12 @@ public class AttachmentController {
         Attachment currentAttachment = new Attachment();
         Attachment attachmentUpdated = null;
         Map<String, Object> response = new HashMap<>();
-
         String tagAction = App.CreateConsole();
         String tag = "[Attachment] ";
-
         if (currentAttachment == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(attachmentRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             Attachment attachment = new Attachment();
             attachment.setIntegrationId(attachmentRequest.getSys_id());
@@ -145,7 +141,6 @@ public class AttachmentController {
             attachment.setSysCreatedOn(Util.isNull(attachmentRequest.getSys_created_on()));
             attachment.setSysUpdatedBy(Util.isNull(attachmentRequest.getSys_updated_by()));
             attachment.setSysUpdatedOn(Util.isNull(attachmentRequest.getSys_updated_on()));
-
             if (attachmentRequest.getTable_name().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(attachment.getElement());
                 if (incident != null) {
@@ -194,7 +189,6 @@ public class AttachmentController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("attachment", attachmentUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
@@ -267,7 +261,6 @@ public class AttachmentController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("attachment", attachmentUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
@@ -528,7 +521,6 @@ public class AttachmentController {
 
     @GetMapping("/findBySolverByQueryCreate")
     public List<Attachment> show(String query, boolean flagQuery, boolean flagCreate) {
-
         System.out.println(App.Start());
         final APIResponse[] apiResponse = {null};
         List<AttachmentSolver> snAttachments = new ArrayList<>();
@@ -537,7 +529,6 @@ public class AttachmentController {
         final long[] endTime = {0};
         String tag = "[Attachment] ";
         String[] sparmOffSets = Util.offSets1500000();
-
         ObjectMapper mapper = new ObjectMapper();
         mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         final String[] result = new String[1];
@@ -591,7 +582,6 @@ public class AttachmentController {
                                 domain[0] = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
                                 if (domain[0] != null)
                                     attachment.setDomain(domain[0]);
-
                                 switch (attachment.getOrigin()) {
                                     case "incident":
                                         incident[0] = incidentService.findByIntegrationId(attachment.getElement());
@@ -609,7 +599,6 @@ public class AttachmentController {
                                             attachment.setScTask(scTask[0]);
                                         break;
                                 }
-
                                 attachmentService.save(attachment);
                                 snAttachments.add(attachmentSolver[0]);
                                 Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain[0]));
@@ -689,7 +678,6 @@ public class AttachmentController {
                     attachment.setSysUpdatedOn(attachmentSolver[0].getSys_updated_on());
                     domain[0] = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
                     attachment.setDomain(getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value()));
-
                     switch (attachment.getOrigin()) {
                         case "incident":
                             incident[0] = incidentService.findByIntegrationId(attachment.getElement());
@@ -707,7 +695,6 @@ public class AttachmentController {
                                 attachment.setScTask(scTask[0]);
                             break;
                     }
-
                     exists[0] = attachmentService.findByIntegrationId(attachment.getIntegrationId());
                     if (exists[0] != null) {
                         attachment.setId(exists[0].getId());
@@ -721,7 +708,6 @@ public class AttachmentController {
                     System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                 }
             });
-
             apiResponse = mapper.readValue(result, APIResponse.class);
             status.setUri(EndPointSN.Incident());
             status.setUserAPI(App.SNUser());
@@ -764,7 +750,6 @@ public class AttachmentController {
                 attachment = rest.sendFileToServiceNow(element, file, type, file.getOriginalFilename());
                 if (attachment != null)
                     Util.printData(tag, tagAction.concat("(ServiceNow)"), Util.getFieldDisplay(current), current.getElement());
-
                 attachment.setId(current.getId());
                 attachment.setExtension(current.getExtension());
                 attachment.setFileName(current.getFileName());
@@ -773,24 +758,20 @@ public class AttachmentController {
                 Domain domain = domainService.findByIntegrationId(attachment.getDomain().getIntegrationId());
                 attachment.setDomain(domain);
                 String pathDirectory = rest.generatePathDirectory(attachment, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
-
                 InputStream initialStream = file.getInputStream();
                 byte[] buffer = new byte[initialStream.available()];
                 initialStream.read(buffer);
                 File targetFile = new File(pathDirectory);
-
                 try (OutputStream outStream = new FileOutputStream(targetFile)) {
                     outStream.write(buffer);
                     outStream.close();
                     Util.printData(tag, tagAction.concat("(SO)"), Util.getFieldDisplay(current), current.getElement());
                     attachment.setDownloadLink(pathDirectory);
                 }
-
                 tagAction = App.UpdateConsole();
                 attachmentService.save(attachment);
                 Util.printData(tag, tagAction.concat("(BD)"), Util.getFieldDisplay(attachment), attachment.getElement());
             }
-
         } catch (DataAccessException | IOException e) {
             response.put("mensaje", "Error upload attachment");
             response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
@@ -804,7 +785,6 @@ public class AttachmentController {
         Deflater deflater = new Deflater();
         deflater.setInput(data);
         deflater.finish();
-
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream(data.length);
         byte[] buffer = new byte[1024];
         while (!deflater.finished()) {
@@ -816,7 +796,6 @@ public class AttachmentController {
         } catch (IOException e) {
         }
         System.out.println("Compressed Image Byte Size - " + outputStream.toByteArray().length);
-
         return outputStream.toByteArray();
     }
 

@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -34,7 +33,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class SysDocumentationController {
-
     @Autowired
     private ISysDocumentationService sysDocumentationService;
     @Autowired
@@ -49,10 +47,8 @@ public class SysDocumentationController {
 
     @GetMapping("/sysDocumentation/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         SysDocumentation sysDocumentation = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysDocumentation = sysDocumentationService.findById(id);
         } catch (DataAccessException e) {
@@ -60,12 +56,10 @@ public class SysDocumentationController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (sysDocumentation == null) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysDocumentation>(sysDocumentation, HttpStatus.OK);
     }
 
@@ -73,7 +67,6 @@ public class SysDocumentationController {
     @PostMapping("/sysDocumentation")
     public ResponseEntity<?> create(@RequestBody SysDocumentation sysDocumentation) {
         SysDocumentation newSysDocumentation = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
             newSysDocumentation = sysDocumentationService.save(sysDocumentation);
@@ -84,24 +77,19 @@ public class SysDocumentationController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("sysDocumentation", newSysDocumentation);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/sysDocumentation/{id}")
     public ResponseEntity<?> update(@RequestBody SysDocumentation sysDocumentation, @PathVariable Long id) {
-
         SysDocumentation currentSysDocumentation = sysDocumentationService.findById(id);
         SysDocumentation sysDocumentationUpdated = null;
-
         Map<String, Object> response = new HashMap<>();
-
         if (currentSysDocumentation == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             currentSysDocumentation.setElement(sysDocumentation.getElement());
             sysDocumentationUpdated = sysDocumentationService.save(currentSysDocumentation);
@@ -113,14 +101,12 @@ public class SysDocumentationController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysDocumentation", sysDocumentationUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/sysDocumentation/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             sysDocumentationService.delete(id);
@@ -136,10 +122,8 @@ public class SysDocumentationController {
 
     @GetMapping("/byIntegrationId/{integrationId}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {
-
         SysDocumentation sysDocumentation = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysDocumentation = sysDocumentationService.findByIntegrationId(integrationId);
         } catch (DataAccessException e) {
@@ -147,21 +131,17 @@ public class SysDocumentationController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (sysDocumentation == null) {
             response.put("mensaje", Messages.notExist.get(integrationId));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysDocumentation>(sysDocumentation, HttpStatus.OK);
     }
 
     @GetMapping("/byUniqueIdentifier/{uniqueIdentifier}")
     public ResponseEntity<?> findByUniqueIdentifier(@PathVariable String uniqueIdentifier) {
-
         SysDocumentation sysDocumentation = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysDocumentation = sysDocumentationService.findByIntegrationId(uniqueIdentifier);
         } catch (DataAccessException e) {
@@ -169,12 +149,10 @@ public class SysDocumentationController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (sysDocumentation == null) {
             response.put("mensaje", Messages.notExist.get(uniqueIdentifier));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysDocumentation>(sysDocumentation, HttpStatus.OK);
     }
 
@@ -187,73 +165,64 @@ public class SysDocumentationController {
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysDocumentation] ";
+        String result;
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JSONParser parser = new JSONParser();
+        JSONObject resultJson = new JSONObject();
+        JSONArray ListSnSysDocumentationJson = new JSONArray();
+        final SysDocumentationRequest[] sysDocumentationRequest = {new SysDocumentationRequest()};
+        SysDocumentation sysDocumentation = new SysDocumentation();
+        final String[] tagAction = new String[1];
+        final SysDocumentation[] exists = new SysDocumentation[1];
+        final APIExecutionStatus[] status = {new APIExecutionStatus()};
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(EndPointSN.SysDocumentation().concat(sparmOffSet));
+                result = rest.responseByEndPoint(EndPointSN.SysDocumentation().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.SysDocumentation().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListSnSysDocumentationJson = new JSONArray();
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
                     ListSnSysDocumentationJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
                 ListSnSysDocumentationJson.stream().forEach(snSysDocumentationJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SysDocumentationRequest sysDocumentationRequest = new SysDocumentationRequest();
-
                     try {
-                        sysDocumentationRequest = objectMapper.readValue(snSysDocumentationJson.toString(), SysDocumentationRequest.class);
-                        SysDocumentation sysDocumentation = new SysDocumentation();
-
-                        sysDocumentationRequests.add(sysDocumentationRequest);
-
-                        sysDocumentation.setElement(sysDocumentationRequest.getElement());
-                        sysDocumentation.setEs(sysDocumentationRequest.getLabel());
-                        sysDocumentation.setOrigin(sysDocumentationRequest.getName());
-                        sysDocumentation.setSysCreatedBy(sysDocumentationRequest.getSys_created_by());
-                        sysDocumentation.setSysCreatedOn(sysDocumentationRequest.getSys_created_on());
-                        sysDocumentation.setIntegrationId(sysDocumentationRequest.getSys_id());
-                        sysDocumentation.setSysUpdatedBy(sysDocumentationRequest.getSys_updated_by());
-                        sysDocumentation.setSysUpdatedOn(sysDocumentationRequest.getSys_updated_on());
-                        sysDocumentation.setUniqueIdentifier(sysDocumentationRequest.getName().concat("•").concat(sysDocumentationRequest.getElement()));
-
+                        sysDocumentationRequest[0] = mapper.readValue(snSysDocumentationJson.toString(), SysDocumentationRequest.class);
+                        sysDocumentationRequests.add(sysDocumentationRequest[0]);
+                        sysDocumentation.setElement(sysDocumentationRequest[0].getElement());
+                        sysDocumentation.setEs(sysDocumentationRequest[0].getLabel());
+                        sysDocumentation.setOrigin(sysDocumentationRequest[0].getName());
+                        sysDocumentation.setSysCreatedBy(sysDocumentationRequest[0].getSys_created_by());
+                        sysDocumentation.setSysCreatedOn(sysDocumentationRequest[0].getSys_created_on());
+                        sysDocumentation.setIntegrationId(sysDocumentationRequest[0].getSys_id());
+                        sysDocumentation.setSysUpdatedBy(sysDocumentationRequest[0].getSys_updated_by());
+                        sysDocumentation.setSysUpdatedOn(sysDocumentationRequest[0].getSys_updated_on());
+                        sysDocumentation.setUniqueIdentifier(sysDocumentationRequest[0].getName().concat("•").concat(sysDocumentationRequest[0].getElement()));
                         sysDocumentation.setActive(true);
 
-                        String tagAction = App.CreateConsole();
-                        SysDocumentation exists = sysDocumentationService.findByUniqueIdentifier(sysDocumentation.getUniqueIdentifier());
-                        if (exists != null) {
-                            sysDocumentation.setId(exists.getId());
-                            tagAction = App.UpdateConsole();
-
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = sysDocumentationService.findByUniqueIdentifier(sysDocumentation.getUniqueIdentifier());
+                        if (exists[0] != null) {
+                            sysDocumentation.setId(exists[0].getId());
+                            tagAction[0] = App.UpdateConsole();
                         }
-                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(sysDocumentation)));
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysDocumentation)));
                         sysDocumentationService.save(sysDocumentation);
                         count[0] = count[0] + 1;
-
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(EndPointSN.Location());
-                status.setUserAPI(App.SNUser());
-                status.setPasswordAPI(App.SNPassword());
-                status.setError(apiResponse.getError());
-                status.setMessage(apiResponse.getMessage());
+                status[0].setUri(EndPointSN.Location());
+                status[0].setUserAPI(App.SNUser());
+                status[0].setPasswordAPI(App.SNPassword());
+                status[0].setError(apiResponse.getError());
+                status[0].setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
-                status.setExecutionTime(endTime);
-                statusService.save(status);
+                status[0].setExecutionTime(endTime);
+                statusService.save(status[0]);
             }
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }

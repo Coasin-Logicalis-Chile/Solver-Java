@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -24,7 +23,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -56,8 +54,6 @@ public class ScRequestItemController {
     @Autowired
     private ICompanyService companyService;
     @Autowired
-    private IContractService contractService;
-    @Autowired
     private ICiServiceService ciServiceService;
     @Autowired
     private IScRequestService scRequestService;
@@ -75,10 +71,8 @@ public class ScRequestItemController {
 
     @GetMapping("/scRequestItem/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         ScRequestItem scRequestItem = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             scRequestItem = scRequestItemService.findById(id);
         } catch (DataAccessException e) {
@@ -86,21 +80,17 @@ public class ScRequestItemController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (scRequestItem == null) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<ScRequestItem>(scRequestItem, HttpStatus.OK);
     }
 
     @GetMapping("/scRequestItem/{scRequest}")
     public ResponseEntity<?> show(@PathVariable ScRequest scRequest) {
-
         List<ScRequestItem> scRequestItems = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             scRequestItems = scRequestItemService.findByScRequest(scRequest);
         } catch (DataAccessException e) {
@@ -108,12 +98,10 @@ public class ScRequestItemController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (scRequestItems == null) {
             response.put("mensaje", Messages.notExist.get(scRequest.getId().toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<List<ScRequestItem>>(scRequestItems, HttpStatus.OK);
     }
 
@@ -121,7 +109,6 @@ public class ScRequestItemController {
     @PostMapping("/scRequestItem")
     public ResponseEntity<?> create(@RequestBody ScRequestItem scRequestItem) {
         ScRequestItem newScRequestItem = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
             newScRequestItem = scRequestItemService.save(scRequestItem);
@@ -132,11 +119,9 @@ public class ScRequestItemController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("scRequestItem", newScRequestItem);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    //@Secured("ROLE_ADMIN")
     @PutMapping("/scRequestItem/{id}")
     public ResponseEntity<?> update(@RequestBody String json, @PathVariable Long id) {
         ScRequestItem currentScRequestItem = scRequestItemService.findById(id);
@@ -147,7 +132,6 @@ public class ScRequestItemController {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             SysUser assignedTo = getSysUserByIntegrationId(Util.parseJson(json, "scRequestItem", "assigned_to"));
             currentScRequestItem.setAssignedTo(assignedTo);
@@ -157,9 +141,7 @@ public class ScRequestItemController {
             currentScRequestItem.setShortDescription(Util.parseJson(json, "scRequestItem", "short_description"));
             currentScRequestItem.setState(Util.parseJson(json, "scRequestItem", "state"));
             ScRequestItem addScRequestItem = rest.putScRequestItem(EndPointSN.PutScRequestItem(), currentScRequestItem);
-
             scRequestItemUpdated = scRequestItemService.save(currentScRequestItem);
-
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -167,14 +149,12 @@ public class ScRequestItemController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("scRequestItem", scRequestItemUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/scRequestItem/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             scRequestItemService.delete(id);
@@ -187,7 +167,6 @@ public class ScRequestItemController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-
     @GetMapping("/findPaginatedScRequestItemsByFilters")
     public ResponseEntity<Page<ScRequestItemInfo>> findPaginatedScRequestItemsByFilters(@RequestParam(value = "page", required = true, defaultValue = "0") Integer page,
                                                                                         @NotNull @RequestParam(value = "size", required = true, defaultValue = "10") Integer size,
@@ -199,9 +178,7 @@ public class ScRequestItemController {
                                                                                         @NotNull @RequestParam(value = "solved", required = true, defaultValue = "false") boolean solved,
                                                                                         String field,
                                                                                         String direction) {
-
         Sort sort = direction.toUpperCase().equals("DESC") ? Sort.by(field).descending() : Sort.by(field).ascending();
-
         Pageable pageRequest;
         if (size > 0) {
             pageRequest = PageRequest.of(page, size, sort);
@@ -210,7 +187,6 @@ public class ScRequestItemController {
         }
         Page<ScRequestItemInfo> pageResult = scRequestItemService.findPaginatedScRequestItemsByFilters(pageRequest, filter.toUpperCase(), assignedTo, company, state, openUnassigned, solved);
         ResponseEntity<Page<ScRequestItemInfo>> pageResponseEntity = new ResponseEntity<>(pageResult, HttpStatus.OK);
-
         return pageResponseEntity;
     }
 
@@ -224,170 +200,13 @@ public class ScRequestItemController {
         return pageResponseEntity;
     }
 
-    /*
-        @PutMapping("/scRequestItemSN")
-        public ResponseEntity<?> update(@RequestBody ScRequestItemRequest scRequestItemRequest) {
-            ScRequestItem currentScRequestItem = new ScRequestItem();
-            ScRequestItem scRequestItemUpdated = null;
-            Map<String, Object> response = new HashMap<>();
-            if (currentScRequestItem == null) {
-                response.put("mensaje", Errors.dataAccessExceptionUpdate.get(scRequestItemRequest.getSys_id()));
-                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
-            }
-
-            try {
-                ScRequestItem scRequestItem = new ScRequestItem();
-                String tagAction = app.CreateConsole();
-                String tag = "[ScRequestItem] ";
-
-                ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItem.getIntegrationId());
-                if (exists != null) {
-                    scRequestItem.setId(exists.getId());
-                    tagAction = app.UpdateConsole();
-                }
-
-
-                scRequestItem.setApproval(scRequestItemRequest.getApproval());
-                scRequestItem.setStage(scRequestItemRequest.getStage());
-                scRequestItem.setCloseNotes(scRequestItemRequest.getClose_notes());
-                scRequestItem.setClosedAt(scRequestItemRequest.getClosed_at());
-                scRequestItem.setContactType(scRequestItemRequest.getContact_type());
-                scRequestItem.setCorrelationDisplay(scRequestItemRequest.getCorrelation_display());
-                scRequestItem.setCorrelationId(scRequestItemRequest.getCorrelation_id());
-                scRequestItem.setDescription(scRequestItemRequest.getDescription());
-                scRequestItem.setEscalation(scRequestItemRequest.getEscalation());
-                scRequestItem.setEstimatedDelivery(scRequestItemRequest.getEstimated_delivery());
-                scRequestItem.setExpectedStart(scRequestItemRequest.getExpected_start());
-                scRequestItem.setNumber(scRequestItemRequest.getNumber());
-                scRequestItem.setOpenedAt(scRequestItemRequest.getOpened_at());
-                scRequestItem.setIncidentParent(scRequestItemRequest.getParent());
-                scRequestItem.setPriority(scRequestItemRequest.getPriority());
-                scRequestItem.setReassignmentCount(scRequestItemRequest.getReassignment_count());
-                scRequestItem.setShortDescription(scRequestItemRequest.getShort_description());
-                scRequestItem.setState(scRequestItemRequest.getState());
-                scRequestItem.setIntegrationId(scRequestItemRequest.getSys_id());
-                scRequestItem.setSysUpdatedBy(scRequestItemRequest.getSys_updated_by());
-                scRequestItem.setSysUpdatedOn(scRequestItemRequest.getSys_updated_on());
-                scRequestItem.setExternalTicket(scRequestItemRequest.getU_external_ticket());
-                scRequestItem.setPartnersOcurrences(scRequestItemRequest.getU_partners_ocurrences());
-                scRequestItem.setSource(scRequestItemRequest.getU_source());
-                scRequestItem.setUrgency(scRequestItemRequest.getUrgency());
-
-                if (Util.hasData(scRequestItemRequest.getContract())) {
-                    scRequestItem.setContract(contractService.findByIntegrationId(scRequestItemRequest.getContract()));
-                } else {
-                    scRequestItem.setContract(null);
-                }
-
-                if (Util.hasData(scRequestItemRequest.getAssigned_to())) {
-                    scRequestItem.setAssignedTo(sysUserService.findByIntegrationId(scRequestItemRequest.getAssigned_to()));
-                } else {
-                    scRequestItem.setAssignedTo(null);
-                }
-
-                if (Util.hasData(scRequestItemRequest.getAssignment_group())) {
-                    scRequestItem.setAssignmentGroup(sysGroupService.findByIntegrationId(scRequestItemRequest.getAssignment_group()));
-                } else {
-                    scRequestItem.setAssignmentGroup(null);
-                }
-
-                if (Util.hasData(scRequestItemRequest.getLocation())) {
-                    scRequestItem.setLocation(locationService.findByIntegrationId(scRequestItemRequest.getLocation()));
-                } else {
-                    scRequestItem.setLocation(null);
-                }
-
-
-                if (Util.hasData(scRequestItemRequest.getClosed_by())) {
-                    scRequestItem.setClosedBy(sysUserService.findByIntegrationId(scRequestItemRequest.getClosed_by()));
-                } else {
-                    scRequestItem.setLocation(null);
-                }
-
-                scRequestItem.setScRequestIntegrationId(scRequestItemRequest.getRequest());
-                ScRequest scRequest = scRequestService.findByIntegrationId(scRequestItemRequest.getRequest());
-                scRequestItem.setScRequest(scRequest);
-                scRequestItem.setCompany(scRequest.getCompany());
-                scRequestItem.setDomain(scRequest.getCompany().getDomain());
-
-
-                if (Util.hasData(scRequestItemRequest.getParent())) {
-                    Incident parent = incidentService.findByIntegrationId(scRequestItemRequest.getParent());
-                    if (!parent.getMaster()) {
-                        parent.setScRequestParent(scRequest.getIntegrationId());
-                        scRequestItem.setIncidentParent(parent.getIntegrationId());
-                        incidentService.save(parent);
-                    }
-                }
-
-
-                if (Util.hasData(scRequestItemRequest.getCat_item())) {
-                    scRequestItem.setScCategoryItem(scCategoryItemService.findByIntegrationId(scRequestItemRequest.getCat_item()));
-                } else {
-                    scRequestItem.setScCategoryItem(null);
-                }
-
-                if (Util.hasData(scRequestItemRequest.getOpened_by())) {
-                    scRequestItem.setOpenedBy(sysUserService.findByIntegrationId(scRequestItemRequest.getOpened_by()));
-                } else {
-                    scRequestItem.setOpenedBy(null);
-                }
-
-                if (Util.hasData(scRequestItemRequest.getTask_for())) {
-                    scRequestItem.setTaskFor(sysUserService.findByIntegrationId(scRequestItemRequest.getTask_for()));
-                } else {
-                    scRequestItem.setTaskFor(null);
-                }
-
-
-                if (Util.hasData(scRequestItemRequest.getBusiness_service())) {
-                    scRequestItem.setBusinessService(ciServiceService.findByIntegrationId(scRequestItemRequest.getBusiness_service()));
-                } else {
-                    scRequestItem.setBusinessService(null);
-                }
-
-                if (Util.hasData(scRequestItemRequest.getRequested_for())) {
-                    scRequestItem.setRequestedFor(sysUserService.findByIntegrationId(scRequestItemRequest.getRequested_for()));
-                } else {
-                    scRequestItem.setRequestedFor(null);
-                }
-
-
-                if (Util.hasData(scRequestItemRequest.getConfiguration_item())) {
-                    scRequestItem.setConfigurationItem(configurationItemService.findByIntegrationId(scRequestItemRequest.getConfiguration_item()));
-                } else {
-                    scRequestItem.setConfigurationItem(null);
-                }
-
-                if (Util.hasData(scRequestItemRequest.getAssignment_group())) {
-                    scRequestItem.setAssignmentGroup(sysGroupService.findByIntegrationId(scRequestItemRequest.getAssignment_group()));
-                } else {
-                    scRequestItem.setAssignmentGroup(null);
-                }
-
-                scRequestItemUpdated = scRequestItemService.save(scRequestItem);
-                Util.printData(tag, tagAction.concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(scRequestItem.getCompany()), Util.getFieldDisplay(scRequestItem.getDomain()));
-            } catch (DataAccessException e) {
-                System.out.println("error " + e.getMessage());
-                response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
-                response.put("error", e.getMessage());
-                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            response.put("mensaje", Messages.UpdateOK.get());
-            response.put("scRequestItem", scRequestItemUpdated);
-
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-        }
-    */
     @PutMapping("/scRequestItemSN")
     public ResponseEntity<?> update(@RequestBody String json) {
         ScRequestItem scRequestItem = new ScRequestItem();
         Map<String, Object> response = new HashMap<>();
-
         try {
             String tagAction = App.CreateConsole();
             String tag = "[ScRequestItem] ";
-
             Gson gson = new Gson();
             ScRequestItemRequest scRequestItemSolver = gson.fromJson(json, ScRequestItemRequest.class);
             ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItemSolver.getSys_id());
@@ -413,71 +232,26 @@ public class ScRequestItemController {
             scRequestItem.setSysUpdatedOn(scRequestItemSolver.getSys_updated_on());
             scRequestItem.setUrgency(scRequestItemSolver.getUrgency());
             scRequestItem.setScRequestIntegrationId(scRequestItemSolver.getRequest());
-
             ScRequest scRequest = scRequestService.findByIntegrationId(scRequestItemSolver.getRequest());
             scRequestItem.setScRequest(scRequest);
-
             Company company = companyService.findByIntegrationId(scRequestItemSolver.getCompany());
             scRequestItem.setCompany(company);
             scRequestItem.setDomain(company.getDomain());
-
             if (Util.hasData(scRequestItemSolver.getOpened_by())) {
                 SysUser openedBy = sysUserService.findByIntegrationId(scRequestItemSolver.getOpened_by());
                 scRequestItem.setOpenedBy(openedBy);
             }
-
             if (Util.hasData(scRequestItemSolver.getTask_for())) {
                 SysUser taskFor = sysUserService.findByIntegrationId(scRequestItemSolver.getTask_for());
                 scRequestItem.setTaskFor(taskFor);
             }
-
             if (Util.hasData(scRequestItemSolver.getRequested_for())) {
                 SysUser requestedFor = sysUserService.findByIntegrationId(scRequestItemSolver.getRequested_for());
                 scRequestItem.setRequestedFor(requestedFor);
             }
-            /*if (Util.hasData(scRequestItemSolver.getCat_item())) {
-                ScCategoryItem scCategoryItem = scCategoryItemService.findByIntegrationId(scRequestItemSolver.getCat_item());
-                scRequestItem.setScCategoryItem(scCategoryItem);
-            }
-
-            if (Util.hasData(scRequestItemSolver.getOpened_by())) {
-                SysUser openedBy = sysUserService.findByIntegrationId(scRequestItemSolver.getOpened_by());
-                scRequestItem.setOpenedBy(openedBy);
-            }
-
-            if (Util.hasData(scRequestItemSolver.getTask_for())) {
-                SysUser taskFor = sysUserService.findByIntegrationId(scRequestItemSolver.getTask_for());
-                scRequestItem.setTaskFor(taskFor);
-            }
-
-            if (Util.hasData(scRequestItemSolver.getBusiness_service())) {
-                CiService businessService = ciServiceService.findByIntegrationId(scRequestItemSolver.getBusiness_service());
-                scRequestItem.setBusinessService(businessService);
-            }
-
-            if (Util.hasData(scRequestItemSolver.getRequested_for())) {
-                SysUser requestedFor = sysUserService.findByIntegrationId(scRequestItemSolver.getRequested_for());
-                scRequestItem.setRequestedFor(requestedFor);
-            }
-
-            if (Util.hasData(scRequestItemSolver.getConfiguration_item())) {
-                ConfigurationItem configurationItem = configurationItemService.findByIntegrationId(scRequestItemSolver.getConfiguration_item());
-                scRequestItem.setConfigurationItem(configurationItem);
-            }
-
-
-            if (Util.hasData(scRequestItemSolver.getParent())) {
-                Incident parent = incidentService.findByIntegrationId(scRequestItemSolver.getParent());
-                if (!parent.getMaster()) {
-                    parent.setScRequestParent(scRequest.getIntegrationId());
-                    scRequestItem.setIncidentParent(scRequestItemSolver.getParent());
-                    incidentService.save(parent);
-                }
-            }*/
 
             scRequestItemService.save(scRequestItem);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(company.getDomain()));
-
         } catch (DataAccessException e) {
             System.out.println("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
@@ -486,10 +260,8 @@ public class ScRequestItemController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("scRequestItem", scRequestItem);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
-
 
     @GetMapping("/scRequestItemBySolver")
     public List<ScRequestItem> findByCompany() {
@@ -500,136 +272,122 @@ public class ScRequestItemController {
         long startTime = 0;
         long endTime = 0;
         String tag = "[ScRequestItem] ";
+        String result;
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JSONParser parser = new JSONParser();
+        JSONObject resultJson = new JSONObject();
+        JSONArray ListSnScRequestItemJson = new JSONArray();
+        ScRequestItem scRequestItem = new ScRequestItem();
+        final Domain[] domain = new Domain[1];
+        final Company[] company = new Company[1];
+        final Location[] location = new Location[1];
+        final ScCategoryItem[] scCategoryItem = new ScCategoryItem[1];
+        final SysUser[] assignedTo = new SysUser[1];
+        final SysUser[] openedBy = new SysUser[1];
+        final SysUser[] taskFor = new SysUser[1];
+        final CiService[] businessService = new CiService[1];
+        final ConfigurationItem[] configurationItem = new ConfigurationItem[1];
+        final SysGroup[] sysGroup = new SysGroup[1];
+        final ScRequest[] scRequest = new ScRequest[1];
+        final String[] incidentParent = new String[1];
+        final Incident[] parent = new Incident[1];
+        final String[] tagAction = new String[1];
+        final ScRequestItem[] exists = new ScRequestItem[1];
+        APIExecutionStatus status = new APIExecutionStatus();
+        final ScRequestItemSolver[] scRequestItemSolver = {new ScRequestItemSolver()};
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(EndPointSN.ScRequestItemByCompany().concat(sparmOffSet));
+                result = rest.responseByEndPoint(EndPointSN.ScRequestItemByCompany().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ScRequestItemByCompany().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListSnScRequestItemJson = new JSONArray();
-
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
                     ListSnScRequestItemJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
                 ListSnScRequestItemJson.stream().forEach(snScRequestItemJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    ScRequestItemSolver scRequestItemSolver = new ScRequestItemSolver();
                     try {
-                        scRequestItemSolver = objectMapper.readValue(snScRequestItemJson.toString(), ScRequestItemSolver.class);
+                        scRequestItemSolver[0] = mapper.readValue(snScRequestItemJson.toString(), ScRequestItemSolver.class);
+                        scRequestItem.setNumber(scRequestItemSolver[0].getNumber());
+                        scRequestItem.setActive(scRequestItemSolver[0].getActive());
+                        scRequestItem.setState(scRequestItemSolver[0].getState());
+                        scRequestItem.setStage(scRequestItemSolver[0].getStage());
+                        scRequestItem.setTimeWorked(scRequestItemSolver[0].getTime_worked());
+                        scRequestItem.setEscalation(scRequestItemSolver[0].getEscalation());
+                        scRequestItem.setExpectedStart(scRequestItemSolver[0].getExpected_start());
+                        scRequestItem.setEstimatedDelivery(scRequestItemSolver[0].getEstimated_delivery());
+                        scRequestItem.setShortDescription(scRequestItemSolver[0].getShort_description());
+                        scRequestItem.setOpenedAt(scRequestItemSolver[0].getOpened_at());
+                        scRequestItem.setDescription(scRequestItemSolver[0].getDescription());
+                        scRequestItem.setIntegrationId(scRequestItemSolver[0].getSys_id());
+                        scRequestItem.setContactType(scRequestItemSolver[0].getContact_type());
+                        scRequestItem.setUrgency(scRequestItemSolver[0].getUrgency());
+                        scRequestItem.setPriority(scRequestItemSolver[0].getPriority());
+                        scRequestItem.setApproval(scRequestItemSolver[0].getApproval());
+                        scRequestItem.setSysUpdatedOn(scRequestItemSolver[0].getSys_updated_on());
+                        scRequestItem.setSysCreatedBy(scRequestItemSolver[0].getSys_created_by());
+                        scRequestItem.setSysUpdatedBy(scRequestItemSolver[0].getSys_updated_by());
+                        scRequestItem.setSysCreatedOn(scRequestItemSolver[0].getSys_created_on());
+                        domain[0] = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), App.Value());
+                        if (domain[0] != null)
+                            scRequestItem.setDomain(domain[0]);
+                        company[0] = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), App.Value());
+                        if (company[0] != null)
+                            scRequestItem.setCompany(company[0]);
 
-                        ScRequestItem scRequestItem = new ScRequestItem();
-                        scRequestItem.setNumber(scRequestItemSolver.getNumber());
-                        scRequestItem.setActive(scRequestItemSolver.getActive());
-                        scRequestItem.setState(scRequestItemSolver.getState());
-                        scRequestItem.setStage(scRequestItemSolver.getStage());
-                        scRequestItem.setTimeWorked(scRequestItemSolver.getTime_worked());
-                        scRequestItem.setEscalation(scRequestItemSolver.getEscalation());
-                        scRequestItem.setExpectedStart(scRequestItemSolver.getExpected_start());
-                        scRequestItem.setEstimatedDelivery(scRequestItemSolver.getEstimated_delivery());
-                        scRequestItem.setShortDescription(scRequestItemSolver.getShort_description());
-                        scRequestItem.setOpenedAt(scRequestItemSolver.getOpened_at());
-                        scRequestItem.setDescription(scRequestItemSolver.getDescription());
-                        scRequestItem.setIntegrationId(scRequestItemSolver.getSys_id());
-                        scRequestItem.setContactType(scRequestItemSolver.getContact_type());
-                        scRequestItem.setUrgency(scRequestItemSolver.getUrgency());
-                        scRequestItem.setPriority(scRequestItemSolver.getPriority());
-                        scRequestItem.setApproval(scRequestItemSolver.getApproval());
-                        scRequestItem.setSysUpdatedOn(scRequestItemSolver.getSys_updated_on());
-                        scRequestItem.setSysCreatedBy(scRequestItemSolver.getSys_created_by());
-                        scRequestItem.setSysUpdatedBy(scRequestItemSolver.getSys_updated_by());
-                        scRequestItem.setSysCreatedOn(scRequestItemSolver.getSys_created_on());
+                        location[0] = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", App.Value());
+                        if (location[0] != null)
+                            scRequestItem.setLocation(location[0]);
 
+                        scCategoryItem[0] = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", App.Value());
+                        if (scCategoryItem[0] != null)
+                            scRequestItem.setScCategoryItem(scCategoryItem[0]);
 
-                        Domain domain = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), App.Value());
-                        if (domain != null)
-                            scRequestItem.setDomain(domain);
+                        assignedTo[0] = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", App.Value());
+                        if (assignedTo[0] != null)
+                            scRequestItem.setAssignedTo(assignedTo[0]);
+                        openedBy[0] = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", App.Value());
+                        if (openedBy[0] != null)
+                            scRequestItem.setOpenedBy(openedBy[0]);
 
-                        Company company = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), App.Value());
-                        if (company != null)
-                            scRequestItem.setCompany(company);
+                        taskFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", App.Value());
+                        if (taskFor[0] != null)
+                            scRequestItem.setTaskFor(taskFor[0]);
 
-                        /*SysUser requestedFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "requested_for", App.Value());
-                        if (requestedFor != null)
-                            scRequestItem.setRequestedFor(requestedFor);*/
+                        businessService[0] = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", App.Value());
+                        if (businessService[0] != null)
+                            scRequestItem.setBusinessService(businessService[0]);
 
-                        Location location = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", App.Value());
-                        if (location != null)
-                            scRequestItem.setLocation(location);
+                        configurationItem[0] = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", App.Value());
+                        if (configurationItem[0] != null)
+                            scRequestItem.setConfigurationItem(configurationItem[0]);
 
-                        ScCategoryItem scCategoryItem = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", App.Value());
-                        if (scCategoryItem != null)
-                            scRequestItem.setScCategoryItem(scCategoryItem);
+                        sysGroup[0] = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", App.Value());
+                        if (sysGroup[0] != null)
+                            scRequestItem.setAssignmentGroup(sysGroup[0]);
 
+                        scRequest[0] = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", App.Value());
+                        if (scRequest[0] != null) {
+                            scRequestItem.setScRequest(scRequest[0]);
 
-                        SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", App.Value());
-                        if (assignedTo != null)
-                            scRequestItem.setAssignedTo(assignedTo);
-
-                        SysUser openedBy = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", App.Value());
-                        if (openedBy != null)
-                            scRequestItem.setOpenedBy(openedBy);
-
-                        SysUser taskFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", App.Value());
-                        if (taskFor != null)
-                            scRequestItem.setTaskFor(taskFor);
-
-                        CiService businessService = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", App.Value());
-                        if (businessService != null)
-                            scRequestItem.setBusinessService(businessService);
-
-                        ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", App.Value());
-                        if (configurationItem != null)
-                            scRequestItem.setConfigurationItem(configurationItem);
-
-                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", App.Value());
-                        if (sysGroup != null)
-                            scRequestItem.setAssignmentGroup(sysGroup);
-
-                        ScRequest scRequest = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", App.Value());
-                        if (scRequest != null) {
-                            scRequestItem.setScRequest(scRequest);
-                           /* if (scRequest != null) {
-                                String incidentParent = Util.getIdByJson((JSONObject) snScRequestItemJson, "parent", App.Value());
-                                if (Util.hasData(incidentParent)) {
-                                    Incident parent = incidentService.findByIntegrationId(incidentParent);
-                                    if (!parent.getMaster()) {
-                                        parent.setScRequestParent(scRequest.getIntegrationId());
-                                      //  scRequestItem.setIncidentParent(incidentParent);
-                                        incidentService.save(parent);
-                                    }
-                                }
-                            }*/
-                            if (scRequest.getRequestedFor() != null)
-                                scRequestItem.setRequestedFor(scRequest.getRequestedFor());
+                            if (scRequest[0].getRequestedFor() != null)
+                                scRequestItem.setRequestedFor(scRequest[0].getRequestedFor());
                         }
 
-                        String incidentParent = Util.getIdByJson((JSONObject) snScRequestItemJson, "parent", App.Value());
-                        if (Util.hasData(incidentParent)) {
-                            Incident parent = incidentService.findByIntegrationId(incidentParent);
-                            if (Util.hasData(parent))
-                                scRequestItem.setIncidentParent(incidentParent);
-                            //incidentService.save(parent);
-
+                        incidentParent[0] = Util.getIdByJson((JSONObject) snScRequestItemJson, "parent", App.Value());
+                        if (Util.hasData(incidentParent[0])) {
+                            parent[0] = incidentService.findByIntegrationId(incidentParent[0]);
+                            if (Util.hasData(parent[0]))
+                                scRequestItem.setIncidentParent(incidentParent[0]);
                         }
-
-                        ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItem.getIntegrationId());
-                        String tagAction = App.CreateConsole();
-                        if (exists != null) {
-                            scRequestItem.setId(exists.getId());
-                            tagAction = App.UpdateConsole();
+                        exists[0] = scRequestItemService.findByIntegrationId(scRequestItem.getIntegrationId());
+                        tagAction[0] = App.CreateConsole();
+                        if (exists[0] != null) {
+                            scRequestItem.setId(exists[0].getId());
+                            tagAction[0] = App.UpdateConsole();
                         }
-
-                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
-
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                         scRequestItems.add(scRequestItemService.save(scRequestItem));
-
-
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -637,7 +395,6 @@ public class ScRequestItemController {
                 });
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
                 status.setUri(EndPointSN.Location());
                 status.setUserAPI(App.SNUser());
                 status.setPasswordAPI(App.SNPassword());
@@ -647,14 +404,12 @@ public class ScRequestItemController {
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
         System.out.println(App.End());
         return scRequestItems;
     }
-
 
     @GetMapping("/scRequestItemBySolverQueryCreate")
     public List<ScRequestItem> show(String query, boolean flagCreate) {
@@ -665,132 +420,122 @@ public class ScRequestItemController {
         long startTime = 0;
         long endTime = 0;
         String tag = "[ScRequestItem] ";
+        ObjectMapper mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        JSONParser parser = new JSONParser();
+        JSONObject resultJson;
+        JSONArray ListSnScRequestItemJson = new JSONArray();
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        final ScRequestItemSolver[] scRequestItemSolver = new ScRequestItemSolver[1];
+        String result;
+        ScRequestItem scRequestItem = new ScRequestItem();
+        final ScRequestItem[] exists = new ScRequestItem[1];
+        final String[] tagAction = new String[1];
+        final Domain[] domain = new Domain[1];
+        final Company[] company = new Company[1];
+        final Location[] location = new Location[1];
+        final ScCategoryItem[] scCategoryItem = new ScCategoryItem[1];
+        final SysUser[] assignedTo = new SysUser[1];
+        final SysUser[] openedBy = new SysUser[1];
+        final SysUser[] taskFor = new SysUser[1];
+        final CiService[] businessService = new CiService[1];
+        final ConfigurationItem[] configurationItem = new ConfigurationItem[1];
+        final SysGroup[] sysGroup = new SysGroup[1];
+        final ScRequest[] scRequest = new ScRequest[1];
+        final String[] incidentParent = new String[1];
+        final Incident[] parent = new Incident[1];
+        final ScRequestItem[] _scRequestItem = new ScRequestItem[1];
+        APIExecutionStatus status = new APIExecutionStatus();
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-
-                String result = rest.responseByEndPoint(EndPointSN.ScRequestItemByQuery().replace("QUERY", query).concat(sparmOffSet));
+                result = rest.responseByEndPoint(EndPointSN.ScRequestItemByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ScRequestItemByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
-
-
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson;
-                JSONArray ListSnScRequestItemJson = new JSONArray();
-
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
                     ListSnScRequestItemJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
                 ListSnScRequestItemJson.stream().forEach(snScRequestItemJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    ScRequestItemSolver scRequestItemSolver;
                     try {
-                        scRequestItemSolver = objectMapper.readValue(snScRequestItemJson.toString(), ScRequestItemSolver.class);
-                        ScRequestItem scRequestItem = new ScRequestItem();
-
-                        ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItem.getIntegrationId());
-                        String tagAction = App.CreateConsole();
-                        if (exists != null) {
-                            scRequestItem.setId(exists.getId());
+                        scRequestItemSolver[0] = objectMapper.readValue(snScRequestItemJson.toString(), ScRequestItemSolver.class);
+                        exists[0] = scRequestItemService.findByIntegrationId(scRequestItem.getIntegrationId());
+                        tagAction[0] = App.CreateConsole();
+                        if (exists[0] != null) {
+                            scRequestItem.setId(exists[0].getId());
                         } else {
-
-                            scRequestItem.setNumber(scRequestItemSolver.getNumber());
-                            scRequestItem.setActive(scRequestItemSolver.getActive());
-                            scRequestItem.setState(scRequestItemSolver.getState());
-                            scRequestItem.setStage(scRequestItemSolver.getStage());
-                            scRequestItem.setTimeWorked(scRequestItemSolver.getTime_worked());
-                            scRequestItem.setEscalation(scRequestItemSolver.getEscalation());
-                            scRequestItem.setExpectedStart(scRequestItemSolver.getExpected_start());
-                            scRequestItem.setEstimatedDelivery(scRequestItemSolver.getEstimated_delivery());
-                            scRequestItem.setShortDescription(scRequestItemSolver.getShort_description());
-                            scRequestItem.setOpenedAt(scRequestItemSolver.getOpened_at());
-                            scRequestItem.setDescription(scRequestItemSolver.getDescription());
-                            scRequestItem.setIntegrationId(scRequestItemSolver.getSys_id());
-                            scRequestItem.setContactType(scRequestItemSolver.getContact_type());
-                            scRequestItem.setUrgency(scRequestItemSolver.getUrgency());
-                            scRequestItem.setPriority(scRequestItemSolver.getPriority());
-                            scRequestItem.setApproval(scRequestItemSolver.getApproval());
-                            scRequestItem.setSysUpdatedOn(scRequestItemSolver.getSys_updated_on());
-                            scRequestItem.setSysCreatedBy(scRequestItemSolver.getSys_created_by());
-                            scRequestItem.setSysUpdatedBy(scRequestItemSolver.getSys_updated_by());
-                            scRequestItem.setSysCreatedOn(scRequestItemSolver.getSys_created_on());
-
-
-                            Domain domain = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), App.Value());
-                            if (domain != null)
-                                scRequestItem.setDomain(domain);
-
-                            Company company = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), App.Value());
-                            if (company != null)
-                                scRequestItem.setCompany(company);
-
-
-                            Location location = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", App.Value());
-                            if (location != null)
-                                scRequestItem.setLocation(location);
-
-                            ScCategoryItem scCategoryItem = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", App.Value());
-                            if (scCategoryItem != null)
-                                scRequestItem.setScCategoryItem(scCategoryItem);
-
-
-                            SysUser assignedTo = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", App.Value());
-                            if (assignedTo != null)
-                                scRequestItem.setAssignedTo(assignedTo);
-
-                            SysUser openedBy = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", App.Value());
-                            if (openedBy != null)
-                                scRequestItem.setOpenedBy(openedBy);
-
-                            SysUser taskFor = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", App.Value());
-                            if (taskFor != null)
-                                scRequestItem.setTaskFor(taskFor);
-
-                            CiService businessService = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", App.Value());
-                            if (businessService != null)
-                                scRequestItem.setBusinessService(businessService);
-
-                            ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", App.Value());
-                            if (configurationItem != null)
-                                scRequestItem.setConfigurationItem(configurationItem);
-
-                            SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", App.Value());
-                            if (sysGroup != null)
-                                scRequestItem.setAssignmentGroup(sysGroup);
-
-                            ScRequest scRequest = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", App.Value());
-                            if (scRequest != null) {
-                                scRequestItem.setScRequest(scRequest);
-
-                                if (scRequest.getRequestedFor() != null)
-                                    scRequestItem.setRequestedFor(scRequest.getRequestedFor());
+                            scRequestItem.setNumber(scRequestItemSolver[0].getNumber());
+                            scRequestItem.setActive(scRequestItemSolver[0].getActive());
+                            scRequestItem.setState(scRequestItemSolver[0].getState());
+                            scRequestItem.setStage(scRequestItemSolver[0].getStage());
+                            scRequestItem.setTimeWorked(scRequestItemSolver[0].getTime_worked());
+                            scRequestItem.setEscalation(scRequestItemSolver[0].getEscalation());
+                            scRequestItem.setExpectedStart(scRequestItemSolver[0].getExpected_start());
+                            scRequestItem.setEstimatedDelivery(scRequestItemSolver[0].getEstimated_delivery());
+                            scRequestItem.setShortDescription(scRequestItemSolver[0].getShort_description());
+                            scRequestItem.setOpenedAt(scRequestItemSolver[0].getOpened_at());
+                            scRequestItem.setDescription(scRequestItemSolver[0].getDescription());
+                            scRequestItem.setIntegrationId(scRequestItemSolver[0].getSys_id());
+                            scRequestItem.setContactType(scRequestItemSolver[0].getContact_type());
+                            scRequestItem.setUrgency(scRequestItemSolver[0].getUrgency());
+                            scRequestItem.setPriority(scRequestItemSolver[0].getPriority());
+                            scRequestItem.setApproval(scRequestItemSolver[0].getApproval());
+                            scRequestItem.setSysUpdatedOn(scRequestItemSolver[0].getSys_updated_on());
+                            scRequestItem.setSysCreatedBy(scRequestItemSolver[0].getSys_created_by());
+                            scRequestItem.setSysUpdatedBy(scRequestItemSolver[0].getSys_updated_by());
+                            scRequestItem.setSysCreatedOn(scRequestItemSolver[0].getSys_created_on());
+                            domain[0] = getDomainByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Domain.get(), App.Value());
+                            if (domain[0] != null)
+                                scRequestItem.setDomain(domain[0]);
+                            company[0] = getCompanyByIntegrationId((JSONObject) snScRequestItemJson, SnTable.Company.get(), App.Value());
+                            if (company[0] != null)
+                                scRequestItem.setCompany(company[0]);
+                            location[0] = getLocationByIntegrationId((JSONObject) snScRequestItemJson, "location", App.Value());
+                            if (location[0] != null)
+                                scRequestItem.setLocation(location[0]);
+                            scCategoryItem[0] = getScCategoryItemByIntegrationId((JSONObject) snScRequestItemJson, "cat_item", App.Value());
+                            if (scCategoryItem[0] != null)
+                                scRequestItem.setScCategoryItem(scCategoryItem[0]);
+                            assignedTo[0] = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "assigned_to", App.Value());
+                            if (assignedTo[0] != null)
+                                scRequestItem.setAssignedTo(assignedTo[0]);
+                            openedBy[0] = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "opened_by", App.Value());
+                            if (openedBy[0] != null)
+                                scRequestItem.setOpenedBy(openedBy[0]);
+                            taskFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestItemJson, "task_for", App.Value());
+                            if (taskFor[0] != null)
+                                scRequestItem.setTaskFor(taskFor[0]);
+                            businessService[0] = getCiServiceByIntegrationId((JSONObject) snScRequestItemJson, "business_service", App.Value());
+                            if (businessService[0] != null)
+                                scRequestItem.setBusinessService(businessService[0]);
+                            configurationItem[0] = getConfigurationItemByIntegrationId((JSONObject) snScRequestItemJson, "cmdb_ci", App.Value());
+                            if (configurationItem[0] != null)
+                                scRequestItem.setConfigurationItem(configurationItem[0]);
+                            sysGroup[0] = getSysGroupByIntegrationId((JSONObject) snScRequestItemJson, "assignment_group", App.Value());
+                            if (sysGroup[0] != null)
+                                scRequestItem.setAssignmentGroup(sysGroup[0]);
+                            scRequest[0] = getScRequestByIntegrationId((JSONObject) snScRequestItemJson, "request", App.Value());
+                            if (scRequest[0] != null) {
+                                scRequestItem.setScRequest(scRequest[0]);
+                                if (scRequest[0].getRequestedFor() != null)
+                                    scRequestItem.setRequestedFor(scRequest[0].getRequestedFor());
                             }
-
-                            String incidentParent = Util.getIdByJson((JSONObject) snScRequestItemJson, "parent", App.Value());
-                            if (Util.hasData(incidentParent)) {
-                                Incident parent = incidentService.findByIntegrationId(incidentParent);
-                                if (Util.hasData(parent))
-                                    scRequestItem.setIncidentParent(incidentParent);
-
+                            incidentParent[0] = Util.getIdByJson((JSONObject) snScRequestItemJson, "parent", App.Value());
+                            if (Util.hasData(incidentParent[0])) {
+                                parent[0] = incidentService.findByIntegrationId(incidentParent[0]);
+                                if (Util.hasData(parent[0]))
+                                    scRequestItem.setIncidentParent(incidentParent[0]);
                             }
-
-
-                            ScRequestItem _scRequestItem = scRequestItemService.save(scRequestItem);
-                            scRequestItems.add(_scRequestItem);
-                            Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
+                            _scRequestItem[0] = scRequestItemService.save(scRequestItem);
+                            scRequestItems.add(_scRequestItem[0]);
+                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {
                         //     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
                 status.setUri(EndPointSN.Location());
                 status.setUserAPI(App.SNUser());
                 status.setPasswordAPI(App.SNPassword());
@@ -800,7 +545,6 @@ public class ScRequestItemController {
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
             //System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
@@ -880,9 +624,7 @@ public class ScRequestItemController {
             return null;
     }
 
-
     public SysUser getSysUserByIntegrationId(String integrationId) {
-        //String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
         if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
@@ -890,7 +632,6 @@ public class ScRequestItemController {
     }
 
     public SysGroup getSysGroupByIntegrationId(String integrationId) {
-        //String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
         if (Util.hasData(integrationId)) {
             return sysGroupService.findByIntegrationId(integrationId);
         } else
