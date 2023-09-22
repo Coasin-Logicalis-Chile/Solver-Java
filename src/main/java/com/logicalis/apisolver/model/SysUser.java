@@ -27,7 +27,6 @@ public class SysUser implements Serializable {
     //   @Column(nullable = false)
     private String name;
 
-
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "sys_user_rol", joinColumns = @JoinColumn(name = "id_user"), inverseJoinColumns = @JoinColumn(name = "id_rol"), uniqueConstraints = {
             @UniqueConstraint(columnNames = {"id_user", "id_rol"})})
