@@ -227,7 +227,6 @@ public class ScRequestController {
             Location location = locationService.findByIntegrationId(scRequestRequest.getLocation());
             scRequest.setLocation(location);
 
-
             SysGroup sysGroup = sysGroupService.findByIntegrationId(scRequestRequest.getAssignment_group());
             scRequest.setAssignmentGroup(sysGroup);
 
@@ -271,7 +270,7 @@ public class ScRequestController {
         final ScRequest[] exists = new ScRequest[1];
         final String[] tagAction = new String[1];
         APIExecutionStatus status = new APIExecutionStatus();
-        ScRequest scRequest = new ScRequest();
+        final ScRequest[] scRequest = {new ScRequest()};
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
@@ -279,72 +278,74 @@ public class ScRequestController {
                 result = rest.responseByEndPoint(EndPointSN.ScRequestByCompany().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ScRequestByCompany().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnScRequestJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnScRequestJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListSnScRequestJson.stream().forEach(snScRequestJson -> {
                     try {
                         scRequestSolver[0] = mapper.readValue(snScRequestJson.toString(), ScRequestSolver.class);
-                        scRequest.setSysUpdatedOn(scRequestSolver[0].getSys_updated_on());
-                        scRequest.setNumber(scRequestSolver[0].getNumber());
-                        scRequest.setState(scRequestSolver[0].getState());
-                        scRequest.setSysCreatedBy(scRequestSolver[0].getSys_created_by());
-                        scRequest.setEscalation(scRequestSolver[0].getEscalation());
-                        scRequest.setExpectedStart(scRequestSolver[0].getExpected_start());
-                        scRequest.setStage(scRequestSolver[0].getStage());
-                        scRequest.setActive(scRequestSolver[0].getActive());
-                        scRequest.setShortDescription(scRequestSolver[0].getShort_description());
-                        scRequest.setCorrelationDisplay(scRequestSolver[0].getCorrelation_display());
-                        scRequest.setCorrelationId(scRequestSolver[0].getCorrelation_id());
-                        scRequest.setSysUpdatedBy(scRequestSolver[0].getSys_updated_by());
-                        scRequest.setSysCreatedOn(scRequestSolver[0].getSys_created_on());
-                        scRequest.setOpenedAt(scRequestSolver[0].getOpened_at());
-                        scRequest.setDescription(scRequestSolver[0].getDescription());
-                        scRequest.setIntegrationId(scRequestSolver[0].getSys_id());
-                        scRequest.setDueDate(scRequestSolver[0].getDue_date());
-                        scRequest.setContactType(scRequestSolver[0].getContact_type());
-                        scRequest.setApproval(scRequestSolver[0].getApproval());
+                        scRequest[0] = new ScRequest();
+                        scRequest[0].setSysUpdatedOn(scRequestSolver[0].getSys_updated_on());
+                        scRequest[0].setNumber(scRequestSolver[0].getNumber());
+                        scRequest[0].setState(scRequestSolver[0].getState());
+                        scRequest[0].setSysCreatedBy(scRequestSolver[0].getSys_created_by());
+                        scRequest[0].setEscalation(scRequestSolver[0].getEscalation());
+                        scRequest[0].setExpectedStart(scRequestSolver[0].getExpected_start());
+                        scRequest[0].setStage(scRequestSolver[0].getStage());
+                        scRequest[0].setActive(scRequestSolver[0].getActive());
+                        scRequest[0].setShortDescription(scRequestSolver[0].getShort_description());
+                        scRequest[0].setCorrelationDisplay(scRequestSolver[0].getCorrelation_display());
+                        scRequest[0].setCorrelationId(scRequestSolver[0].getCorrelation_id());
+                        scRequest[0].setSysUpdatedBy(scRequestSolver[0].getSys_updated_by());
+                        scRequest[0].setSysCreatedOn(scRequestSolver[0].getSys_created_on());
+                        scRequest[0].setOpenedAt(scRequestSolver[0].getOpened_at());
+                        scRequest[0].setDescription(scRequestSolver[0].getDescription());
+                        scRequest[0].setIntegrationId(scRequestSolver[0].getSys_id());
+                        scRequest[0].setDueDate(scRequestSolver[0].getDue_date());
+                        scRequest[0].setContactType(scRequestSolver[0].getContact_type());
+                        scRequest[0].setApproval(scRequestSolver[0].getApproval());
 
                         domain[0] = getDomainByIntegrationId((JSONObject) snScRequestJson, SnTable.Domain.get(), App.Value());
                         if (domain[0] != null)
-                            scRequest.setDomain(domain[0]);
+                            scRequest[0].setDomain(domain[0]);
 
                         company[0] = getCompanyByIntegrationId((JSONObject) snScRequestJson, SnTable.Company.get(), App.Value());
                         if (company[0] != null)
-                            scRequest.setCompany(company[0]);
+                            scRequest[0].setCompany(company[0]);
 
                         requestedFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "requested_for", App.Value());
                         if (requestedFor[0] != null)
-                            scRequest.setRequestedFor(requestedFor[0]);
+                            scRequest[0].setRequestedFor(requestedFor[0]);
 
                         openedBy[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "opened_by", App.Value());
                         if (openedBy[0] != null)
-                            scRequest.setOpenedBy(openedBy[0]);
+                            scRequest[0].setOpenedBy(openedBy[0]);
 
                         assignedTo[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "assigned_to", App.Value());
                         if (assignedTo[0] != null)
-                            scRequest.setAssignedTo(assignedTo[0]);
+                            scRequest[0].setAssignedTo(assignedTo[0]);
 
                         taskFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "task_for", App.Value());
                         if (taskFor[0] != null)
-                            scRequest.setTaskFor(taskFor[0]);
+                            scRequest[0].setTaskFor(taskFor[0]);
 
                         location[0] = getLocationByIntegrationId((JSONObject) snScRequestJson, "location", App.Value());
                         if (location[0] != null)
-                            scRequest.setLocation(location[0]);
+                            scRequest[0].setLocation(location[0]);
 
                         sysGroup[0] = getSysGroupByIntegrationId((JSONObject) snScRequestJson, "assignment_group", App.Value());
                         if (sysGroup[0] != null)
-                            scRequest.setAssignmentGroup(sysGroup[0]);
+                            scRequest[0].setAssignmentGroup(sysGroup[0]);
 
-                        exists[0] = scRequestService.findByIntegrationId(scRequest.getIntegrationId());
+                        exists[0] = scRequestService.findByIntegrationId(scRequest[0].getIntegrationId());
                         tagAction[0] = App.CreateConsole();
                         if (exists[0] != null) {
-                            scRequest.setId(exists[0].getId());
+                            scRequest[0].setId(exists[0].getId());
                             tagAction[0] = App.UpdateConsole();
                         }
 
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scRequest)), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
-                        scRequests.add(scRequestService.save(scRequest));
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scRequest[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
+                        scRequests.add(scRequestService.save(scRequest[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -387,7 +388,7 @@ public class ScRequestController {
         final Company[] company = new Company[1];
         final SysUser[] requestedFor = new SysUser[1];
         APIExecutionStatus status = new APIExecutionStatus();
-        ScRequest scRequest = new ScRequest();
+        final ScRequest[] scRequest = {new ScRequest()};
         final String[] tagAction = new String[1];
         final ScRequestSolver[] scRequestSolver = new ScRequestSolver[1];
         final SysUser[] openedBy = new SysUser[1];
@@ -403,66 +404,68 @@ public class ScRequestController {
                 result = rest.responseByEndPoint(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnScRequestJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnScRequestJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListSnScRequestJson.stream().forEach(snScRequestJson -> {
                     try {
                         scRequestSolver[0] = mapper.readValue(snScRequestJson.toString(), ScRequestSolver.class);
-                        exists[0] = scRequestService.findByIntegrationId(scRequest.getIntegrationId());
+                        scRequest[0] = new ScRequest();
+                        exists[0] = scRequestService.findByIntegrationId(scRequest[0].getIntegrationId());
                         tagAction[0] = App.CreateConsole();
                         if (exists[0] != null) {
-                            scRequest.setId(exists[0].getId());
+                            scRequest[0].setId(exists[0].getId());
                         } else {
-                            scRequest.setSysUpdatedOn(scRequestSolver[0].getSys_updated_on());
-                            scRequest.setNumber(scRequestSolver[0].getNumber());
-                            scRequest.setState(scRequestSolver[0].getState());
-                            scRequest.setSysCreatedBy(scRequestSolver[0].getSys_created_by());
-                            scRequest.setEscalation(scRequestSolver[0].getEscalation());
-                            scRequest.setExpectedStart(scRequestSolver[0].getExpected_start());
-                            scRequest.setStage(scRequestSolver[0].getStage());
-                            scRequest.setActive(scRequestSolver[0].getActive());
-                            scRequest.setShortDescription(scRequestSolver[0].getShort_description());
-                            scRequest.setCorrelationDisplay(scRequestSolver[0].getCorrelation_display());
-                            scRequest.setCorrelationId(scRequestSolver[0].getCorrelation_id());
-                            scRequest.setSysUpdatedBy(scRequestSolver[0].getSys_updated_by());
-                            scRequest.setSysCreatedOn(scRequestSolver[0].getSys_created_on());
-                            scRequest.setOpenedAt(scRequestSolver[0].getOpened_at());
-                            scRequest.setDescription(scRequestSolver[0].getDescription());
-                            scRequest.setIntegrationId(scRequestSolver[0].getSys_id());
-                            scRequest.setDueDate(scRequestSolver[0].getDue_date());
-                            scRequest.setContactType(scRequestSolver[0].getContact_type());
-                            scRequest.setApproval(scRequestSolver[0].getApproval());
+                            scRequest[0].setSysUpdatedOn(scRequestSolver[0].getSys_updated_on());
+                            scRequest[0].setNumber(scRequestSolver[0].getNumber());
+                            scRequest[0].setState(scRequestSolver[0].getState());
+                            scRequest[0].setSysCreatedBy(scRequestSolver[0].getSys_created_by());
+                            scRequest[0].setEscalation(scRequestSolver[0].getEscalation());
+                            scRequest[0].setExpectedStart(scRequestSolver[0].getExpected_start());
+                            scRequest[0].setStage(scRequestSolver[0].getStage());
+                            scRequest[0].setActive(scRequestSolver[0].getActive());
+                            scRequest[0].setShortDescription(scRequestSolver[0].getShort_description());
+                            scRequest[0].setCorrelationDisplay(scRequestSolver[0].getCorrelation_display());
+                            scRequest[0].setCorrelationId(scRequestSolver[0].getCorrelation_id());
+                            scRequest[0].setSysUpdatedBy(scRequestSolver[0].getSys_updated_by());
+                            scRequest[0].setSysCreatedOn(scRequestSolver[0].getSys_created_on());
+                            scRequest[0].setOpenedAt(scRequestSolver[0].getOpened_at());
+                            scRequest[0].setDescription(scRequestSolver[0].getDescription());
+                            scRequest[0].setIntegrationId(scRequestSolver[0].getSys_id());
+                            scRequest[0].setDueDate(scRequestSolver[0].getDue_date());
+                            scRequest[0].setContactType(scRequestSolver[0].getContact_type());
+                            scRequest[0].setApproval(scRequestSolver[0].getApproval());
 
                             domain[0] = getDomainByIntegrationId((JSONObject) snScRequestJson, SnTable.Domain.get(), App.Value());
                             if (domain[0] != null)
-                                scRequest.setDomain(domain[0]);
+                                scRequest[0].setDomain(domain[0]);
                             company[0] = getCompanyByIntegrationId((JSONObject) snScRequestJson, SnTable.Company.get(), App.Value());
                             if (company[0] != null)
-                                scRequest.setCompany(company[0]);
+                                scRequest[0].setCompany(company[0]);
                             requestedFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "requested_for", App.Value());
                             if (requestedFor[0] != null)
-                                scRequest.setRequestedFor(requestedFor[0]);
+                                scRequest[0].setRequestedFor(requestedFor[0]);
                             openedBy[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "opened_by", App.Value());
                             if (openedBy[0] != null)
-                                scRequest.setOpenedBy(openedBy[0]);
+                                scRequest[0].setOpenedBy(openedBy[0]);
                             assignedTo[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "assigned_to", App.Value());
                             if (assignedTo[0] != null)
-                                scRequest.setAssignedTo(assignedTo[0]);
+                                scRequest[0].setAssignedTo(assignedTo[0]);
                             taskFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "task_for", App.Value());
                             if (taskFor[0] != null)
-                                scRequest.setTaskFor(taskFor[0]);
+                                scRequest[0].setTaskFor(taskFor[0]);
 
                             location[0] = getLocationByIntegrationId((JSONObject) snScRequestJson, "location", App.Value());
                             if (location[0] != null)
-                                scRequest.setLocation(location[0]);
+                                scRequest[0].setLocation(location[0]);
 
                             sysGroup[0] = getSysGroupByIntegrationId((JSONObject) snScRequestJson, "assignment_group", App.Value());
                             if (sysGroup[0] != null)
-                                scRequest.setAssignmentGroup(sysGroup[0]);
+                                scRequest[0].setAssignmentGroup(sysGroup[0]);
 
-                            _scRequest[0] = scRequestService.save(scRequest);
+                            _scRequest[0] = scRequestService.save(scRequest[0]);
                             scRequests.add(_scRequest[0]);
-                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scRequest)), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
+                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scRequest[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {

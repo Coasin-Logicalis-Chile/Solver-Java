@@ -193,7 +193,7 @@ public class ScTaskController {
         JSONParser parser = new JSONParser();
         JSONObject resultJson = new JSONObject();
         JSONArray ListScTaskJson = new JSONArray();
-        ScTask scTask = new ScTask();
+        final ScTask[] scTask = {new ScTask()};
         final Domain[] domain = new Domain[1];
         final Company[] company = new Company[1];
         final SysUser[] closedBy = new SysUser[1];
@@ -219,129 +219,131 @@ public class ScTaskController {
                 result = rest.responseByEndPoint(EndPointSN.ScTaskByCompany().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ScTaskByCompany().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListScTaskJson.clear();
                 if (resultJson.get("result") != null)
                     ListScTaskJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListScTaskJson.stream().forEach(scTaskJson -> {
                     try {
                         scTaskSolver[0] = mapper.readValue(scTaskJson.toString(), ScTaskRequest.class);
-                        scTask.setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
-                        scTask.setActive(scTaskSolver[0].getActive());
-                        scTask.setActivityDue(Util.isNull(scTaskSolver[0].getActivity_due()));
-                        scTask.setAdditionalAssigneeList(Util.isNull(scTaskSolver[0].getAdditional_assignee_list()));
-                        scTask.setApproval(Util.isNull(scTaskSolver[0].getApproval()));
-                        scTask.setApprovalHistory(Util.isNull(scTaskSolver[0].getApproval_history()));
-                        scTask.setApprovalSet(Util.isNull(scTaskSolver[0].getApproval_set()));
-                        scTask.setBusinessDuration(Util.isNull(scTaskSolver[0].getBusiness_duration()));
-                        scTask.setCalendarDuration(Util.isNull(scTaskSolver[0].getCalendar_duration()));
-                        scTask.setCalendarStc(Util.isNull(scTaskSolver[0].getCalendar_stc()));
-                        scTask.setCloseNotes(Util.isNull(scTaskSolver[0].getClose_notes()));
-                        scTask.setClosedAt(Util.isNull(scTaskSolver[0].getClosed_at()));
-                        scTask.setComments(Util.isNull(scTaskSolver[0].getComments()));
-                        scTask.setCommentsAndWorkNotes(Util.isNull(scTaskSolver[0].getComments_and_work_notes()));
-                        scTask.setContactType(Util.isNull(scTaskSolver[0].getContact_type()));
-                        scTask.setCorrelationDisplay(Util.isNull(scTaskSolver[0].getCorrelation_display()));
-                        scTask.setCorrelationId(Util.isNull(scTaskSolver[0].getCorrelation_id()));
-                        scTask.setDeliveryPlan(Util.isNull(scTaskSolver[0].getDelivery_plan()));
-                        scTask.setDeliveryTask(Util.isNull(scTaskSolver[0].getDelivery_task()));
-                        scTask.setDescription(Util.isNull(scTaskSolver[0].getDescription()));
-                        scTask.setDueDate(Util.isNull(scTaskSolver[0].getDue_date()));
-                        scTask.setEscalation(Util.isNull(scTaskSolver[0].getEscalation()));
-                        scTask.setExpectedStart(Util.isNull(scTaskSolver[0].getExpected_start()));
-                        scTask.setFollowUp(Util.isNull(scTaskSolver[0].getFollow_up()));
-                        scTask.setGroupList(Util.isNull(scTaskSolver[0].getGroup_list()));
-                        scTask.setImpact(Util.isNull(scTaskSolver[0].getImpact()));
-                        scTask.setKnowledge(Util.isNull(scTaskSolver[0].getKnowledge()));
-                        scTask.setMadeSla(Util.isNull(scTaskSolver[0].getMade_sla()));
-                        scTask.setNeedsAttention(Util.isNull(scTaskSolver[0].getNeeds_attention()));
-                        scTask.setNumber(Util.isNull(scTaskSolver[0].getNumber()));
-                        scTask.setOpenedAt(Util.isNull(scTaskSolver[0].getOpened_at()));
-                        scTask.setPriority(Util.isNull(scTaskSolver[0].getPriority()));
-                        scTask.setReassignmentCount(Util.isNull(scTaskSolver[0].getReassignment_count()));
-                        scTask.setRouteReason(Util.isNull(scTaskSolver[0].getRoute_reason()));
-                        scTask.setServiceOffering(Util.isNull(scTaskSolver[0].getService_offering()));
-                        scTask.setShortDescription(Util.isNull(scTaskSolver[0].getShort_description()));
-                        scTask.setSkills(Util.isNull(scTaskSolver[0].getSkills()));
-                        scTask.setSlaDue(Util.isNull(scTaskSolver[0].getSla_due()));
-                        scTask.setState(Util.isNull(scTaskSolver[0].getState()));
-                        scTask.setSysClassName(Util.isNull(scTaskSolver[0].getSys_class_name()));
-                        scTask.setSysCreatedBy(Util.isNull(scTaskSolver[0].getSys_created_by()));
-                        scTask.setSysCreatedOn(Util.isNull(scTaskSolver[0].getSys_created_on()));
-                        scTask.setCreatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_created_on())));
-                        scTask.setIntegrationId(Util.isNull(scTaskSolver[0].getSys_id()));
-                        scTask.setSysModCount(Util.isNull(scTaskSolver[0].getSys_mod_count()));
-                        scTask.setSysUpdatedBy(Util.isNull(scTaskSolver[0].getSys_updated_by()));
-                        scTask.setSysUpdatedOn(Util.isNull(scTaskSolver[0].getSys_updated_on()));
-                        scTask.setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_updated_on())));
-                        scTask.setTaskEffectiveNumber(Util.isNull(scTaskSolver[0].getTask_effective_number()));
-                        scTask.setTimeWorked(Util.isNull(scTaskSolver[0].getTime_worked()));
-                        scTask.setUniversalRequest(Util.isNull(scTaskSolver[0].getUniversal_request()));
-                        scTask.setUponApproval(Util.isNull(scTaskSolver[0].getUpon_approval()));
-                        scTask.setUponReject(Util.isNull(scTaskSolver[0].getUpon_reject()));
-                        scTask.setUrgency(Util.isNull(scTaskSolver[0].getUrgency()));
-                        scTask.setUserInput(Util.isNull(scTaskSolver[0].getUser_input()));
-                        scTask.setWorkEnd(Util.isNull(scTaskSolver[0].getWork_end()));
-                        scTask.setWorkStart(Util.isNull(scTaskSolver[0].getWork_start()));
-                        scTask.setScaling(scTaskSolver[0].getU_pending_other_group());
+                        scTask[0] = new ScTask();
+                        scTask[0].setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
+                        scTask[0].setActive(scTaskSolver[0].getActive());
+                        scTask[0].setActivityDue(Util.isNull(scTaskSolver[0].getActivity_due()));
+                        scTask[0].setAdditionalAssigneeList(Util.isNull(scTaskSolver[0].getAdditional_assignee_list()));
+                        scTask[0].setApproval(Util.isNull(scTaskSolver[0].getApproval()));
+                        scTask[0].setApprovalHistory(Util.isNull(scTaskSolver[0].getApproval_history()));
+                        scTask[0].setApprovalSet(Util.isNull(scTaskSolver[0].getApproval_set()));
+                        scTask[0].setBusinessDuration(Util.isNull(scTaskSolver[0].getBusiness_duration()));
+                        scTask[0].setCalendarDuration(Util.isNull(scTaskSolver[0].getCalendar_duration()));
+                        scTask[0].setCalendarStc(Util.isNull(scTaskSolver[0].getCalendar_stc()));
+                        scTask[0].setCloseNotes(Util.isNull(scTaskSolver[0].getClose_notes()));
+                        scTask[0].setClosedAt(Util.isNull(scTaskSolver[0].getClosed_at()));
+                        scTask[0].setComments(Util.isNull(scTaskSolver[0].getComments()));
+                        scTask[0].setCommentsAndWorkNotes(Util.isNull(scTaskSolver[0].getComments_and_work_notes()));
+                        scTask[0].setContactType(Util.isNull(scTaskSolver[0].getContact_type()));
+                        scTask[0].setCorrelationDisplay(Util.isNull(scTaskSolver[0].getCorrelation_display()));
+                        scTask[0].setCorrelationId(Util.isNull(scTaskSolver[0].getCorrelation_id()));
+                        scTask[0].setDeliveryPlan(Util.isNull(scTaskSolver[0].getDelivery_plan()));
+                        scTask[0].setDeliveryTask(Util.isNull(scTaskSolver[0].getDelivery_task()));
+                        scTask[0].setDescription(Util.isNull(scTaskSolver[0].getDescription()));
+                        scTask[0].setDueDate(Util.isNull(scTaskSolver[0].getDue_date()));
+                        scTask[0].setEscalation(Util.isNull(scTaskSolver[0].getEscalation()));
+                        scTask[0].setExpectedStart(Util.isNull(scTaskSolver[0].getExpected_start()));
+                        scTask[0].setFollowUp(Util.isNull(scTaskSolver[0].getFollow_up()));
+                        scTask[0].setGroupList(Util.isNull(scTaskSolver[0].getGroup_list()));
+                        scTask[0].setImpact(Util.isNull(scTaskSolver[0].getImpact()));
+                        scTask[0].setKnowledge(Util.isNull(scTaskSolver[0].getKnowledge()));
+                        scTask[0].setMadeSla(Util.isNull(scTaskSolver[0].getMade_sla()));
+                        scTask[0].setNeedsAttention(Util.isNull(scTaskSolver[0].getNeeds_attention()));
+                        scTask[0].setNumber(Util.isNull(scTaskSolver[0].getNumber()));
+                        scTask[0].setOpenedAt(Util.isNull(scTaskSolver[0].getOpened_at()));
+                        scTask[0].setPriority(Util.isNull(scTaskSolver[0].getPriority()));
+                        scTask[0].setReassignmentCount(Util.isNull(scTaskSolver[0].getReassignment_count()));
+                        scTask[0].setRouteReason(Util.isNull(scTaskSolver[0].getRoute_reason()));
+                        scTask[0].setServiceOffering(Util.isNull(scTaskSolver[0].getService_offering()));
+                        scTask[0].setShortDescription(Util.isNull(scTaskSolver[0].getShort_description()));
+                        scTask[0].setSkills(Util.isNull(scTaskSolver[0].getSkills()));
+                        scTask[0].setSlaDue(Util.isNull(scTaskSolver[0].getSla_due()));
+                        scTask[0].setState(Util.isNull(scTaskSolver[0].getState()));
+                        scTask[0].setSysClassName(Util.isNull(scTaskSolver[0].getSys_class_name()));
+                        scTask[0].setSysCreatedBy(Util.isNull(scTaskSolver[0].getSys_created_by()));
+                        scTask[0].setSysCreatedOn(Util.isNull(scTaskSolver[0].getSys_created_on()));
+                        scTask[0].setCreatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_created_on())));
+                        scTask[0].setIntegrationId(Util.isNull(scTaskSolver[0].getSys_id()));
+                        scTask[0].setSysModCount(Util.isNull(scTaskSolver[0].getSys_mod_count()));
+                        scTask[0].setSysUpdatedBy(Util.isNull(scTaskSolver[0].getSys_updated_by()));
+                        scTask[0].setSysUpdatedOn(Util.isNull(scTaskSolver[0].getSys_updated_on()));
+                        scTask[0].setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_updated_on())));
+                        scTask[0].setTaskEffectiveNumber(Util.isNull(scTaskSolver[0].getTask_effective_number()));
+                        scTask[0].setTimeWorked(Util.isNull(scTaskSolver[0].getTime_worked()));
+                        scTask[0].setUniversalRequest(Util.isNull(scTaskSolver[0].getUniversal_request()));
+                        scTask[0].setUponApproval(Util.isNull(scTaskSolver[0].getUpon_approval()));
+                        scTask[0].setUponReject(Util.isNull(scTaskSolver[0].getUpon_reject()));
+                        scTask[0].setUrgency(Util.isNull(scTaskSolver[0].getUrgency()));
+                        scTask[0].setUserInput(Util.isNull(scTaskSolver[0].getUser_input()));
+                        scTask[0].setWorkEnd(Util.isNull(scTaskSolver[0].getWork_end()));
+                        scTask[0].setWorkStart(Util.isNull(scTaskSolver[0].getWork_start()));
+                        scTask[0].setScaling(scTaskSolver[0].getU_pending_other_group());
 
                         domain[0] = getDomainByIntegrationId((JSONObject) scTaskJson, SnTable.Domain.get(), App.Value());
                         if (domain[0] != null)
-                            scTask.setDomain(domain[0]);
+                            scTask[0].setDomain(domain[0]);
                         company[0] = getCompanyByIntegrationId((JSONObject) scTaskJson, SnTable.Company.get(), App.Value());
                         if (company[0] != null)
-                            scTask.setCompany(company[0]);
+                            scTask[0].setCompany(company[0]);
                         closedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "closed_by", App.Value());
                         if (closedBy[0] != null)
-                            scTask.setClosedBy(closedBy[0]);
+                            scTask[0].setClosedBy(closedBy[0]);
                         requestedfor[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "requested_for", App.Value());
                         if (requestedfor[0] != null)
-                            scTask.setRequestedFor(requestedfor[0]);
+                            scTask[0].setRequestedFor(requestedfor[0]);
                         scalingAssignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_scaling_assigned_to", App.Value());
                         if (scalingAssignedTo[0] != null)
-                            scTask.setScalingAssignedTo(scalingAssignedTo[0]);
+                            scTask[0].setScalingAssignedTo(scalingAssignedTo[0]);
                         location[0] = getLocationByIntegrationId((JSONObject) scTaskJson, "location", App.Value());
                         if (location[0] != null)
-                            scTask.setLocation(location[0]);
+                            scTask[0].setLocation(location[0]);
                         assignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_solver_assigned_to", App.Value());
                         if (assignedTo[0] != null)
-                            scTask.setAssignedTo(assignedTo[0]);
+                            scTask[0].setAssignedTo(assignedTo[0]);
                         openedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "opened_by", App.Value());
                         if (openedBy[0] != null)
-                            scTask.setOpenedBy(openedBy[0]);
+                            scTask[0].setOpenedBy(openedBy[0]);
 
                         businessService[0] = getCiServiceByIntegrationId((JSONObject) scTaskJson, "business_service", App.Value());
                         if (businessService[0] != null)
-                            scTask.setBusinessService(businessService[0]);
+                            scTask[0].setBusinessService(businessService[0]);
 
                         configurationItem[0] = getConfigurationItemByIntegrationId((JSONObject) scTaskJson, "cmdb_ci", App.Value());
                         if (configurationItem[0] != null)
-                            scTask.setConfigurationItem(configurationItem[0]);
+                            scTask[0].setConfigurationItem(configurationItem[0]);
                         sysGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "assignment_group", App.Value());
                         if (sysGroup[0] != null)
-                            scTask.setAssignmentGroup(sysGroup[0]);
+                            scTask[0].setAssignmentGroup(sysGroup[0]);
                         scalingAssignmentGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "u_scaling_group", App.Value());
                         if (scalingAssignmentGroup[0] != null)
-                            scTask.setScalingAssignmentGroup(scalingAssignmentGroup[0]);
+                            scTask[0].setScalingAssignmentGroup(scalingAssignmentGroup[0]);
 
                         scRequest[0] = getScRequestByIntegrationId((JSONObject) scTaskJson, "request", App.Value());
                         if (scRequest[0] != null)
-                            scTask.setScRequest(scRequest[0]);
+                            scTask[0].setScRequest(scRequest[0]);
 
                         scRequestItem[0] = getScRequestItemByIntegrationId((JSONObject) scTaskJson, "request_item", App.Value());
                         if (scRequestItem[0] != null) {
-                            scTask.setScRequestItem(scRequestItem[0]);
+                            scTask[0].setScRequestItem(scRequestItem[0]);
                             if (scRequestItem[0].getRequestedFor() != null)
-                                scTask.setRequestedFor(scRequestItem[0].getRequestedFor());
+                                scTask[0].setRequestedFor(scRequestItem[0].getRequestedFor());
                             if (scRequestItem[0].getTaskFor() != null)
-                                scTask.setTaskFor(scRequestItem[0].getTaskFor());
+                                scTask[0].setTaskFor(scRequestItem[0].getTaskFor());
                         }
-                        exists[0] = scTaskService.findByIntegrationId(scTask.getIntegrationId());
+                        exists[0] = scTaskService.findByIntegrationId(scTask[0].getIntegrationId());
                         tagAction[0] = App.CreateConsole();
                         if (exists[0] != null) {
-                            scTask.setId(exists[0].getId());
+                            scTask[0].setId(exists[0].getId());
                             tagAction[0] = App.UpdateConsole();
                         }
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scTask)), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
-                        scTasks.add(scTaskService.save(scTask));
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scTask[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
+                        scTasks.add(scTaskService.save(scTask[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -381,7 +383,7 @@ public class ScTaskController {
         JSONArray ListScTaskJson = new JSONArray();
         final ScTaskRequest[] scTaskSolver = {new ScTaskRequest()};
         Gson gson = new Gson();
-        ScTask scTask = new ScTask();
+        final ScTask[] scTask = {new ScTask()};
         final Domain[] domain = new Domain[1];
         final Company[] company = new Company[1];
         final SysUser[] closedBy = new SysUser[1];
@@ -405,124 +407,126 @@ public class ScTaskController {
                 result= rest.responseByEndPoint(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListScTaskJson.clear();
                 if (resultJson.get("result") != null)
                     ListScTaskJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListScTaskJson.stream().forEach(scTaskJson -> {
                     try {
                         scTaskSolver[0] = gson.fromJson(scTaskJson.toString(), ScTaskRequest.class);
-                        scTask.setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
-                        scTask.setActive(scTaskSolver[0].getActive());
-                        scTask.setActivityDue(Util.isNull(scTaskSolver[0].getActivity_due()));
-                        scTask.setAdditionalAssigneeList(Util.isNull(scTaskSolver[0].getAdditional_assignee_list()));
-                        scTask.setApproval(Util.isNull(scTaskSolver[0].getApproval()));
-                        scTask.setApprovalHistory(Util.isNull(scTaskSolver[0].getApproval_history()));
-                        scTask.setApprovalSet(Util.isNull(scTaskSolver[0].getApproval_set()));
-                        scTask.setBusinessDuration(Util.isNull(scTaskSolver[0].getBusiness_duration()));
-                        scTask.setCalendarDuration(Util.isNull(scTaskSolver[0].getCalendar_duration()));
-                        scTask.setCalendarStc(Util.isNull(scTaskSolver[0].getCalendar_stc()));
-                        scTask.setCloseNotes(Util.isNull(scTaskSolver[0].getClose_notes()));
-                        scTask.setClosedAt(Util.isNull(scTaskSolver[0].getClosed_at()));
-                        scTask.setComments(Util.isNull(scTaskSolver[0].getComments()));
-                        scTask.setCommentsAndWorkNotes(Util.isNull(scTaskSolver[0].getComments_and_work_notes()));
-                        scTask.setContactType(Util.isNull(scTaskSolver[0].getContact_type()));
-                        scTask.setCorrelationDisplay(Util.isNull(scTaskSolver[0].getCorrelation_display()));
-                        scTask.setCorrelationId(Util.isNull(scTaskSolver[0].getCorrelation_id()));
-                        scTask.setDeliveryPlan(Util.isNull(scTaskSolver[0].getDelivery_plan()));
-                        scTask.setDeliveryTask(Util.isNull(scTaskSolver[0].getDelivery_task()));
-                        scTask.setDescription(Util.isNull(scTaskSolver[0].getDescription()));
-                        scTask.setDueDate(Util.isNull(scTaskSolver[0].getDue_date()));
-                        scTask.setEscalation(Util.isNull(scTaskSolver[0].getEscalation()));
-                        scTask.setExpectedStart(Util.isNull(scTaskSolver[0].getExpected_start()));
-                        scTask.setFollowUp(Util.isNull(scTaskSolver[0].getFollow_up()));
-                        scTask.setGroupList(Util.isNull(scTaskSolver[0].getGroup_list()));
-                        scTask.setImpact(Util.isNull(scTaskSolver[0].getImpact()));
-                        scTask.setKnowledge(Util.isNull(scTaskSolver[0].getKnowledge()));
-                        scTask.setMadeSla(Util.isNull(scTaskSolver[0].getMade_sla()));
-                        scTask.setNeedsAttention(Util.isNull(scTaskSolver[0].getNeeds_attention()));
-                        scTask.setNumber(Util.isNull(scTaskSolver[0].getNumber()));
-                        scTask.setOpenedAt(Util.isNull(scTaskSolver[0].getOpened_at()));
-                        scTask.setPriority(Util.isNull(scTaskSolver[0].getPriority()));
-                        scTask.setReassignmentCount(Util.isNull(scTaskSolver[0].getReassignment_count()));
-                        scTask.setRouteReason(Util.isNull(scTaskSolver[0].getRoute_reason()));
-                        scTask.setServiceOffering(Util.isNull(scTaskSolver[0].getService_offering()));
-                        scTask.setShortDescription(Util.isNull(scTaskSolver[0].getShort_description()));
-                        scTask.setSkills(Util.isNull(scTaskSolver[0].getSkills()));
-                        scTask.setSlaDue(Util.isNull(scTaskSolver[0].getSla_due()));
-                        scTask.setState(Util.isNull(scTaskSolver[0].getState()));
-                        scTask.setSysClassName(Util.isNull(scTaskSolver[0].getSys_class_name()));
-                        scTask.setSysCreatedBy(Util.isNull(scTaskSolver[0].getSys_created_by()));
-                        scTask.setSysCreatedOn(Util.isNull(scTaskSolver[0].getSys_created_on()));
+                        scTask[0] =  new ScTask();
+                        scTask[0].setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
+                        scTask[0].setActive(scTaskSolver[0].getActive());
+                        scTask[0].setActivityDue(Util.isNull(scTaskSolver[0].getActivity_due()));
+                        scTask[0].setAdditionalAssigneeList(Util.isNull(scTaskSolver[0].getAdditional_assignee_list()));
+                        scTask[0].setApproval(Util.isNull(scTaskSolver[0].getApproval()));
+                        scTask[0].setApprovalHistory(Util.isNull(scTaskSolver[0].getApproval_history()));
+                        scTask[0].setApprovalSet(Util.isNull(scTaskSolver[0].getApproval_set()));
+                        scTask[0].setBusinessDuration(Util.isNull(scTaskSolver[0].getBusiness_duration()));
+                        scTask[0].setCalendarDuration(Util.isNull(scTaskSolver[0].getCalendar_duration()));
+                        scTask[0].setCalendarStc(Util.isNull(scTaskSolver[0].getCalendar_stc()));
+                        scTask[0].setCloseNotes(Util.isNull(scTaskSolver[0].getClose_notes()));
+                        scTask[0].setClosedAt(Util.isNull(scTaskSolver[0].getClosed_at()));
+                        scTask[0].setComments(Util.isNull(scTaskSolver[0].getComments()));
+                        scTask[0].setCommentsAndWorkNotes(Util.isNull(scTaskSolver[0].getComments_and_work_notes()));
+                        scTask[0].setContactType(Util.isNull(scTaskSolver[0].getContact_type()));
+                        scTask[0].setCorrelationDisplay(Util.isNull(scTaskSolver[0].getCorrelation_display()));
+                        scTask[0].setCorrelationId(Util.isNull(scTaskSolver[0].getCorrelation_id()));
+                        scTask[0].setDeliveryPlan(Util.isNull(scTaskSolver[0].getDelivery_plan()));
+                        scTask[0].setDeliveryTask(Util.isNull(scTaskSolver[0].getDelivery_task()));
+                        scTask[0].setDescription(Util.isNull(scTaskSolver[0].getDescription()));
+                        scTask[0].setDueDate(Util.isNull(scTaskSolver[0].getDue_date()));
+                        scTask[0].setEscalation(Util.isNull(scTaskSolver[0].getEscalation()));
+                        scTask[0].setExpectedStart(Util.isNull(scTaskSolver[0].getExpected_start()));
+                        scTask[0].setFollowUp(Util.isNull(scTaskSolver[0].getFollow_up()));
+                        scTask[0].setGroupList(Util.isNull(scTaskSolver[0].getGroup_list()));
+                        scTask[0].setImpact(Util.isNull(scTaskSolver[0].getImpact()));
+                        scTask[0].setKnowledge(Util.isNull(scTaskSolver[0].getKnowledge()));
+                        scTask[0].setMadeSla(Util.isNull(scTaskSolver[0].getMade_sla()));
+                        scTask[0].setNeedsAttention(Util.isNull(scTaskSolver[0].getNeeds_attention()));
+                        scTask[0].setNumber(Util.isNull(scTaskSolver[0].getNumber()));
+                        scTask[0].setOpenedAt(Util.isNull(scTaskSolver[0].getOpened_at()));
+                        scTask[0].setPriority(Util.isNull(scTaskSolver[0].getPriority()));
+                        scTask[0].setReassignmentCount(Util.isNull(scTaskSolver[0].getReassignment_count()));
+                        scTask[0].setRouteReason(Util.isNull(scTaskSolver[0].getRoute_reason()));
+                        scTask[0].setServiceOffering(Util.isNull(scTaskSolver[0].getService_offering()));
+                        scTask[0].setShortDescription(Util.isNull(scTaskSolver[0].getShort_description()));
+                        scTask[0].setSkills(Util.isNull(scTaskSolver[0].getSkills()));
+                        scTask[0].setSlaDue(Util.isNull(scTaskSolver[0].getSla_due()));
+                        scTask[0].setState(Util.isNull(scTaskSolver[0].getState()));
+                        scTask[0].setSysClassName(Util.isNull(scTaskSolver[0].getSys_class_name()));
+                        scTask[0].setSysCreatedBy(Util.isNull(scTaskSolver[0].getSys_created_by()));
+                        scTask[0].setSysCreatedOn(Util.isNull(scTaskSolver[0].getSys_created_on()));
                         if (!Util.isNull(scTaskSolver[0].getSys_created_on()).equals(""))
-                            scTask.setCreatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_created_on())));
-                        scTask.setIntegrationId(Util.isNull(scTaskSolver[0].getSys_id()));
-                        scTask.setSysModCount(Util.isNull(scTaskSolver[0].getSys_mod_count()));
-                        scTask.setSysUpdatedBy(Util.isNull(scTaskSolver[0].getSys_updated_by()));
-                        scTask.setSysUpdatedOn(Util.isNull(scTaskSolver[0].getSys_updated_on()));
+                            scTask[0].setCreatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_created_on())));
+                        scTask[0].setIntegrationId(Util.isNull(scTaskSolver[0].getSys_id()));
+                        scTask[0].setSysModCount(Util.isNull(scTaskSolver[0].getSys_mod_count()));
+                        scTask[0].setSysUpdatedBy(Util.isNull(scTaskSolver[0].getSys_updated_by()));
+                        scTask[0].setSysUpdatedOn(Util.isNull(scTaskSolver[0].getSys_updated_on()));
                         if (!Util.isNull(scTaskSolver[0].getClosed_at()).equals(""))
-                            scTask.setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getClosed_at())));
-                        scTask.setTaskEffectiveNumber(Util.isNull(scTaskSolver[0].getTask_effective_number()));
-                        scTask.setTimeWorked(Util.isNull(scTaskSolver[0].getTime_worked()));
-                        scTask.setUniversalRequest(Util.isNull(scTaskSolver[0].getUniversal_request()));
-                        scTask.setUponApproval(Util.isNull(scTaskSolver[0].getUpon_approval()));
-                        scTask.setUponReject(Util.isNull(scTaskSolver[0].getUpon_reject()));
-                        scTask.setUrgency(Util.isNull(scTaskSolver[0].getUrgency()));
-                        scTask.setUserInput(Util.isNull(scTaskSolver[0].getUser_input()));
-                        scTask.setWorkEnd(Util.isNull(scTaskSolver[0].getWork_end()));
-                        scTask.setWorkStart(Util.isNull(scTaskSolver[0].getWork_start()));
-                        scTask.setScaling(scTaskSolver[0].getU_pending_other_group());
+                            scTask[0].setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getClosed_at())));
+                        scTask[0].setTaskEffectiveNumber(Util.isNull(scTaskSolver[0].getTask_effective_number()));
+                        scTask[0].setTimeWorked(Util.isNull(scTaskSolver[0].getTime_worked()));
+                        scTask[0].setUniversalRequest(Util.isNull(scTaskSolver[0].getUniversal_request()));
+                        scTask[0].setUponApproval(Util.isNull(scTaskSolver[0].getUpon_approval()));
+                        scTask[0].setUponReject(Util.isNull(scTaskSolver[0].getUpon_reject()));
+                        scTask[0].setUrgency(Util.isNull(scTaskSolver[0].getUrgency()));
+                        scTask[0].setUserInput(Util.isNull(scTaskSolver[0].getUser_input()));
+                        scTask[0].setWorkEnd(Util.isNull(scTaskSolver[0].getWork_end()));
+                        scTask[0].setWorkStart(Util.isNull(scTaskSolver[0].getWork_start()));
+                        scTask[0].setScaling(scTaskSolver[0].getU_pending_other_group());
                         domain[0] = getDomainByIntegrationId((JSONObject) scTaskJson, SnTable.Domain.get(), App.Value());
                         if (domain[0] != null)
-                            scTask.setDomain(domain[0]);
+                            scTask[0].setDomain(domain[0]);
                         company[0] = getCompanyByIntegrationId((JSONObject) scTaskJson, SnTable.Company.get(), App.Value());
                         if (company[0] != null)
-                            scTask.setCompany(company[0]);
+                            scTask[0].setCompany(company[0]);
                         closedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "closed_by", App.Value());
                         if (closedBy[0] != null)
-                            scTask.setClosedBy(closedBy[0]);
+                            scTask[0].setClosedBy(closedBy[0]);
                         scalingAssignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_scaling_assigned_to", App.Value());
                         if (scalingAssignedTo[0] != null)
-                            scTask.setScalingAssignedTo(scalingAssignedTo[0]);
+                            scTask[0].setScalingAssignedTo(scalingAssignedTo[0]);
                         location[0] = getLocationByIntegrationId((JSONObject) scTaskJson, "location", App.Value());
                         if (location[0] != null)
-                            scTask.setLocation(location[0]);
+                            scTask[0].setLocation(location[0]);
                         assignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_solver_assigned_to", App.Value());
                         if (assignedTo[0] != null)
-                            scTask.setAssignedTo(assignedTo[0]);
+                            scTask[0].setAssignedTo(assignedTo[0]);
                         openedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "opened_by", App.Value());
                         if (openedBy[0] != null)
-                            scTask.setOpenedBy(openedBy[0]);
+                            scTask[0].setOpenedBy(openedBy[0]);
                         businessService[0] = getCiServiceByIntegrationId((JSONObject) scTaskJson, "business_service", App.Value());
                         if (businessService[0] != null)
-                            scTask.setBusinessService(businessService[0]);
+                            scTask[0].setBusinessService(businessService[0]);
                         configurationItem[0] = getConfigurationItemByIntegrationId((JSONObject) scTaskJson, "cmdb_ci", App.Value());
                         if (configurationItem[0] != null)
-                            scTask.setConfigurationItem(configurationItem[0]);
+                            scTask[0].setConfigurationItem(configurationItem[0]);
                         sysGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "assignment_group", App.Value());
                         if (sysGroup[0] != null)
-                            scTask.setAssignmentGroup(sysGroup[0]);
+                            scTask[0].setAssignmentGroup(sysGroup[0]);
 
                         scalingAssignmentGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "u_scaling_group", App.Value());
                         if (scalingAssignmentGroup[0] != null)
-                            scTask.setScalingAssignmentGroup(scalingAssignmentGroup[0]);
+                            scTask[0].setScalingAssignmentGroup(scalingAssignmentGroup[0]);
                         scRequest[0] = getScRequestByIntegrationId((JSONObject) scTaskJson, "request", App.Value());
                         if (scRequest[0] != null)
-                            scTask.setScRequest(scRequest[0]);
+                            scTask[0].setScRequest(scRequest[0]);
                         scRequestItem[0] = getScRequestItemByIntegrationId((JSONObject) scTaskJson, "request_item", App.Value());
                         if (scRequestItem[0] != null) {
-                            scTask.setScRequestItem(scRequestItem[0]);
+                            scTask[0].setScRequestItem(scRequestItem[0]);
                             if (scRequestItem[0].getRequestedFor() != null)
-                                scTask.setRequestedFor(scRequestItem[0].getRequestedFor());
+                                scTask[0].setRequestedFor(scRequestItem[0].getRequestedFor());
                             if (scRequestItem[0].getTaskFor() != null)
-                                scTask.setTaskFor(scRequestItem[0].getTaskFor());
+                                scTask[0].setTaskFor(scRequestItem[0].getTaskFor());
                         }
-                        exists[0] = scTaskService.findByIntegrationId(scTask.getIntegrationId());
+                        exists[0] = scTaskService.findByIntegrationId(scTask[0].getIntegrationId());
                         tagAction[0] = App.CreateConsole();
                         if (exists[0] != null) {
-                            scTask.setId(exists[0].getId());
+                            scTask[0].setId(exists[0].getId());
                             tagAction[0] = App.UpdateConsole();
                         }
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scTask)), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
-                        scTasks.add(scTaskService.save(scTask));
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scTask[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
+                        scTasks.add(scTaskService.save(scTask[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -562,7 +566,7 @@ public class ScTaskController {
         JSONArray ListScTaskJson = new JSONArray();
         final ScTaskRequest[] scTaskSolver = new ScTaskRequest[1];
         Gson gson = new Gson();
-        ScTask scTask = new ScTask();
+        final ScTask[] scTask = {new ScTask()};
         final ScTask[] exists = new ScTask[1];
         final String[] tagAction = new String[1];
         final Domain[] domain = new Domain[1];
@@ -587,123 +591,125 @@ public class ScTaskController {
                 result = rest.responseByEndPoint(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListScTaskJson.clear();
                 if (resultJson.get("result") != null)
                     ListScTaskJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListScTaskJson.stream().forEach(scTaskJson -> {
                     try {
                         scTaskSolver[0] = gson.fromJson(scTaskJson.toString(), ScTaskRequest.class);
-                        exists[0] = scTaskService.findByIntegrationId(scTask.getIntegrationId());
+                        scTask[0] = new ScTask();
+                        exists[0] = scTaskService.findByIntegrationId(scTask[0].getIntegrationId());
                         tagAction[0] = App.CreateConsole();
                         if (exists[0] != null) {
-                            scTask.setId(exists[0].getId());
+                            scTask[0].setId(exists[0].getId());
                         } else {
-                            scTask.setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
-                            scTask.setActive(scTaskSolver[0].getActive());
-                            scTask.setActivityDue(Util.isNull(scTaskSolver[0].getActivity_due()));
-                            scTask.setAdditionalAssigneeList(Util.isNull(scTaskSolver[0].getAdditional_assignee_list()));
-                            scTask.setApproval(Util.isNull(scTaskSolver[0].getApproval()));
-                            scTask.setApprovalHistory(Util.isNull(scTaskSolver[0].getApproval_history()));
-                            scTask.setApprovalSet(Util.isNull(scTaskSolver[0].getApproval_set()));
-                            scTask.setBusinessDuration(Util.isNull(scTaskSolver[0].getBusiness_duration()));
-                            scTask.setCalendarDuration(Util.isNull(scTaskSolver[0].getCalendar_duration()));
-                            scTask.setCalendarStc(Util.isNull(scTaskSolver[0].getCalendar_stc()));
-                            scTask.setCloseNotes(Util.isNull(scTaskSolver[0].getClose_notes()));
-                            scTask.setClosedAt(Util.isNull(scTaskSolver[0].getClosed_at()));
-                            scTask.setComments(Util.isNull(scTaskSolver[0].getComments()));
-                            scTask.setCommentsAndWorkNotes(Util.isNull(scTaskSolver[0].getComments_and_work_notes()));
-                            scTask.setContactType(Util.isNull(scTaskSolver[0].getContact_type()));
-                            scTask.setCorrelationDisplay(Util.isNull(scTaskSolver[0].getCorrelation_display()));
-                            scTask.setCorrelationId(Util.isNull(scTaskSolver[0].getCorrelation_id()));
-                            scTask.setDeliveryPlan(Util.isNull(scTaskSolver[0].getDelivery_plan()));
-                            scTask.setDeliveryTask(Util.isNull(scTaskSolver[0].getDelivery_task()));
-                            scTask.setDescription(Util.isNull(scTaskSolver[0].getDescription()));
-                            scTask.setDueDate(Util.isNull(scTaskSolver[0].getDue_date()));
-                            scTask.setEscalation(Util.isNull(scTaskSolver[0].getEscalation()));
-                            scTask.setExpectedStart(Util.isNull(scTaskSolver[0].getExpected_start()));
-                            scTask.setFollowUp(Util.isNull(scTaskSolver[0].getFollow_up()));
-                            scTask.setGroupList(Util.isNull(scTaskSolver[0].getGroup_list()));
-                            scTask.setImpact(Util.isNull(scTaskSolver[0].getImpact()));
-                            scTask.setKnowledge(Util.isNull(scTaskSolver[0].getKnowledge()));
-                            scTask.setMadeSla(Util.isNull(scTaskSolver[0].getMade_sla()));
-                            scTask.setNeedsAttention(Util.isNull(scTaskSolver[0].getNeeds_attention()));
-                            scTask.setNumber(Util.isNull(scTaskSolver[0].getNumber()));
-                            scTask.setOpenedAt(Util.isNull(scTaskSolver[0].getOpened_at()));
-                            scTask.setPriority(Util.isNull(scTaskSolver[0].getPriority()));
-                            scTask.setReassignmentCount(Util.isNull(scTaskSolver[0].getReassignment_count()));
-                            scTask.setRouteReason(Util.isNull(scTaskSolver[0].getRoute_reason()));
-                            scTask.setServiceOffering(Util.isNull(scTaskSolver[0].getService_offering()));
-                            scTask.setShortDescription(Util.isNull(scTaskSolver[0].getShort_description()));
-                            scTask.setSkills(Util.isNull(scTaskSolver[0].getSkills()));
-                            scTask.setSlaDue(Util.isNull(scTaskSolver[0].getSla_due()));
-                            scTask.setState(Util.isNull(scTaskSolver[0].getState()));
-                            scTask.setSysClassName(Util.isNull(scTaskSolver[0].getSys_class_name()));
-                            scTask.setSysCreatedBy(Util.isNull(scTaskSolver[0].getSys_created_by()));
-                            scTask.setSysCreatedOn(Util.isNull(scTaskSolver[0].getSys_created_on()));
+                            scTask[0].setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
+                            scTask[0].setActive(scTaskSolver[0].getActive());
+                            scTask[0].setActivityDue(Util.isNull(scTaskSolver[0].getActivity_due()));
+                            scTask[0].setAdditionalAssigneeList(Util.isNull(scTaskSolver[0].getAdditional_assignee_list()));
+                            scTask[0].setApproval(Util.isNull(scTaskSolver[0].getApproval()));
+                            scTask[0].setApprovalHistory(Util.isNull(scTaskSolver[0].getApproval_history()));
+                            scTask[0].setApprovalSet(Util.isNull(scTaskSolver[0].getApproval_set()));
+                            scTask[0].setBusinessDuration(Util.isNull(scTaskSolver[0].getBusiness_duration()));
+                            scTask[0].setCalendarDuration(Util.isNull(scTaskSolver[0].getCalendar_duration()));
+                            scTask[0].setCalendarStc(Util.isNull(scTaskSolver[0].getCalendar_stc()));
+                            scTask[0].setCloseNotes(Util.isNull(scTaskSolver[0].getClose_notes()));
+                            scTask[0].setClosedAt(Util.isNull(scTaskSolver[0].getClosed_at()));
+                            scTask[0].setComments(Util.isNull(scTaskSolver[0].getComments()));
+                            scTask[0].setCommentsAndWorkNotes(Util.isNull(scTaskSolver[0].getComments_and_work_notes()));
+                            scTask[0].setContactType(Util.isNull(scTaskSolver[0].getContact_type()));
+                            scTask[0].setCorrelationDisplay(Util.isNull(scTaskSolver[0].getCorrelation_display()));
+                            scTask[0].setCorrelationId(Util.isNull(scTaskSolver[0].getCorrelation_id()));
+                            scTask[0].setDeliveryPlan(Util.isNull(scTaskSolver[0].getDelivery_plan()));
+                            scTask[0].setDeliveryTask(Util.isNull(scTaskSolver[0].getDelivery_task()));
+                            scTask[0].setDescription(Util.isNull(scTaskSolver[0].getDescription()));
+                            scTask[0].setDueDate(Util.isNull(scTaskSolver[0].getDue_date()));
+                            scTask[0].setEscalation(Util.isNull(scTaskSolver[0].getEscalation()));
+                            scTask[0].setExpectedStart(Util.isNull(scTaskSolver[0].getExpected_start()));
+                            scTask[0].setFollowUp(Util.isNull(scTaskSolver[0].getFollow_up()));
+                            scTask[0].setGroupList(Util.isNull(scTaskSolver[0].getGroup_list()));
+                            scTask[0].setImpact(Util.isNull(scTaskSolver[0].getImpact()));
+                            scTask[0].setKnowledge(Util.isNull(scTaskSolver[0].getKnowledge()));
+                            scTask[0].setMadeSla(Util.isNull(scTaskSolver[0].getMade_sla()));
+                            scTask[0].setNeedsAttention(Util.isNull(scTaskSolver[0].getNeeds_attention()));
+                            scTask[0].setNumber(Util.isNull(scTaskSolver[0].getNumber()));
+                            scTask[0].setOpenedAt(Util.isNull(scTaskSolver[0].getOpened_at()));
+                            scTask[0].setPriority(Util.isNull(scTaskSolver[0].getPriority()));
+                            scTask[0].setReassignmentCount(Util.isNull(scTaskSolver[0].getReassignment_count()));
+                            scTask[0].setRouteReason(Util.isNull(scTaskSolver[0].getRoute_reason()));
+                            scTask[0].setServiceOffering(Util.isNull(scTaskSolver[0].getService_offering()));
+                            scTask[0].setShortDescription(Util.isNull(scTaskSolver[0].getShort_description()));
+                            scTask[0].setSkills(Util.isNull(scTaskSolver[0].getSkills()));
+                            scTask[0].setSlaDue(Util.isNull(scTaskSolver[0].getSla_due()));
+                            scTask[0].setState(Util.isNull(scTaskSolver[0].getState()));
+                            scTask[0].setSysClassName(Util.isNull(scTaskSolver[0].getSys_class_name()));
+                            scTask[0].setSysCreatedBy(Util.isNull(scTaskSolver[0].getSys_created_by()));
+                            scTask[0].setSysCreatedOn(Util.isNull(scTaskSolver[0].getSys_created_on()));
                             if (!Util.isNull(scTaskSolver[0].getSys_created_on()).equals(""))
-                                scTask.setCreatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_created_on())));
-                            scTask.setIntegrationId(Util.isNull(scTaskSolver[0].getSys_id()));
-                            scTask.setSysModCount(Util.isNull(scTaskSolver[0].getSys_mod_count()));
-                            scTask.setSysUpdatedBy(Util.isNull(scTaskSolver[0].getSys_updated_by()));
-                            scTask.setSysUpdatedOn(Util.isNull(scTaskSolver[0].getSys_updated_on()));
+                                scTask[0].setCreatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_created_on())));
+                            scTask[0].setIntegrationId(Util.isNull(scTaskSolver[0].getSys_id()));
+                            scTask[0].setSysModCount(Util.isNull(scTaskSolver[0].getSys_mod_count()));
+                            scTask[0].setSysUpdatedBy(Util.isNull(scTaskSolver[0].getSys_updated_by()));
+                            scTask[0].setSysUpdatedOn(Util.isNull(scTaskSolver[0].getSys_updated_on()));
                             if (!Util.isNull(scTaskSolver[0].getClosed_at()).equals(""))
-                                scTask.setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getClosed_at())));
-                            scTask.setTaskEffectiveNumber(Util.isNull(scTaskSolver[0].getTask_effective_number()));
-                            scTask.setTimeWorked(Util.isNull(scTaskSolver[0].getTime_worked()));
-                            scTask.setUniversalRequest(Util.isNull(scTaskSolver[0].getUniversal_request()));
-                            scTask.setUponApproval(Util.isNull(scTaskSolver[0].getUpon_approval()));
-                            scTask.setUponReject(Util.isNull(scTaskSolver[0].getUpon_reject()));
-                            scTask.setUrgency(Util.isNull(scTaskSolver[0].getUrgency()));
-                            scTask.setUserInput(Util.isNull(scTaskSolver[0].getUser_input()));
-                            scTask.setWorkEnd(Util.isNull(scTaskSolver[0].getWork_end()));
-                            scTask.setWorkStart(Util.isNull(scTaskSolver[0].getWork_start()));
-                            scTask.setScaling(scTaskSolver[0].getU_pending_other_group());
+                                scTask[0].setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getClosed_at())));
+                            scTask[0].setTaskEffectiveNumber(Util.isNull(scTaskSolver[0].getTask_effective_number()));
+                            scTask[0].setTimeWorked(Util.isNull(scTaskSolver[0].getTime_worked()));
+                            scTask[0].setUniversalRequest(Util.isNull(scTaskSolver[0].getUniversal_request()));
+                            scTask[0].setUponApproval(Util.isNull(scTaskSolver[0].getUpon_approval()));
+                            scTask[0].setUponReject(Util.isNull(scTaskSolver[0].getUpon_reject()));
+                            scTask[0].setUrgency(Util.isNull(scTaskSolver[0].getUrgency()));
+                            scTask[0].setUserInput(Util.isNull(scTaskSolver[0].getUser_input()));
+                            scTask[0].setWorkEnd(Util.isNull(scTaskSolver[0].getWork_end()));
+                            scTask[0].setWorkStart(Util.isNull(scTaskSolver[0].getWork_start()));
+                            scTask[0].setScaling(scTaskSolver[0].getU_pending_other_group());
                             domain[0] = getDomainByIntegrationId((JSONObject) scTaskJson, SnTable.Domain.get(), App.Value());
                             if (domain[0] != null)
-                                scTask.setDomain(domain[0]);
+                                scTask[0].setDomain(domain[0]);
                             company[0] = getCompanyByIntegrationId((JSONObject) scTaskJson, SnTable.Company.get(), App.Value());
                             if (company[0] != null)
-                                scTask.setCompany(company[0]);
+                                scTask[0].setCompany(company[0]);
                             closedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "closed_by", App.Value());
                             if (closedBy[0] != null)
-                                scTask.setClosedBy(closedBy[0]);
+                                scTask[0].setClosedBy(closedBy[0]);
                             scalingAssignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_scaling_assigned_to", App.Value());
                             if (scalingAssignedTo[0] != null)
-                                scTask.setScalingAssignedTo(scalingAssignedTo[0]);
+                                scTask[0].setScalingAssignedTo(scalingAssignedTo[0]);
                             location[0] = getLocationByIntegrationId((JSONObject) scTaskJson, "location", App.Value());
                             if (location[0] != null)
-                                scTask.setLocation(location[0]);
+                                scTask[0].setLocation(location[0]);
                             assignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_solver_assigned_to", App.Value());
                             if (assignedTo[0] != null)
-                                scTask.setAssignedTo(assignedTo[0]);
+                                scTask[0].setAssignedTo(assignedTo[0]);
                             openedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "opened_by", App.Value());
                             if (openedBy[0] != null)
-                                scTask.setOpenedBy(openedBy[0]);
+                                scTask[0].setOpenedBy(openedBy[0]);
                             businessService[0] = getCiServiceByIntegrationId((JSONObject) scTaskJson, "business_service", App.Value());
                             if (businessService[0] != null)
-                                scTask.setBusinessService(businessService[0]);
+                                scTask[0].setBusinessService(businessService[0]);
                             configurationItem[0] = getConfigurationItemByIntegrationId((JSONObject) scTaskJson, "cmdb_ci", App.Value());
                             if (configurationItem[0] != null)
-                                scTask.setConfigurationItem(configurationItem[0]);
+                                scTask[0].setConfigurationItem(configurationItem[0]);
                             sysGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "assignment_group", App.Value());
                             if (sysGroup[0] != null)
-                                scTask.setAssignmentGroup(sysGroup[0]);
+                                scTask[0].setAssignmentGroup(sysGroup[0]);
                             scalingAssignmentGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "u_scaling_group", App.Value());
                             if (scalingAssignmentGroup[0] != null)
-                                scTask.setScalingAssignmentGroup(scalingAssignmentGroup[0]);
+                                scTask[0].setScalingAssignmentGroup(scalingAssignmentGroup[0]);
                             scRequest[0] = getScRequestByIntegrationId((JSONObject) scTaskJson, "request", App.Value());
                             if (scRequest[0] != null)
-                                scTask.setScRequest(scRequest[0]);
+                                scTask[0].setScRequest(scRequest[0]);
                             scRequestItem[0] = getScRequestItemByIntegrationId((JSONObject) scTaskJson, "request_item", App.Value());
                             if (scRequestItem[0] != null) {
-                                scTask.setScRequestItem(scRequestItem[0]);
+                                scTask[0].setScRequestItem(scRequestItem[0]);
                                 if (scRequestItem[0].getRequestedFor() != null)
-                                    scTask.setRequestedFor(scRequestItem[0].getRequestedFor());
+                                    scTask[0].setRequestedFor(scRequestItem[0].getRequestedFor());
                                 if (scRequestItem[0].getTaskFor() != null)
-                                    scTask.setTaskFor(scRequestItem[0].getTaskFor());
+                                    scTask[0].setTaskFor(scRequestItem[0].getTaskFor());
                             }
-                            _scTask[0] = scTaskService.save(scTask);
+                            _scTask[0] = scTaskService.save(scTask[0]);
                             scTasks.add(_scTask[0]);
-                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scTask)), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
+                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scTask[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {

@@ -160,11 +160,11 @@ public class CmnScheduleController {
             JSONArray ListCmnScheduleJson = new JSONArray();
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            CmnSchedule cmnSchedule = new CmnSchedule();
+            final CmnSchedule[] cmnSchedule = {new CmnSchedule()};
             final Domain[] domain = new Domain[1];
             final CmnSchedule[] exists = new CmnSchedule[1];
             final String[] tagAction = new String[1];
-            final CmnScheduleSolver[] cmnScheduleSolver = new CmnScheduleSolver[1];
+            final CmnScheduleSolver[] cmnScheduleSolver = {new CmnScheduleSolver()};
             APIExecutionStatus status = new APIExecutionStatus();
             if (resultJson.get("result") != null)
                 ListCmnScheduleJson = (JSONArray) parser.parse(resultJson.get("result").toString());
@@ -173,34 +173,34 @@ public class CmnScheduleController {
                 try {
                     cmnScheduleSolver[0] = objectMapper.readValue(cmnScheduleJson.toString(), CmnScheduleSolver.class);
                     snCmnSchedulesSolver.add(cmnScheduleSolver[0]);
-                    cmnSchedule.setParent(cmnScheduleSolver[0].getParent());
-                    cmnSchedule.setDocument(cmnScheduleSolver[0].getDocument());
-                    cmnSchedule.setDescription(cmnScheduleSolver[0].getDescription());
-                    cmnSchedule.setSysUpdatedOn(cmnScheduleSolver[0].getSys_updated_on());
-                    cmnSchedule.setType(cmnScheduleSolver[0].getType());
-                    cmnSchedule.setDocumentKey(cmnScheduleSolver[0].getDocument_key());
-                    cmnSchedule.setSysUpdatedBy(cmnScheduleSolver[0].getSys_updated_by());
-                    cmnSchedule.setSysCreatedOn(cmnScheduleSolver[0].getSys_created_on());
-                    cmnSchedule.setSysName(cmnScheduleSolver[0].getSys_name());
-                    cmnSchedule.setSysCreatedBy(cmnScheduleSolver[0].getSys_created_by());
-                    cmnSchedule.setLabel(cmnScheduleSolver[0].getLabel());
-                    cmnSchedule.setCalendarName(cmnScheduleSolver[0].getCalendar_name());
-                    cmnSchedule.setTimeZone(cmnScheduleSolver[0].getTime_zone());
-                    cmnSchedule.setSysUpdateName(cmnScheduleSolver[0].getSys_update_name());
-                    cmnSchedule.setName(cmnScheduleSolver[0].getName());
-                    cmnSchedule.setIntegrationId(cmnScheduleSolver[0].getSys_id());
+                    cmnSchedule[0] = new CmnSchedule();
+                    cmnSchedule[0].setParent(cmnScheduleSolver[0].getParent());
+                    cmnSchedule[0].setDocument(cmnScheduleSolver[0].getDocument());
+                    cmnSchedule[0].setDescription(cmnScheduleSolver[0].getDescription());
+                    cmnSchedule[0].setSysUpdatedOn(cmnScheduleSolver[0].getSys_updated_on());
+                    cmnSchedule[0].setType(cmnScheduleSolver[0].getType());
+                    cmnSchedule[0].setDocumentKey(cmnScheduleSolver[0].getDocument_key());
+                    cmnSchedule[0].setSysUpdatedBy(cmnScheduleSolver[0].getSys_updated_by());
+                    cmnSchedule[0].setSysCreatedOn(cmnScheduleSolver[0].getSys_created_on());
+                    cmnSchedule[0].setSysName(cmnScheduleSolver[0].getSys_name());
+                    cmnSchedule[0].setSysCreatedBy(cmnScheduleSolver[0].getSys_created_by());
+                    cmnSchedule[0].setLabel(cmnScheduleSolver[0].getLabel());
+                    cmnSchedule[0].setCalendarName(cmnScheduleSolver[0].getCalendar_name());
+                    cmnSchedule[0].setTimeZone(cmnScheduleSolver[0].getTime_zone());
+                    cmnSchedule[0].setSysUpdateName(cmnScheduleSolver[0].getSys_update_name());
+                    cmnSchedule[0].setName(cmnScheduleSolver[0].getName());
+                    cmnSchedule[0].setIntegrationId(cmnScheduleSolver[0].getSys_id());
                     domain[0] = getDomainByIntegrationId((JSONObject) cmnScheduleJson, SnTable.Domain.get(), App.Value());
                     if (domain[0] != null)
-                        cmnSchedule.setDomain(domain[0]);
-                    exists[0] = cmnScheduleService.findByIntegrationId(cmnSchedule.getIntegrationId());
+                        cmnSchedule[0].setDomain(domain[0]);
+                    exists[0] = cmnScheduleService.findByIntegrationId(cmnSchedule[0].getIntegrationId());
                     tagAction[0] = App.CreateConsole();
                     if (exists[0] != null) {
-                        cmnSchedule.setId(exists[0].getId());
+                        cmnSchedule[0].setId(exists[0].getId());
                         tagAction[0] = App.UpdateConsole();
                     }
-
-                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(cmnSchedule)), Util.getFieldDisplay(cmnSchedule.getDomain()));
-                    cmnScheduleService.save(cmnSchedule);
+                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(cmnSchedule[0])), Util.getFieldDisplay(cmnSchedule[0].getDomain()));
+                    cmnScheduleService.save(cmnSchedule[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));

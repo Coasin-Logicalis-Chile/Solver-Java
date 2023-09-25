@@ -28,9 +28,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnCatalogLineController {
-
-    @Autowired
-    private ISnCatalogLineService snCatalogLineService;
     @Autowired
     private ICatalogLineService catalogLineService;
     @Autowired
@@ -66,66 +63,67 @@ public class SnCatalogLineController {
             if (resultJson.get("result") != null)
                 ListSnCatalogLineJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
+            final String[] tagAction = new String[1];
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            final SnCatalogLine[] snCatalogLine = new SnCatalogLine[1];
+            final CatalogLine[] catalogLine = new CatalogLine[1];
+            final CatalogLine[] exists = new CatalogLine[1];
+            APIExecutionStatus status = new APIExecutionStatus();
+            final Company[] company = new Company[1];
+            final ConfigurationItem[] configurationItem = new ConfigurationItem[1];
+            final SysGroup[] sysGroup = new SysGroup[1];
+            final SysGroup[] approvalGroup = new SysGroup[1];
+            final CiService[] businessService = new CiService[1];
             ListSnCatalogLineJson.forEach(snCatalogLineJson -> {
-                String tagAction = App.CreateConsole();
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                tagAction[0] = App.CreateConsole();
                 try {
-                    SnCatalogLine snCatalogLine = objectMapper.readValue(snCatalogLineJson.toString(), SnCatalogLine.class);
-                    snCatalogsLine.add(snCatalogLine);
-                    CatalogLine catalogLine = new CatalogLine();
-                    catalogLine.setIntegrationId(snCatalogLine.getSys_id());
-                    catalogLine.setNumber(snCatalogLine.getU_number());
-                    catalogLine.setService(snCatalogLine.getU_service());
-                    catalogLine.setAmbite(snCatalogLine.getU_ambite());
-                    catalogLine.setPlatform(snCatalogLine.getU_platform());
-                    catalogLine.setSpecification(snCatalogLine.getU_specification());
-                    catalogLine.setSysCreatedBy(snCatalogLine.getSys_created_by());
-                    catalogLine.setSysCreatedOn(snCatalogLine.getSys_created_on());
-                    catalogLine.setSysUpdatedBy(snCatalogLine.getSys_updated_by());
-                    catalogLine.setSysUpdatedOn(snCatalogLine.getSys_updated_on());
-                    catalogLine.setActive(snCatalogLine.isU_active());
+                    snCatalogLine[0] = objectMapper.readValue(snCatalogLineJson.toString(), SnCatalogLine.class);
+                    snCatalogsLine.add(snCatalogLine[0]);
+                    catalogLine[0] = new CatalogLine();
+                    catalogLine[0].setIntegrationId(snCatalogLine[0].getSys_id());
+                    catalogLine[0].setNumber(snCatalogLine[0].getU_number());
+                    catalogLine[0].setService(snCatalogLine[0].getU_service());
+                    catalogLine[0].setAmbite(snCatalogLine[0].getU_ambite());
+                    catalogLine[0].setPlatform(snCatalogLine[0].getU_platform());
+                    catalogLine[0].setSpecification(snCatalogLine[0].getU_specification());
+                    catalogLine[0].setSysCreatedBy(snCatalogLine[0].getSys_created_by());
+                    catalogLine[0].setSysCreatedOn(snCatalogLine[0].getSys_created_on());
+                    catalogLine[0].setSysUpdatedBy(snCatalogLine[0].getSys_updated_by());
+                    catalogLine[0].setSysUpdatedOn(snCatalogLine[0].getSys_updated_on());
+                    catalogLine[0].setActive(snCatalogLine[0].isU_active());
+                    company[0] = getCompanyByIntegrationId((JSONObject) snCatalogLineJson, "u_company", App.Value());
+                    if (company[0] != null)
+                        catalogLine[0].setCompany(company[0]);
 
-                    Company company = getCompanyByIntegrationId((JSONObject) snCatalogLineJson, "u_company", App.Value());
-                    if (company != null)
-                        catalogLine.setCompany(company);
+                    configurationItem[0] = getConfigurationItemByIntegrationId((JSONObject) snCatalogLineJson, "u_configuration_item", App.Value());
+                    if (configurationItem[0] != null)
+                        catalogLine[0].setConfigurationItem(configurationItem[0]);
 
-                    ConfigurationItem configurationItem = getConfigurationItemByIntegrationId((JSONObject) snCatalogLineJson, "u_configuration_item", App.Value());
-                    if (configurationItem != null)
-                        catalogLine.setConfigurationItem(configurationItem);
+                    sysGroup[0] = getSysGroupByIntegrationId((JSONObject) snCatalogLineJson, "u_assignment_group", App.Value());
+                    if (sysGroup[0] != null)
+                        catalogLine[0].setAssignmentGroup(sysGroup[0]);
 
-                    SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snCatalogLineJson, "u_assignment_group", App.Value());
-                    if (sysGroup != null)
-                        catalogLine.setAssignmentGroup(sysGroup);
+                    approvalGroup[0] = getSysGroupByIntegrationId((JSONObject) snCatalogLineJson, "u_approval_group", App.Value());
+                    if (approvalGroup[0] != null)
+                        catalogLine[0].setApprovalGroup(approvalGroup[0]);
 
-                    SysGroup approvalGroup = getSysGroupByIntegrationId((JSONObject) snCatalogLineJson, "u_approval_group", App.Value());
-                    if (approvalGroup != null)
-                        catalogLine.setApprovalGroup(approvalGroup);
-
-                    CiService businessService = getCiServiceByIntegrationId((JSONObject) snCatalogLineJson, "u_cmdb_ci_service", App.Value());
-                    if (businessService != null)
-                        catalogLine.setBusinessService(businessService);
-
-                    //util.printData(tag, count[0], (catalogLine != null ? catalogLine.getNumber() != "" ? catalogLine.getNumber() : App.Title() : App.Title()));
-
-                    CatalogLine exists = catalogLineService.findByIntegrationId(catalogLine.getIntegrationId());
-                    if (exists != null) {
-                        catalogLine.setId(exists.getId());
-                        tagAction = App.UpdateConsole();
+                    businessService[0] = getCiServiceByIntegrationId((JSONObject) snCatalogLineJson, "u_cmdb_ci_service", App.Value());
+                    if (businessService[0] != null)
+                        catalogLine[0].setBusinessService(businessService[0]);
+                    exists[0] = catalogLineService.findByIntegrationId(catalogLine[0].getIntegrationId());
+                    if (exists[0] != null) {
+                        catalogLine[0].setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
-                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(catalogLine)), Util.getFieldDisplay(company));
-
-
-                    catalogLineService.save(catalogLine);
+                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(catalogLine[0])), Util.getFieldDisplay(company[0]));
+                    catalogLineService.save(catalogLine[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
-
             apiResponse = mapper.readValue(result, APIResponse.class);
-
-            APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Catalog());
             status.setUserAPI(App.SNUser());
             status.setPasswordAPI(App.SNPassword());

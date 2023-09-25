@@ -161,7 +161,7 @@ public class ContractSlaController {
             JSONArray ListContractsSlaJson = new JSONArray();
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            ContractSla contractSla = new ContractSla();
+            final ContractSla[] contractSla = {new ContractSla()};
             if (resultJson.get("result") != null)
                 ListContractsSlaJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
@@ -169,49 +169,50 @@ public class ContractSlaController {
                 try {
                     contractSlaSolver[0] = objectMapper.readValue(contractSlaJson.toString(), ContractSlaSolver.class);
                     snContractsSlaSolver.add(contractSlaSolver[0]);
-                    contractSla.setActive(Boolean.parseBoolean(contractSlaSolver[0].getActive()));
-                    contractSla.setCollection(contractSlaSolver[0].getCollection());
-                    contractSla.setDuration(contractSlaSolver[0].getDuration());
-                    contractSla.setDurationType(contractSlaSolver[0].getDuration_type());
-                    contractSla.setEnableLogging(contractSlaSolver[0].getEnable_logging());
-                    contractSla.setName(contractSlaSolver[0].getName());
-                    contractSla.setRelativeDurationWorksOn(contractSlaSolver[0].getRelative_duration_works_on());
-                    contractSla.setResetAction(contractSlaSolver[0].getReset_action());
-                    contractSla.setRetroactive(contractSlaSolver[0].getRetroactive());
-                    contractSla.setRetroactivePause(contractSlaSolver[0].getRetroactive_pause());
-                    contractSla.setScheduleSource(contractSlaSolver[0].getSchedule_source());
-                    contractSla.setScheduleSourceField(contractSlaSolver[0].getSchedule_source_field());
-                    contractSla.setSysClassName(contractSlaSolver[0].getSys_class_name());
-                    contractSla.setSysCreatedBy(contractSlaSolver[0].getSys_created_by());
-                    contractSla.setSysCreatedOn(contractSlaSolver[0].getSys_created_on());
-                    contractSla.setSysModCount(contractSlaSolver[0].getSys_mod_count());
-                    contractSla.setSysName(contractSlaSolver[0].getSys_name());
-                    contractSla.setSysPolicy(contractSlaSolver[0].getSys_policy());
-                    contractSla.setSysUpdateName(contractSlaSolver[0].getSys_update_name());
-                    contractSla.setSysUpdatedBy(contractSlaSolver[0].getSys_updated_by());
-                    contractSla.setSysUpdatedOn(contractSlaSolver[0].getSys_updated_on());
-                    contractSla.setTarget(contractSlaSolver[0].getTarget());
-                    contractSla.setTimezone(contractSlaSolver[0].getTimezone());
-                    contractSla.setTimezoneSource(contractSlaSolver[0].getTimezone_source());
-                    contractSla.setType(contractSlaSolver[0].getType());
-                    contractSla.setVendor(contractSlaSolver[0].getVendor());
-                    contractSla.setWhenToCancel(contractSlaSolver[0].getWhen_to_cancel());
-                    contractSla.setWhenToResume(contractSlaSolver[0].getWhen_to_resume());
-                    contractSla.setIntegrationId(contractSlaSolver[0].getSys_id());
+                    contractSla[0] = new ContractSla();
+                    contractSla[0].setActive(Boolean.parseBoolean(contractSlaSolver[0].getActive()));
+                    contractSla[0].setCollection(contractSlaSolver[0].getCollection());
+                    contractSla[0].setDuration(contractSlaSolver[0].getDuration());
+                    contractSla[0].setDurationType(contractSlaSolver[0].getDuration_type());
+                    contractSla[0].setEnableLogging(contractSlaSolver[0].getEnable_logging());
+                    contractSla[0].setName(contractSlaSolver[0].getName());
+                    contractSla[0].setRelativeDurationWorksOn(contractSlaSolver[0].getRelative_duration_works_on());
+                    contractSla[0].setResetAction(contractSlaSolver[0].getReset_action());
+                    contractSla[0].setRetroactive(contractSlaSolver[0].getRetroactive());
+                    contractSla[0].setRetroactivePause(contractSlaSolver[0].getRetroactive_pause());
+                    contractSla[0].setScheduleSource(contractSlaSolver[0].getSchedule_source());
+                    contractSla[0].setScheduleSourceField(contractSlaSolver[0].getSchedule_source_field());
+                    contractSla[0].setSysClassName(contractSlaSolver[0].getSys_class_name());
+                    contractSla[0].setSysCreatedBy(contractSlaSolver[0].getSys_created_by());
+                    contractSla[0].setSysCreatedOn(contractSlaSolver[0].getSys_created_on());
+                    contractSla[0].setSysModCount(contractSlaSolver[0].getSys_mod_count());
+                    contractSla[0].setSysName(contractSlaSolver[0].getSys_name());
+                    contractSla[0].setSysPolicy(contractSlaSolver[0].getSys_policy());
+                    contractSla[0].setSysUpdateName(contractSlaSolver[0].getSys_update_name());
+                    contractSla[0].setSysUpdatedBy(contractSlaSolver[0].getSys_updated_by());
+                    contractSla[0].setSysUpdatedOn(contractSlaSolver[0].getSys_updated_on());
+                    contractSla[0].setTarget(contractSlaSolver[0].getTarget());
+                    contractSla[0].setTimezone(contractSlaSolver[0].getTimezone());
+                    contractSla[0].setTimezoneSource(contractSlaSolver[0].getTimezone_source());
+                    contractSla[0].setType(contractSlaSolver[0].getType());
+                    contractSla[0].setVendor(contractSlaSolver[0].getVendor());
+                    contractSla[0].setWhenToCancel(contractSlaSolver[0].getWhen_to_cancel());
+                    contractSla[0].setWhenToResume(contractSlaSolver[0].getWhen_to_resume());
+                    contractSla[0].setIntegrationId(contractSlaSolver[0].getSys_id());
                     domain[0] = getDomainByIntegrationId((JSONObject) contractSlaJson, SnTable.Domain.get(), App.Value());
 
                     if (domain[0] != null)
-                        contractSla.setDomain(domain[0]);
-                    exists[0] = contractSlaService.findByIntegrationId(contractSla.getIntegrationId());
+                        contractSla[0].setDomain(domain[0]);
+                    exists[0] = contractSlaService.findByIntegrationId(contractSla[0].getIntegrationId());
                     tagAction[0] = App.CreateConsole();
 
                     if (exists[0] != null) {
-                        contractSla.setId(exists[0].getId());
+                        contractSla[0].setId(exists[0].getId());
                         tagAction[0] = App.UpdateConsole();
                     }
 
-                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(contractSla)), Util.getFieldDisplay(contractSla.getDomain()));
-                    contractSlaService.save(contractSla);
+                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(contractSla[0])), Util.getFieldDisplay(contractSla[0].getDomain()));
+                    contractSlaService.save(contractSla[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -252,7 +253,7 @@ public class ContractSlaController {
         final ContractSlaSolver[] contractSlaSolver = new ContractSlaSolver[1];
         final int[] count = {1};
         JSONObject resultJson;
-        ContractSla contractSla = new ContractSla();
+        final ContractSla[] contractSla = {new ContractSla()};
         final Domain[] domain = new Domain[1];
         final ContractSla[] exists = new ContractSla[1];
         final String[] tagAction = new String[1];
@@ -263,7 +264,7 @@ public class ContractSlaController {
                 result = rest.responseByEndPoint(EndPointSN.ContractSlaByQuery().replace("QUERY", query).concat(sparmOffSet));
                 endTime = (System.currentTimeMillis() - startTime);
                 resultJson = (JSONObject) parser.parse(result);
-
+                ListContractsSlaJson.clear();
                 if (resultJson.get("result") != null)
                     ListContractsSlaJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
@@ -271,47 +272,48 @@ public class ContractSlaController {
                     try {
                         contractSlaSolver[0] = objectMapper.readValue(contractSlaJson.toString(), ContractSlaSolver.class);
                         snContractsSlaSolver.add(contractSlaSolver[0]);
-                        contractSla.setActive(Boolean.parseBoolean(contractSlaSolver[0].getActive()));
-                        contractSla.setCollection(contractSlaSolver[0].getCollection());
-                        contractSla.setDuration(contractSlaSolver[0].getDuration());
-                        contractSla.setDurationType(contractSlaSolver[0].getDuration_type());
-                        contractSla.setEnableLogging(contractSlaSolver[0].getEnable_logging());
-                        contractSla.setName(contractSlaSolver[0].getName());
-                        contractSla.setRelativeDurationWorksOn(contractSlaSolver[0].getRelative_duration_works_on());
-                        contractSla.setResetAction(contractSlaSolver[0].getReset_action());
-                        contractSla.setRetroactive(contractSlaSolver[0].getRetroactive());
-                        contractSla.setRetroactivePause(contractSlaSolver[0].getRetroactive_pause());
-                        contractSla.setScheduleSource(contractSlaSolver[0].getSchedule_source());
-                        contractSla.setScheduleSourceField(contractSlaSolver[0].getSchedule_source_field());
-                        contractSla.setSysClassName(contractSlaSolver[0].getSys_class_name());
-                        contractSla.setSysCreatedBy(contractSlaSolver[0].getSys_created_by());
-                        contractSla.setSysCreatedOn(contractSlaSolver[0].getSys_created_on());
-                        contractSla.setSysModCount(contractSlaSolver[0].getSys_mod_count());
-                        contractSla.setSysName(contractSlaSolver[0].getSys_name());
-                        contractSla.setSysPolicy(contractSlaSolver[0].getSys_policy());
-                        contractSla.setSysUpdateName(contractSlaSolver[0].getSys_update_name());
-                        contractSla.setSysUpdatedBy(contractSlaSolver[0].getSys_updated_by());
-                        contractSla.setSysUpdatedOn(contractSlaSolver[0].getSys_updated_on());
-                        contractSla.setTarget(contractSlaSolver[0].getTarget());
-                        contractSla.setTimezone(contractSlaSolver[0].getTimezone());
-                        contractSla.setTimezoneSource(contractSlaSolver[0].getTimezone_source());
-                        contractSla.setType(contractSlaSolver[0].getType());
-                        contractSla.setVendor(contractSlaSolver[0].getVendor());
-                        contractSla.setWhenToCancel(contractSlaSolver[0].getWhen_to_cancel());
-                        contractSla.setWhenToResume(contractSlaSolver[0].getWhen_to_resume());
-                        contractSla.setIntegrationId(contractSlaSolver[0].getSys_id());
+                        contractSla[0] = new ContractSla();
+                        contractSla[0].setActive(Boolean.parseBoolean(contractSlaSolver[0].getActive()));
+                        contractSla[0].setCollection(contractSlaSolver[0].getCollection());
+                        contractSla[0].setDuration(contractSlaSolver[0].getDuration());
+                        contractSla[0].setDurationType(contractSlaSolver[0].getDuration_type());
+                        contractSla[0].setEnableLogging(contractSlaSolver[0].getEnable_logging());
+                        contractSla[0].setName(contractSlaSolver[0].getName());
+                        contractSla[0].setRelativeDurationWorksOn(contractSlaSolver[0].getRelative_duration_works_on());
+                        contractSla[0].setResetAction(contractSlaSolver[0].getReset_action());
+                        contractSla[0].setRetroactive(contractSlaSolver[0].getRetroactive());
+                        contractSla[0].setRetroactivePause(contractSlaSolver[0].getRetroactive_pause());
+                        contractSla[0].setScheduleSource(contractSlaSolver[0].getSchedule_source());
+                        contractSla[0].setScheduleSourceField(contractSlaSolver[0].getSchedule_source_field());
+                        contractSla[0].setSysClassName(contractSlaSolver[0].getSys_class_name());
+                        contractSla[0].setSysCreatedBy(contractSlaSolver[0].getSys_created_by());
+                        contractSla[0].setSysCreatedOn(contractSlaSolver[0].getSys_created_on());
+                        contractSla[0].setSysModCount(contractSlaSolver[0].getSys_mod_count());
+                        contractSla[0].setSysName(contractSlaSolver[0].getSys_name());
+                        contractSla[0].setSysPolicy(contractSlaSolver[0].getSys_policy());
+                        contractSla[0].setSysUpdateName(contractSlaSolver[0].getSys_update_name());
+                        contractSla[0].setSysUpdatedBy(contractSlaSolver[0].getSys_updated_by());
+                        contractSla[0].setSysUpdatedOn(contractSlaSolver[0].getSys_updated_on());
+                        contractSla[0].setTarget(contractSlaSolver[0].getTarget());
+                        contractSla[0].setTimezone(contractSlaSolver[0].getTimezone());
+                        contractSla[0].setTimezoneSource(contractSlaSolver[0].getTimezone_source());
+                        contractSla[0].setType(contractSlaSolver[0].getType());
+                        contractSla[0].setVendor(contractSlaSolver[0].getVendor());
+                        contractSla[0].setWhenToCancel(contractSlaSolver[0].getWhen_to_cancel());
+                        contractSla[0].setWhenToResume(contractSlaSolver[0].getWhen_to_resume());
+                        contractSla[0].setIntegrationId(contractSlaSolver[0].getSys_id());
                         domain[0] = getDomainByIntegrationId((JSONObject) contractSlaJson, SnTable.Domain.get(), App.Value());
                         if (domain[0] != null)
-                            contractSla.setDomain(domain[0]);
-                        exists[0] = contractSlaService.findByIntegrationId(contractSla.getIntegrationId());
+                            contractSla[0].setDomain(domain[0]);
+                        exists[0] = contractSlaService.findByIntegrationId(contractSla[0].getIntegrationId());
                         tagAction[0] = App.CreateConsole();
                         if (exists[0] != null) {
-                            contractSla.setId(exists[0].getId());
+                            contractSla[0].setId(exists[0].getId());
                             tagAction[0] = App.UpdateConsole();
                         }
 
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(contractSla)), Util.getFieldDisplay(contractSla.getDomain()));
-                        contractSlaService.save(contractSla);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(contractSla[0])), Util.getFieldDisplay(contractSla[0].getDomain()));
+                        contractSlaService.save(contractSla[0]);
                         count[0] = count[0] + 1;
                     } catch (JsonProcessingException e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));

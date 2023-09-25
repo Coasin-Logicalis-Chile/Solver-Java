@@ -172,7 +172,7 @@ public class SysDocumentationController {
         JSONObject resultJson = new JSONObject();
         JSONArray ListSnSysDocumentationJson = new JSONArray();
         final SysDocumentationRequest[] sysDocumentationRequest = {new SysDocumentationRequest()};
-        SysDocumentation sysDocumentation = new SysDocumentation();
+        final SysDocumentation[] sysDocumentation = {new SysDocumentation()};
         final String[] tagAction = new String[1];
         final SysDocumentation[] exists = new SysDocumentation[1];
         final APIExecutionStatus[] status = {new APIExecutionStatus()};
@@ -183,31 +183,33 @@ public class SysDocumentationController {
                 result = rest.responseByEndPoint(EndPointSN.SysDocumentation().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.SysDocumentation().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnSysDocumentationJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnSysDocumentationJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListSnSysDocumentationJson.stream().forEach(snSysDocumentationJson -> {
                     try {
                         sysDocumentationRequest[0] = mapper.readValue(snSysDocumentationJson.toString(), SysDocumentationRequest.class);
                         sysDocumentationRequests.add(sysDocumentationRequest[0]);
-                        sysDocumentation.setElement(sysDocumentationRequest[0].getElement());
-                        sysDocumentation.setEs(sysDocumentationRequest[0].getLabel());
-                        sysDocumentation.setOrigin(sysDocumentationRequest[0].getName());
-                        sysDocumentation.setSysCreatedBy(sysDocumentationRequest[0].getSys_created_by());
-                        sysDocumentation.setSysCreatedOn(sysDocumentationRequest[0].getSys_created_on());
-                        sysDocumentation.setIntegrationId(sysDocumentationRequest[0].getSys_id());
-                        sysDocumentation.setSysUpdatedBy(sysDocumentationRequest[0].getSys_updated_by());
-                        sysDocumentation.setSysUpdatedOn(sysDocumentationRequest[0].getSys_updated_on());
-                        sysDocumentation.setUniqueIdentifier(sysDocumentationRequest[0].getName().concat("•").concat(sysDocumentationRequest[0].getElement()));
-                        sysDocumentation.setActive(true);
+                        sysDocumentation[0] = new SysDocumentation();
+                        sysDocumentation[0].setElement(sysDocumentationRequest[0].getElement());
+                        sysDocumentation[0].setEs(sysDocumentationRequest[0].getLabel());
+                        sysDocumentation[0].setOrigin(sysDocumentationRequest[0].getName());
+                        sysDocumentation[0].setSysCreatedBy(sysDocumentationRequest[0].getSys_created_by());
+                        sysDocumentation[0].setSysCreatedOn(sysDocumentationRequest[0].getSys_created_on());
+                        sysDocumentation[0].setIntegrationId(sysDocumentationRequest[0].getSys_id());
+                        sysDocumentation[0].setSysUpdatedBy(sysDocumentationRequest[0].getSys_updated_by());
+                        sysDocumentation[0].setSysUpdatedOn(sysDocumentationRequest[0].getSys_updated_on());
+                        sysDocumentation[0].setUniqueIdentifier(sysDocumentationRequest[0].getName().concat("•").concat(sysDocumentationRequest[0].getElement()));
+                        sysDocumentation[0].setActive(true);
 
                         tagAction[0] = App.CreateConsole();
-                        exists[0] = sysDocumentationService.findByUniqueIdentifier(sysDocumentation.getUniqueIdentifier());
+                        exists[0] = sysDocumentationService.findByUniqueIdentifier(sysDocumentation[0].getUniqueIdentifier());
                         if (exists[0] != null) {
-                            sysDocumentation.setId(exists[0].getId());
+                            sysDocumentation[0].setId(exists[0].getId());
                             tagAction[0] = App.UpdateConsole();
                         }
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysDocumentation)));
-                        sysDocumentationService.save(sysDocumentation);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysDocumentation[0])));
+                        sysDocumentationService.save(sysDocumentation[0]);
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
                         System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));

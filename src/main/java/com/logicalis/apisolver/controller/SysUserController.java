@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.*;
@@ -29,9 +28,6 @@ import java.util.*;
 @RestController
 @RequestMapping("/api/v1")
 public class SysUserController {
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
     @Autowired
     private ISysUserService sysUserService;
     @Autowired

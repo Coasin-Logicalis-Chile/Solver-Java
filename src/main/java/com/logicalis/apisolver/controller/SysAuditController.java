@@ -190,7 +190,7 @@ public class SysAuditController {
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
         final SysAuditRequest[] sysAuditRequest = {new SysAuditRequest()};
-        SysAudit sysAudit = new SysAudit();
+        final SysAudit[] sysAudit = {new SysAudit()};
         final String[] tagAction = new String[1];
         final SysAudit[] exists = new SysAudit[1];
         final String[] element = new String[1];
@@ -206,11 +206,9 @@ public class SysAuditController {
         final String[] field = new String[1];
         final String[] newValue = new String[1];
         final String[] oldValue = new String[1];
-        //final List<SysAudit>[] sysAudits = new List[]{Arrays.asList(new SysAudit())};
         final List<SysAudit>[] sysAudits = new List[1];
         final List<SysDocumentation>[] documentations = new List[1];
         final List<ChoiceFields>[] choices = new List[1];
-        //final List<ChoiceFields> listChoicefiels = new List[1];
         final SysUser[] sysUser = new SysUser[1];
         final SysGroup[] sysGroup = new SysGroup[1];
         final ConfigurationItem[] configurationItem = new ConfigurationItem[1];
@@ -224,37 +222,39 @@ public class SysAuditController {
                 result = rest.responseByEndPoint(EndPointSN.SysAudit().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.SysAudit().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnSysAuditJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnSysAuditJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListSnSysAuditJson.stream().forEach(snSysAuditJson -> {
                     try {
                         sysAuditRequest[0] = objectMapper.readValue(snSysAuditJson.toString(), SysAuditRequest.class);
                         sysAuditRequests.add(sysAuditRequest[0]);
-                        sysAudit.setFieldname(sysAuditRequest[0].getFieldname());
-                        sysAudit.setReason(sysAuditRequest[0].getReason());
-                        sysAudit.setIntegrationId(sysAuditRequest[0].getSys_id());
-                        sysAudit.setNewvalue(sysAuditRequest[0].getNewvalue());
-                        sysAudit.setSysCreatedOn(sysAuditRequest[0].getSys_created_on());
-                        sysAudit.setDocumentkey(sysAuditRequest[0].getDocumentkey());
-                        sysAudit.setInternalCheckpoint(sysAuditRequest[0].getInternal_checkpoint());
-                        sysAudit.setRecordCheckpoint(sysAuditRequest[0].getRecord_checkpoint());
-                        sysAudit.setTablename(sysAuditRequest[0].getTablename());
-                        sysAudit.setUserName(sysAuditRequest[0].getUser());
-                        sysAudit.setOldvalue(sysAuditRequest[0].getOldvalue());
-                        sysAudit.setSysCreatedBy(sysAuditRequest[0].getSys_created_by());
-                        sysAudit.setActive(true);
+                        sysAudit[0] = new SysAudit();
+                        sysAudit[0].setFieldname(sysAuditRequest[0].getFieldname());
+                        sysAudit[0].setReason(sysAuditRequest[0].getReason());
+                        sysAudit[0].setIntegrationId(sysAuditRequest[0].getSys_id());
+                        sysAudit[0].setNewvalue(sysAuditRequest[0].getNewvalue());
+                        sysAudit[0].setSysCreatedOn(sysAuditRequest[0].getSys_created_on());
+                        sysAudit[0].setDocumentkey(sysAuditRequest[0].getDocumentkey());
+                        sysAudit[0].setInternalCheckpoint(sysAuditRequest[0].getInternal_checkpoint());
+                        sysAudit[0].setRecordCheckpoint(sysAuditRequest[0].getRecord_checkpoint());
+                        sysAudit[0].setTablename(sysAuditRequest[0].getTablename());
+                        sysAudit[0].setUserName(sysAuditRequest[0].getUser());
+                        sysAudit[0].setOldvalue(sysAuditRequest[0].getOldvalue());
+                        sysAudit[0].setSysCreatedBy(sysAuditRequest[0].getSys_created_by());
+                        sysAudit[0].setActive(true);
                         tagAction[0] = App.CreateConsole();
-                        exists[0] = sysAuditService.findByIntegrationId(sysAudit.getIntegrationId());
+                        exists[0] = sysAuditService.findByIntegrationId(sysAudit[0].getIntegrationId());
                         element[0] = "";
                         company[0] = "";
                         if (exists[0] != null) {
-                            sysAudit.setId(exists[0].getId());
+                            sysAudit[0].setId(exists[0].getId());
                             tagAction[0] = App.UpdateConsole();
 
                         }
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysAudit)));
-                        sysAuditService.save(sysAudit);
-                        sysAudits[0] = sysAuditService.findByInternalCheckpoint(sysAudit.getInternalCheckpoint()).stream().
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysAudit[0])));
+                        sysAuditService.save(sysAudit[0]);
+                        sysAudits[0] = sysAuditService.findByInternalCheckpoint(sysAudit[0].getInternalCheckpoint()).stream().
                                 filter(p -> !p.getFieldname().equals(Field.businessDuration.get()) &&
                                         !p.getFieldname().equals(Field.calendarDuration.get()) &&
                                         !p.getFieldname().equals(Field.CalendarStc.get()) &&
@@ -262,36 +262,38 @@ public class SysAuditController {
                                         !p.getFieldname().equals(Field.BusinessStc.get())).
                                 collect(Collectors.toList());
                         template[0] = App.TableData();
+                        templateDetail[0] = "";
+                        journal[0] = new Journal();
                         journal[0].setOrigin(App.OriginFieldChanges());
-                        journal[0].setElement(sysAudit.getDocumentkey());
+                        journal[0].setElement(sysAudit[0].getDocumentkey());
                         journal[0].setReviewed(true);
-                        journal[0].setCreatedOn(sysAudit.getSysCreatedOn());
-                        journal[0].setIntegrationId(sysAudit.getInternalCheckpoint());
-                        journal[0].setInternalCheckpoint(sysAudit.getInternalCheckpoint());
+                        journal[0].setCreatedOn(sysAudit[0].getSysCreatedOn());
+                        journal[0].setIntegrationId(sysAudit[0].getInternalCheckpoint());
+                        journal[0].setInternalCheckpoint(sysAudit[0].getInternalCheckpoint());
                         journal[0].setActive(true);
                         if (sysAuditRequest[0].getTablename().equals(SnTable.Incident.get())) {
-                            incident[0] = incidentService.findByIntegrationId(sysAudit.getDocumentkey());
+                            incident[0] = incidentService.findByIntegrationId(sysAudit[0].getDocumentkey());
                             if (incident[0] != null) {
                                 journal[0].setIncident(incident[0]);
                                 company[0] = Util.getFieldDisplay(incident[0].getCompany());
                                 element[0] = Util.getFieldDisplay(incident[0]);
                             }
                         } else if (sysAuditRequest[0].getTablename().equals(SnTable.ScRequestItem.get())) {
-                            scRequestItem[0] = scRequestItemService.findByIntegrationId(sysAudit.getDocumentkey());
+                            scRequestItem[0] = scRequestItemService.findByIntegrationId(sysAudit[0].getDocumentkey());
                             if (scRequestItem[0] != null) {
                                 journal[0].setScRequestItem(scRequestItem[0]);
                                 company[0] = Util.getFieldDisplay(scRequestItem[0].getCompany());
                                 element[0] = Util.getFieldDisplay(scRequestItem[0]);
                             }
                         } else if (sysAuditRequest[0].getTablename().equals(SnTable.ScRequest.get())) {
-                            scRequest[0] = scRequestService.findByIntegrationId(sysAudit.getDocumentkey());
+                            scRequest[0] = scRequestService.findByIntegrationId(sysAudit[0].getDocumentkey());
                             if (scRequest[0] != null) {
                                 journal[0].setScRequest(scRequest[0]);
                                 company[0] = Util.getFieldDisplay(scRequest[0].getCompany());
                                 element[0] = Util.getFieldDisplay(scRequest[0]);
                             }
                         } else if (sysAuditRequest[0].getTablename().equals(SnTable.ScTask.get())) {
-                            scTask[0] = scTaskService.findByIntegrationId(sysAudit.getDocumentkey());
+                            scTask[0] = scTaskService.findByIntegrationId(sysAudit[0].getDocumentkey());
                             scRequestItem[0] = scTask[0].getScRequestItem();
                             if (scRequestItem[0] != null) {
                                 journal[0].setScRequestItem(scRequestItem[0]);

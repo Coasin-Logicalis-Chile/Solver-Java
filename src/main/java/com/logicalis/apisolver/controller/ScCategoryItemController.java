@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.ScCategoryItem;
@@ -118,4 +117,3 @@ public class ScCategoryItemController {
 		return new ResponseEntity<ScCategoryItem>(scCategoryItem, HttpStatus.OK);
 	}
 }
-

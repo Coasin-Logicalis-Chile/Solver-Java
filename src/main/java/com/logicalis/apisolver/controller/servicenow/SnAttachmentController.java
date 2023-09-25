@@ -67,7 +67,6 @@ public class SnAttachmentController {
                     downloadFile = new File(attachment.getDownloadLink());
                     System.out.println("LINUX");
                     System.out.println(downloadFile.getAbsolutePath());
-
                 } else {
                     RestTemplate restTemplate = rest.restTemplateServiceNow();
                     downloadFile = rest.responseFileByEndPointSO(attachment, restTemplate, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
@@ -124,21 +123,17 @@ public class SnAttachmentController {
                     downloadFile = new File(attachment.getDownloadLink());
                     System.out.println("LINUX");
                     System.out.println(downloadFile.getAbsolutePath());
-
                 } else {
                     RestTemplate restTemplate = rest.restTemplateServiceNow();
                     downloadFile = rest.responseFileByEndPointSO(attachment, restTemplate, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
                     attachment.setDownloadLink(downloadFile.getAbsolutePath());
                     attachment = attachmentService.save(attachment);
-
                     System.out.println("SERVICENOW");
                     System.out.println(downloadFile.getAbsolutePath());
                 }
-
                 byte[] fileByte = Files.readAllBytes(downloadFile.toPath());
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(fileByte);
                 attachmentResource[0] = new InputStreamResource(inputStream);
-
             } catch (JsonProcessingException e) {
                 System.out.println(tag.concat("/snAttachment/{id} JsonProcessingException (I) : ").concat(String.valueOf(e)));
             } catch (IOException e) {
@@ -167,7 +162,6 @@ public class SnAttachmentController {
 
     @GetMapping("/attachments/{integrationId}")
     public List<Attachment> show(@PathVariable String integrationId) {
-
         System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnAttachment> snAttachments = new ArrayList<>();
@@ -187,62 +181,64 @@ public class SnAttachmentController {
             JSONParser parser = new JSONParser();
             JSONObject resultJson = (JSONObject) parser.parse(result);
             JSONArray ListSnAttachmentJson = new JSONArray();
+            final Domain[] domain = new Domain[1];
+            final Incident[] incident = new Incident[1];
+            final ScRequestItem[] scRequestItem = new ScRequestItem[1];
+            final ScTask[] scTask = new ScTask[1];
+            final Attachment[] exists = new Attachment[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             if (resultJson.get("result") != null)
                 ListSnAttachmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
+            final String[] tagAction = {App.CreateConsole()};
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            final SnAttachment[] snAttachment = new SnAttachment[1];
+            Attachment attachment = new Attachment();
             ListSnAttachmentJson.forEach(snAttachmentJson -> {
-                String tagAction = App.CreateConsole();
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+                tagAction[0] = App.CreateConsole();
                 try {
-                    SnAttachment snAttachment = objectMapper.readValue(snAttachmentJson.toString(), SnAttachment.class);
-                    Attachment attachment = new Attachment();
-                    attachment.setActive(snAttachment.getActive());
-                    attachment.setIntegrationId(snAttachment.getSys_id());
-                    attachment.setDownloadLinkSN(snAttachment.getDownload_link());
-                    attachment.setExtension(".".concat(snAttachment.getFile_name().substring(Math.max(0, snAttachment.getFile_name().length() - 5)).split("\\s*[.]+")[1]));
-                    attachment.setFileName(snAttachment.getFile_name());
-                    attachment.setElement(snAttachment.getTable_sys_id());
-                    attachment.setOrigin(snAttachment.getTable_name());
-                    attachment.setContentType(snAttachment.getContent_type());
-                    attachment.setSysCreatedBy(snAttachment.getSys_created_by());
-                    attachment.setSysCreatedOn(snAttachment.getSys_created_on());
-                    attachment.setSysUpdatedBy(snAttachment.getSys_updated_by());
-                    attachment.setSysUpdatedOn(snAttachment.getSys_updated_on());
-
-                    Domain domain = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
-                    if (domain != null)
-                        attachment.setDomain(domain);
-
+                    snAttachment[0] = objectMapper.readValue(snAttachmentJson.toString(), SnAttachment.class);
+                    attachment.setActive(snAttachment[0].getActive());
+                    attachment.setIntegrationId(snAttachment[0].getSys_id());
+                    attachment.setDownloadLinkSN(snAttachment[0].getDownload_link());
+                    attachment.setExtension(".".concat(snAttachment[0].getFile_name().substring(Math.max(0, snAttachment[0].getFile_name().length() - 5)).split("\\s*[.]+")[1]));
+                    attachment.setFileName(snAttachment[0].getFile_name());
+                    attachment.setElement(snAttachment[0].getTable_sys_id());
+                    attachment.setOrigin(snAttachment[0].getTable_name());
+                    attachment.setContentType(snAttachment[0].getContent_type());
+                    attachment.setSysCreatedBy(snAttachment[0].getSys_created_by());
+                    attachment.setSysCreatedOn(snAttachment[0].getSys_created_on());
+                    attachment.setSysUpdatedBy(snAttachment[0].getSys_updated_by());
+                    attachment.setSysUpdatedOn(snAttachment[0].getSys_updated_on());
+                    domain[0] = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(), App.Value());
+                    if (domain[0] != null)
+                        attachment.setDomain(domain[0]);
                     switch (attachment.getOrigin()) {
                         case "incident":
-                            Incident incident = incidentService.findByIntegrationId(attachment.getElement());
-                            if (incident != null)
-                                attachment.setIncident(incident);
+                            incident[0] = incidentService.findByIntegrationId(attachment.getElement());
+                            if (incident[0] != null)
+                                attachment.setIncident(incident[0]);
                             break;
                         case "sc_req_item":
-                            ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(attachment.getElement());
-                            if (scRequestItem != null)
-                                attachment.setScRequestItem(scRequestItem);
+                            scRequestItem[0] = scRequestItemService.findByIntegrationId(attachment.getElement());
+                            if (scRequestItem[0] != null)
+                                attachment.setScRequestItem(scRequestItem[0]);
                             break;
                         case "sc_task":
-                            ScTask scTask = scTaskService.findByIntegrationId(attachment.getElement());
-                            if (scTask != null)
-                                attachment.setScTask(scTask);
+                            scTask[0] = scTaskService.findByIntegrationId(attachment.getElement());
+                            if (scTask[0] != null)
+                                attachment.setScTask(scTask[0]);
                             break;
                     }
-
-
-                    snAttachments.add(snAttachment);
-                    Attachment exists = attachmentService.findByIntegrationId(attachment.getIntegrationId());
-                    if (exists != null) {
-                        attachment.setId(exists.getId());
-                        tagAction = App.UpdateConsole();
+                    snAttachments.add(snAttachment[0]);
+                    exists[0] = attachmentService.findByIntegrationId(attachment.getIntegrationId());
+                    if (exists[0] != null) {
+                        attachment.setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
                     attachmentService.save(attachment);
-                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain));
-
-
+                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment)), Util.getFieldDisplay(domain[0]));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
@@ -253,7 +249,6 @@ public class SnAttachmentController {
             });
 
             apiResponse = mapper.readValue(result, APIResponse.class);
-            APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Incident());
             status.setUserAPI(App.SNUser());
             status.setPasswordAPI(App.SNPassword());

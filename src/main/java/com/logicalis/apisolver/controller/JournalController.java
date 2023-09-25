@@ -402,6 +402,7 @@ public class JournalController {
                 result = rest.responseByEndPoint(EndPointSN.Journal().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.Journal().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnJournalJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnJournalJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
@@ -409,6 +410,9 @@ public class JournalController {
                     flag[0] = false;
                     try {
                         journalRequest[0] = objectMapper.readValue(snJournalJson.toString(), JournalRequest.class);
+                        journal[0] = new Journal();
+                        element[0] = "";
+                        company[0] = "";
                         if (journalRequest[0].getName().equals(SnTable.Incident.get())) {
                             incident[0] = incidentService.findByIntegrationId(journalRequest[0].getElement_id());
                             if (incident[0] != null) {
@@ -495,7 +499,7 @@ public class JournalController {
         JSONArray ListSnJournalJson = new JSONArray();
         ObjectMapper objectMapper = new ObjectMapper();
         objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        Journal journal = new Journal();
+        final Journal[] journal = {new Journal()};
         final String[] element = {""};
         final String[] company = {""};
         final JournalRequest[] journalRequest = {new JournalRequest()};
@@ -515,18 +519,20 @@ public class JournalController {
                 result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnJournalJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnJournalJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListSnJournalJson.stream().forEach(snJournalJson -> {
                     flag[0] = false;
                     try {
                         journalRequest[0] = objectMapper.readValue(snJournalJson.toString(), JournalRequest.class);
+                        journal[0] = new Journal();
                         element[0] = "";
                         company[0] = "";
                         if (journalRequest[0].getName().equals(SnTable.Incident.get())) {
                             incident[0] = incidentService.findByIntegrationId(journalRequest[0].getElement_id());
                             if (incident[0] != null) {
-                                journal.setIncident(incident[0]);
+                                journal[0].setIncident(incident[0]);
                                 flag[0] = incident[0].getCompany().getSolver();
                                 company[0] = Util.getFieldDisplay(incident[0].getCompany());
                                 element[0] = Util.getFieldDisplay(incident[0]);
@@ -534,7 +540,7 @@ public class JournalController {
                         } else if (journalRequest[0].getName().equals(SnTable.ScRequestItem.get())) {
                             scRequestItem[0] = scRequestItemService.findByIntegrationId(journalRequest[0].getElement_id());
                             if (scRequestItem[0] != null) {
-                                journal.setScRequestItem(scRequestItem[0]);
+                                journal[0].setScRequestItem(scRequestItem[0]);
                                 flag[0] = scRequestItem[0].getCompany().getSolver();
                                 company[0] = Util.getFieldDisplay(scRequestItem[0].getCompany());
                                 element[0] = Util.getFieldDisplay(scRequestItem[0]);
@@ -542,7 +548,7 @@ public class JournalController {
                         } else if (journalRequest[0].getName().equals(SnTable.ScRequest.get())) {
                             scRequest[0] = scRequestService.findByIntegrationId(journalRequest[0].getElement_id());
                             if (scRequest[0] != null) {
-                                journal.setScRequest(scRequest[0]);
+                                journal[0].setScRequest(scRequest[0]);
                                 flag[0] = scRequest[0].getCompany().getSolver();
                                 company[0] = Util.getFieldDisplay(scRequest[0].getCompany());
                                 element[0] = Util.getFieldDisplay(scRequest[0]);
@@ -550,25 +556,25 @@ public class JournalController {
                         }
                         if (flag[0]) {
                             journalRequests.add(journalRequest[0]);
-                            journal.setOrigin(journalRequest[0].getElement());
-                            journal.setElement(journalRequest[0].getElement_id());
-                            journal.setValue(Util.reeplaceImg(journalRequest[0].getValue().trim()));
-                            journal.setCreatedOn(journalRequest[0].getSys_created_on());
-                            journal.setIntegrationId(journalRequest[0].getSys_id());
-                            journal.setActive(true);
+                            journal[0].setOrigin(journalRequest[0].getElement());
+                            journal[0].setElement(journalRequest[0].getElement_id());
+                            journal[0].setValue(Util.reeplaceImg(journalRequest[0].getValue().trim()));
+                            journal[0].setCreatedOn(journalRequest[0].getSys_created_on());
+                            journal[0].setIntegrationId(journalRequest[0].getSys_id());
+                            journal[0].setActive(true);
                             if (Util.hasData(journalRequest[0].getSys_created_by())) {
                                 openedBy[0] = sysUserService.findByUserName(journalRequest[0].getSys_created_by());
                                 if (openedBy[0] != null)
-                                    journal.setCreateBy(openedBy[0]);
+                                    journal[0].setCreateBy(openedBy[0]);
                             }
                             tagAction[0] = App.CreateConsole();
-                            exists[0] = journalService.findByIntegrationId(journal.getIntegrationId());
+                            exists[0] = journalService.findByIntegrationId(journal[0].getIntegrationId());
                             if (exists[0] != null) {
-                                journal.setId(exists[0].getId());
+                                journal[0].setId(exists[0].getId());
                                 tagAction[0] = App.UpdateConsole();
                             }
-                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(journal)), element[0], company[0]);
-                            journalService.save(journal);
+                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(journal[0])), element[0], company[0]);
+                            journalService.save(journal[0]);
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {
@@ -613,7 +619,7 @@ public class JournalController {
         final JournalRequest[] journalRequest = {new JournalRequest()};
         final Journal[] exists = new Journal[1];
         final ScRequestItem[] scRequestItem = new ScRequestItem[1];
-        Journal journal = new Journal();
+        final Journal[] journal = {new Journal()};
         final ScRequest[] scRequest = new ScRequest[1];
         final SysUser[] openedBy = new SysUser[1];
         final String[] tagAction = new String[1];
@@ -625,23 +631,25 @@ public class JournalController {
                 String result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnJournalJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnJournalJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListSnJournalJson.stream().forEach(snJournalJson -> {
                     flag[0] = false;
                     try {
+                        journal[0] = new Journal();
                         tagAction[0] = App.CreateConsole();
                         journalRequest[0] = mapper.readValue(snJournalJson.toString(), JournalRequest.class);
                         exists[0] = journalService.findByIntegrationId(journalRequest[0].getSys_id());
                         if (exists[0] != null) {
-                            journal.setId(exists[0].getId());
+                            journal[0].setId(exists[0].getId());
                         } else {
                             element[0] = "";
                             company[0] = "";
                             if (journalRequest[0].getName().equals(SnTable.Incident.get())) {
                                 incident[0] = incidentService.findByIntegrationId(journalRequest[0].getElement_id());
                                 if (incident[0] != null) {
-                                    journal.setIncident(incident[0]);
+                                    journal[0].setIncident(incident[0]);
                                     flag[0] = incident[0].getCompany().getSolver();
                                     company[0] = Util.getFieldDisplay(incident[0].getCompany());
                                     element[0] = Util.getFieldDisplay(incident[0]);
@@ -649,7 +657,7 @@ public class JournalController {
                             } else if (journalRequest[0].getName().equals(SnTable.ScRequestItem.get())) {
                                 scRequestItem[0] = scRequestItemService.findByIntegrationId(journalRequest[0].getElement_id());
                                 if (scRequestItem[0] != null) {
-                                    journal.setScRequestItem(scRequestItem[0]);
+                                    journal[0].setScRequestItem(scRequestItem[0]);
                                     flag[0] = scRequestItem[0].getCompany().getSolver();
                                     company[0] = Util.getFieldDisplay(scRequestItem[0].getCompany());
                                     element[0] = Util.getFieldDisplay(scRequestItem[0]);
@@ -657,7 +665,7 @@ public class JournalController {
                             } else if (journalRequest[0].getName().equals(SnTable.ScRequest.get())) {
                                 scRequest[0] = scRequestService.findByIntegrationId(journalRequest[0].getElement_id());
                                 if (scRequest[0] != null) {
-                                    journal.setScRequest(scRequest[0]);
+                                    journal[0].setScRequest(scRequest[0]);
                                     flag[0] = scRequest[0].getCompany().getSolver();
                                     company[0] = Util.getFieldDisplay(scRequest[0].getCompany());
                                     element[0] = Util.getFieldDisplay(scRequest[0]);
@@ -665,19 +673,19 @@ public class JournalController {
                             }
                             if (flag[0]) {
                                 journalRequests.add(journalRequest[0]);
-                                journal.setOrigin(journalRequest[0].getElement());
-                                journal.setElement(journalRequest[0].getElement_id());
-                                journal.setValue(Util.reeplaceImg(journalRequest[0].getValue().trim()));
-                                journal.setCreatedOn(journalRequest[0].getSys_created_on());
-                                journal.setIntegrationId(journalRequest[0].getSys_id());
-                                journal.setActive(true);
+                                journal[0].setOrigin(journalRequest[0].getElement());
+                                journal[0].setElement(journalRequest[0].getElement_id());
+                                journal[0].setValue(Util.reeplaceImg(journalRequest[0].getValue().trim()));
+                                journal[0].setCreatedOn(journalRequest[0].getSys_created_on());
+                                journal[0].setIntegrationId(journalRequest[0].getSys_id());
+                                journal[0].setActive(true);
                                 if (Util.hasData(journalRequest[0].getSys_created_by())) {
                                     openedBy[0] = sysUserService.findByUserName(journalRequest[0].getSys_created_by());
                                     if (openedBy[0] != null)
-                                        journal.setCreateBy(openedBy[0]);
+                                        journal[0].setCreateBy(openedBy[0]);
                                 }
-                                Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(journal)), element[0], company[0]);
-                                journalService.save(journal);
+                                Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(journal[0])), element[0], company[0]);
+                                journalService.save(journal[0]);
                                 count[0] = count[0] + 1;
                             }
                         }
@@ -743,17 +751,18 @@ public class JournalController {
             final JournalRequest[] journalRequest = {new JournalRequest()};
             final ScRequest[] scRequest = new ScRequest[1];
             final ScRequestItem[] scRequestItem = new ScRequestItem[1];
-            Journal journal = new Journal();
+            final Journal[] journal = {new Journal()};
             if (resultJson.get("result") != null)
                 ListSnJournalJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             ListSnJournalJson.stream().forEach(snJournalJson -> {
                 flag[0] = false;
                 try {
                     journalRequest[0] = objectMapper.readValue(snJournalJson.toString(), JournalRequest.class);
+                    journal[0] = new Journal();
                     if (journalRequest[0].getName().equals(SnTable.Incident.get())) {
                         incident[0] = incidentService.findByIntegrationId(journalRequest[0].getElement_id());
                         if (incident[0] != null) {
-                            journal.setIncident(incident[0]);
+                            journal[0].setIncident(incident[0]);
                             flag[0] = incident[0].getCompany().getSolver();
                             company[0] = Util.getFieldDisplay(incident[0].getCompany());
                             element[0] = Util.getFieldDisplay(incident[0]);
@@ -761,7 +770,7 @@ public class JournalController {
                     } else if (journalRequest[0].getName().equals(SnTable.ScRequestItem.get())) {
                         scRequestItem[0] = scRequestItemService.findByIntegrationId(journalRequest[0].getElement_id());
                         if (scRequestItem[0] != null) {
-                            journal.setScRequestItem(scRequestItem[0]);
+                            journal[0].setScRequestItem(scRequestItem[0]);
                             flag[0] = scRequestItem[0].getCompany().getSolver();
                             company[0] = Util.getFieldDisplay(scRequestItem[0].getCompany());
                             element[0] = Util.getFieldDisplay(scRequestItem[0]);
@@ -769,7 +778,7 @@ public class JournalController {
                     } else if (journalRequest[0].getName().equals(SnTable.ScRequest.get())) {
                         scRequest[0] = scRequestService.findByIntegrationId(journalRequest[0].getElement_id());
                         if (scRequest[0] != null) {
-                            journal.setScRequest(scRequest[0]);
+                            journal[0].setScRequest(scRequest[0]);
                             flag[0] = scRequest[0].getCompany().getSolver();
                             company[0] = Util.getFieldDisplay(scRequest[0].getCompany());
                             element[0] = Util.getFieldDisplay(scRequest[0]);
@@ -777,16 +786,16 @@ public class JournalController {
                     }
                     if (flag[0]) {
                         journalRequests.add(journalRequest[0]);
-                        journal.setOrigin(journalRequest[0].getElement());
-                        journal.setElement(journalRequest[0].getElement_id());
-                        journal.setValue(Util.reeplaceImg(journalRequest[0].getValue().trim()));
+                        journal[0].setOrigin(journalRequest[0].getElement());
+                        journal[0].setElement(journalRequest[0].getElement_id());
+                        journal[0].setValue(Util.reeplaceImg(journalRequest[0].getValue().trim()));
                         p[0] = Pattern.compile(".*\\<[^>]+>.*");
-                        m[0] = p[0].matcher(journal.getValue());
-                        if (m[0].find() && !journal.getReviewed()) {
+                        m[0] = p[0].matcher(journal[0].getValue());
+                        if (m[0].find() && !journal[0].getReviewed()) {
                             attachments.forEach(attachment -> {
-                                journal.setParse(true);
-                                journal.setReviewed(true);
-                                master[0] = journal.getValue();
+                                journal[0].setParse(true);
+                                journal[0].setReviewed(true);
+                                master[0] = journal[0].getValue();
                                 target[0] = EndPointSN.SrcAttachment().concat(attachment.getIntegrationId());
                                 replacement[0] = environment.getProperty("setting.url.api.img").concat(":").concat(environment.getProperty("server.port")).concat(environment.getProperty("setting.api.version")).concat("/").concat("snAttachment/").concat(attachment.getId().toString());
                                 startIndex[0] = master[0].indexOf(target[0]);
@@ -794,26 +803,26 @@ public class JournalController {
                                 builder[0] = new StringBuilder(master[0]);
                                 if (startIndex[0] != -1) {
                                     builder[0].replace(startIndex[0], stopIndex[0], replacement[0]);
-                                    journal.setValue(builder[0].toString());
+                                    journal[0].setValue(builder[0].toString());
                                 }
                             });
                         }
-                        journal.setCreatedOn(journalRequest[0].getSys_created_on());
-                        journal.setIntegrationId(journalRequest[0].getSys_id());
-                        journal.setActive(true);
+                        journal[0].setCreatedOn(journalRequest[0].getSys_created_on());
+                        journal[0].setIntegrationId(journalRequest[0].getSys_id());
+                        journal[0].setActive(true);
                         if (Util.hasData(journalRequest[0].getSys_created_by())) {
                             openedBy[0] = sysUserService.findByUserName(journalRequest[0].getSys_created_by());
                             if (openedBy[0] != null)
-                                journal.setCreateBy(openedBy[0]);
+                                journal[0].setCreateBy(openedBy[0]);
                         }
                         tagAction[0] = App.CreateConsole();
-                        exists[0] = journalService.findByIntegrationId(journal.getIntegrationId());
+                        exists[0] = journalService.findByIntegrationId(journal[0].getIntegrationId());
                         if (exists[0] != null) {
-                            journal.setId(exists[0].getId());
+                            journal[0].setId(exists[0].getId());
                             tagAction[0] = App.UpdateConsole();
                         }
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(journal)), element[0], company[0]);
-                        journalService.save(journal);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(journal[0])), element[0], company[0]);
+                        journalService.save(journal[0]);
                         count[0] = count[0] + 1;
                     }
                 } catch (Exception e) {
