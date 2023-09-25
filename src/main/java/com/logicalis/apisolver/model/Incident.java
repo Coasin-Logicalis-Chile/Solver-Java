@@ -14,7 +14,6 @@ public class Incident implements Serializable {
     private Long id;
     @Column(unique = true)
     private String integrationId;
-    //private String parent;
 
     @Column(unique = true)
     private String number;

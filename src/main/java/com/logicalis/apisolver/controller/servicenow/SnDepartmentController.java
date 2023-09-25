@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -13,7 +12,6 @@ import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.ICompanyService;
 import com.logicalis.apisolver.services.IDepartmentService;
 import com.logicalis.apisolver.services.IDomainService;
-import com.logicalis.apisolver.services.servicenow.ISnDepartmentService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import org.json.simple.JSONArray;
@@ -32,9 +30,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnDepartmentController {
-
-    @Autowired
-    private ISnDepartmentService snDepartmentService;
     @Autowired
     private IDepartmentService departmentService;
     @Autowired
@@ -45,12 +40,10 @@ public class SnDepartmentController {
     private ICompanyService companyService;
     @Autowired
     private Rest rest;
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
 
     @GetMapping("/sn_departments")
     public List<SnDepartment> show() {
-        System.out.println(app.Start());
+        System.out.println(App.Start());
         APIResponse apiResponse = null;
         List<SnDepartment> snDepartments = new ArrayList<>();
         long startTime = 0;
@@ -63,75 +56,75 @@ public class SnDepartmentController {
             System.out.println(tag.concat("(Get All Companies)"));
 
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Department());
+            String result = rest.responseByEndPoint(EndPointSN.Department());
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             JSONParser parser = new JSONParser();
             JSONObject resultJson = (JSONObject) parser.parse(result);
-
             JSONArray ListSnDepartmentJson = new JSONArray();
+            final Department[] department = {new Department()};
+            final String[] domainSysId = new String[1];
+            final Domain[] domain = new Domain[1];
+            final String[] companySysId = new String[1];
+            final Company[] company = new Company[1];
+            final Department[] exists = new Department[1];
+            final String[] tagAction = new String[1];
+            APIExecutionStatus status = new APIExecutionStatus();
+            final SnDepartment[] snDepartment = new SnDepartment[1];
             if (resultJson.get("result") != null)
                 ListSnDepartmentJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListSnDepartmentJson.forEach(snDepartmentJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    SnDepartment snDepartment = objectMapper.readValue(snDepartmentJson.toString(), SnDepartment.class);
-                    snDepartments.add(snDepartment);
-                    Department department = new Department();
-                    department.setActive(snDepartment.isActive());
-                    department.setName(snDepartment.getName());
-                    department.setDescription(snDepartment.getDescription());
-                    department.setIntegrationId(snDepartment.getsys_id());
+                    snDepartment[0] = mapper.readValue(snDepartmentJson.toString(), SnDepartment.class);
+                    snDepartments.add(snDepartment[0]);
+                    department[0] = new Department();
+                    department[0].setActive(snDepartment[0].isActive());
+                    department[0].setName(snDepartment[0].getName());
+                    department[0].setDescription(snDepartment[0].getDescription());
+                    department[0].setIntegrationId(snDepartment[0].getsys_id());
 
-                    String domainSysId = Util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = Util.filterDomain(domains, domainSysId);
-                    if (domain != null)
-                        department.setDomain(domain);
+                    domainSysId[0] = Util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Domain.get(), App.Value());
+                    domain[0] = Util.filterDomain(domains, domainSysId[0]);
+                    if (domain[0] != null)
+                        department[0].setDomain(domain[0]);
 
-                    String companySysId = Util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Company.get(), app.Value());
-                    Company company = Util.filterCompany(companies, companySysId);
-                    if (company != null)
-                        department.setCompany(company);
+                    companySysId[0] = Util.getIdByJson((JSONObject) snDepartmentJson, SnTable.Company.get(), App.Value());
+                    company[0] = Util.filterCompany(companies, companySysId[0]);
+                    if (company[0] != null)
+                        department[0].setCompany(company[0]);
 
-
-                    Department exists = departmentService.findByIntegrationId(department.getIntegrationId());
-                    String tagAction = app.CreateConsole();
-                    if (exists != null) {
-                        department.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                    exists[0] = departmentService.findByIntegrationId(department[0].getIntegrationId());
+                    tagAction[0] = App.CreateConsole();
+                    if (exists[0] != null) {
+                        department[0].setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
 
                     Util.printData(tag,
                             count[0],
-                            tagAction.concat((department != null ? department.getName() != "" ? department.getName() : app.Name() : app.Name())),
-                            (company != null ? company.getName() != "" ? company.getName() : app.Company() : app.Company()));
+                            tagAction[0].concat((department[0] != null ? department[0].getName() != "" ? department[0].getName() : App.Name() : App.Name())),
+                            (company[0] != null ? company[0].getName() != "" ? company[0].getName() : App.Company() : App.Company()));
 
-                    departmentService.save(department);
+                    departmentService.save(department[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
-
             apiResponse = mapper.readValue(result, APIResponse.class);
-
-            APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Department());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Department());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
             statusService.save(status);
-
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        System.out.println(App.End());
         return snDepartments;
     }
 }

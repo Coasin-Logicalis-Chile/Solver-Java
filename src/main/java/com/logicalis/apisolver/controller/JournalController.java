@@ -624,11 +624,12 @@ public class JournalController {
         final SysUser[] openedBy = new SysUser[1];
         final String[] tagAction = new String[1];
         final Incident[] incident = new Incident[1];
+        String result;
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
+                result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnJournalJson.clear();

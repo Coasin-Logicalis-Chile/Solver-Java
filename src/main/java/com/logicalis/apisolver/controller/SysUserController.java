@@ -18,7 +18,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -50,7 +49,6 @@ public class SysUserController {
     public ResponseEntity<?> show(@PathVariable Long id) {
         SysUser sysUser = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysUser = sysUserService.findById(id);
         } catch (DataAccessException e) {
@@ -58,7 +56,6 @@ public class SysUserController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (sysUser == null) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -68,10 +65,8 @@ public class SysUserController {
 
     @GetMapping("/sysUserByIntegrationId/{integrationId}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {
-
         SysUser sysUser = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysUser = sysUserService.findByIntegrationId(integrationId);
         } catch (DataAccessException e) {
@@ -210,7 +205,6 @@ public class SysUserController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUser", sysUserUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
@@ -300,7 +294,6 @@ public class SysUserController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-
     @GetMapping("/sysUsersByMySysGroups")
     public ResponseEntity<List<SysUserFields>> findSysUsersByMySysGroups(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company,
                                                                          @NotNull @RequestParam(value = "sysUser", required = true, defaultValue = "0") Long sysUser) {
@@ -308,7 +301,6 @@ public class SysUserController {
         ResponseEntity<List<SysUserFields>> pageResponseEntity = new ResponseEntity<>(sysUsers, HttpStatus.OK);
         return pageResponseEntity;
     }
-
 
     @GetMapping("/sysUserByEmailAndSolverAndCode")
     public ResponseEntity<SysUser> getCodeByEmailAndSolver(@NotNull @RequestParam(value = "email", required = true, defaultValue = "0") String email,
@@ -360,4 +352,3 @@ public class SysUserController {
             return null;
     }
 }
-

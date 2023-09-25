@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,7 +11,6 @@ import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.ICatalogService;
 import com.logicalis.apisolver.services.IScCategoryItemService;
 import com.logicalis.apisolver.services.IScCategoryService;
-import com.logicalis.apisolver.services.servicenow.ISnScCategoryItemService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import org.json.simple.JSONArray;
@@ -31,9 +29,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnScCategoryItemController {
-
-    @Autowired
-    private ISnScCategoryItemService snScCategoryItemService;
     @Autowired
     private IScCategoryItemService scCategoryItemService;
     @Autowired
@@ -62,40 +57,43 @@ public class SnScCategoryItemController {
             JSONParser parser = new JSONParser();
             JSONObject resultJson = (JSONObject) parser.parse(result);
             JSONArray ListSnScCategoryItemJson = new JSONArray();
+            final SnScCategoryItem[] snScCategoryItem = new SnScCategoryItem[1];
+            final ScCategoryItem[] scCategoryItem = {new ScCategoryItem()};
+            final Catalog[] catalog = new Catalog[1];
             if (resultJson.get("result") != null)
                 ListSnScCategoryItemJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
+            final ScCategory[] scCategory = new ScCategory[1];
+            final ScCategoryItem[] exists = new ScCategoryItem[1];
+            final String[] tagAction = new String[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             ListSnScCategoryItemJson.forEach(snCatalogJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    SnScCategoryItem snScCategoryItem = objectMapper.readValue(snCatalogJson.toString(), SnScCategoryItem.class);
-                    snCatalogs.add(snScCategoryItem);
-                    ScCategoryItem scCategoryItem = new ScCategoryItem();
-                    scCategoryItem.setActive(snScCategoryItem.isActive());
-                    scCategoryItem.setName(snScCategoryItem.getName());
-                    scCategoryItem.setDescription(snScCategoryItem.getDescription());
-                    scCategoryItem.setIntegrationId(snScCategoryItem.getSys_id());
+                    snScCategoryItem[0] = mapper.readValue(snCatalogJson.toString(), SnScCategoryItem.class);
+                    snCatalogs.add(snScCategoryItem[0]);
+                    scCategoryItem[0] = new ScCategoryItem();
+                    scCategoryItem[0].setActive(snScCategoryItem[0].isActive());
+                    scCategoryItem[0].setName(snScCategoryItem[0].getName());
+                    scCategoryItem[0].setDescription(snScCategoryItem[0].getDescription());
+                    scCategoryItem[0].setIntegrationId(snScCategoryItem[0].getSys_id());
 
-                    Catalog catalog = getCatalogByIntegrationId((JSONObject) snCatalogJson, "sc_catalogs");
-                    if (catalog != null)
-                        scCategoryItem.setCatalog(catalog);
+                    catalog[0] = getCatalogByIntegrationId((JSONObject) snCatalogJson, "sc_catalogs");
+                    if (catalog[0] != null)
+                        scCategoryItem[0].setCatalog(catalog[0]);
 
-                    ScCategory scCategory = getScCategoryByIntegrationId((JSONObject) snCatalogJson, "category", App.Value());
-                    if (scCategory != null)
-                        scCategoryItem.setScCategory(scCategory);
+                    scCategory[0] = getScCategoryByIntegrationId((JSONObject) snCatalogJson, "category", App.Value());
+                    if (scCategory[0] != null)
+                        scCategoryItem[0].setScCategory(scCategory[0]);
 
-
-                   ScCategoryItem exists = scCategoryItemService.findByIntegrationId(scCategoryItem.getIntegrationId());
-                    String tagAction = App.CreateConsole();
-                    if (exists != null) {
-                        scCategoryItem.setId(exists.getId());
-                        tagAction = App.UpdateConsole();
+                    exists[0] = scCategoryItemService.findByIntegrationId(scCategoryItem[0].getIntegrationId());
+                    tagAction[0] = App.CreateConsole();
+                    if (exists[0] != null) {
+                        scCategoryItem[0].setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
 
-                    Util.printData(tag, count[0],  tagAction.concat(scCategoryItem != null ? scCategoryItem.getName() != "" &&  scCategoryItem.getName() != null  ? scCategoryItem.getName() : App.Title() : App.Title()));
-
-                    scCategoryItemService.save(scCategoryItem);
+                    Util.printData(tag, count[0],  tagAction[0].concat(scCategoryItem[0] != null ? scCategoryItem[0].getName() != "" &&  scCategoryItem[0].getName() != null  ? scCategoryItem[0].getName() : App.Title() : App.Title()));
+                    scCategoryItemService.save(scCategoryItem[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
@@ -103,8 +101,6 @@ public class SnScCategoryItemController {
             });
 
             apiResponse = mapper.readValue(result, APIResponse.class);
-
-            APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.ScCategoryItem());
             status.setUserAPI(App.SNUser());
             status.setPasswordAPI(App.SNPassword());
@@ -112,8 +108,6 @@ public class SnScCategoryItemController {
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
             statusService.save(status);
-
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }

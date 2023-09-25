@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -9,7 +8,6 @@ import com.logicalis.apisolver.model.enums.App;
 import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.servicenow.SnCatalogLine;
 import com.logicalis.apisolver.services.*;
-import com.logicalis.apisolver.services.servicenow.ISnCatalogLineService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import org.json.simple.JSONArray;

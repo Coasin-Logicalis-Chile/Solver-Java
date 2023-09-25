@@ -33,9 +33,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnScCategoryController {
-
-    @Autowired
-    private ISnScCategoryService snScCategoryService;
     @Autowired
     private IScCategoryService scCategoryService;
     @Autowired
@@ -62,42 +59,43 @@ public class SnScCategoryController {
             JSONParser parser = new JSONParser();
             JSONObject resultJson = (JSONObject) parser.parse(result);
             JSONArray ListSnScCategoryJson = new JSONArray();
+            final ScCategory[] scCategory = {new ScCategory()};
+            final Catalog[] catalog = new Catalog[1];
+            final ScCategory[] exists = new ScCategory[1];
+            final String[] tagAction = new String[1];
+            APIExecutionStatus status = new APIExecutionStatus();
+            final SnScCategory[] snScCategory = new SnScCategory[1];
             if (resultJson.get("result") != null)
                 ListSnScCategoryJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListSnScCategoryJson.forEach(snCatalogJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    SnScCategory snScCategory = objectMapper.readValue(snCatalogJson.toString(), SnScCategory.class);
-                    snCatalogs.add(snScCategory);
-                    ScCategory scCategory = new ScCategory();
-                    scCategory.setActive(snScCategory.isActive());
-                    scCategory.setTitle(snScCategory.getTitle());
-                    scCategory.setDescription(snScCategory.getDescription());
-                    scCategory.setIntegrationId(snScCategory.getSys_id());
+                    snScCategory[0] = mapper.readValue(snCatalogJson.toString(), SnScCategory.class);
+                    snCatalogs.add(snScCategory[0]);
+                    scCategory[0] = new ScCategory();
+                    scCategory[0].setActive(snScCategory[0].isActive());
+                    scCategory[0].setTitle(snScCategory[0].getTitle());
+                    scCategory[0].setDescription(snScCategory[0].getDescription());
+                    scCategory[0].setIntegrationId(snScCategory[0].getSys_id());
 
-                    Catalog catalog = getCatalogByIntegrationId((JSONObject) snCatalogJson, SnTable.Catalog.get(), App.Value());
-                    if (catalog != null)
-                        scCategory.setCatalog(catalog);
+                    catalog[0] = getCatalogByIntegrationId((JSONObject) snCatalogJson, SnTable.Catalog.get(), App.Value());
+                    if (catalog[0] != null)
+                        scCategory[0].setCatalog(catalog[0]);
 
-                    ScCategory exists = scCategoryService.findByIntegrationId(scCategory.getIntegrationId());
-                    String tagAction = App.CreateConsole();
-                    if (exists != null) {
-                        scCategory.setId(exists.getId());
-                        tagAction = App.UpdateConsole();
+                    exists[0] = scCategoryService.findByIntegrationId(scCategory[0].getIntegrationId());
+                    tagAction[0] = App.CreateConsole();
+                    if (exists[0] != null) {
+                        scCategory[0].setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
-                    scCategoryService.save(scCategory);
-                    Util.printData(tag, count[0], tagAction.concat(scCategory != null ? scCategory.getTitle() != "" && scCategory.getTitle() != null ? scCategory.getTitle() : App.Title() : App.Title()));
+                    scCategoryService.save(scCategory[0]);
+                    Util.printData(tag, count[0], tagAction[0].concat(scCategory[0] != null ? scCategory[0].getTitle() != "" && scCategory[0].getTitle() != null ? scCategory[0].getTitle() : App.Title() : App.Title()));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
-
             apiResponse = mapper.readValue(result, APIResponse.class);
-
-            APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.ScCategory());
             status.setUserAPI(App.SNUser());
             status.setPasswordAPI(App.SNPassword());

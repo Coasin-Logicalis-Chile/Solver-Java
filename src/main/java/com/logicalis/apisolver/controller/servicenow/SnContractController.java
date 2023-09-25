@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.logicalis.apisolver.model.enums.Errors;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class SnContractController {
-
 	@Autowired
 	private ISnContractService snContractService;
 	
@@ -31,10 +29,8 @@ public class SnContractController {
 	
 	@GetMapping("/snContract/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		SnContract snContract = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			snContract = snContractService.findById(id);
 		} catch(DataAccessException e){
@@ -42,12 +38,10 @@ public class SnContractController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(snContract == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<SnContract>(snContract, HttpStatus.OK);
 	}
 
@@ -55,7 +49,6 @@ public class SnContractController {
 	@PostMapping("/snContract")
 	public ResponseEntity<?> create(@RequestBody SnContract snContract) {
 		SnContract newSnContract = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newSnContract = snContractService.save(snContract);
@@ -66,19 +59,15 @@ public class SnContractController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("snContract", newSnContract);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/snContract/{id}")
 	public ResponseEntity<?> update(@RequestBody SnContract snContract, @PathVariable Long id) {
-
 		SnContract currentSnContract = snContractService.findById(id);
 		SnContract snContractUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentSnContract == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -102,7 +91,6 @@ public class SnContractController {
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/snContract/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			snContractService.delete(id);

@@ -8,7 +8,6 @@ import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.enums.SnTable;
 import com.logicalis.apisolver.model.servicenow.SnConfigurationItem;
 import com.logicalis.apisolver.services.*;
-import com.logicalis.apisolver.services.servicenow.ISnConfigurationItemService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import org.json.simple.JSONArray;
@@ -28,8 +27,6 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class SnConfigurationItemController {
     @Autowired
-    private ISnConfigurationItemService snConfigurationItemService;
-    @Autowired
     private IConfigurationItemService configurationItemService;
     @Autowired
     private IDomainService domainService;
@@ -43,8 +40,6 @@ public class SnConfigurationItemController {
     private ISysUserService sysUserService;
     @Autowired
     private ISysGroupService sysGroupService;
-    @Autowired
-    private ICiServiceService ciServiceService;
     @Autowired
     private Rest rest;
 
@@ -70,81 +65,92 @@ public class SnConfigurationItemController {
             System.out.println(tag.concat("(Get All Sys Groups)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JSONParser parser = new JSONParser();
+            JSONObject resultJson = new JSONObject();
+            JSONArray ListSnConfigurationItemJson = new JSONArray();
+            final SnConfigurationItem[] snConfigurationItem = {new SnConfigurationItem()};
+            final ConfigurationItem[] configurationItem = {new ConfigurationItem()};
+            APIExecutionStatus status = new APIExecutionStatus();
+            final Company[] company = new Company[1];
+            final Location[] location = new Location[1];
+            final Company[] manufacturer = new Company[1];
+            final SysUser[] assignedTo = new SysUser[1];
+            final SysUser[] ownedBy = new SysUser[1];
+            final Domain[] domain = new Domain[1];
+            final SysGroup[] supportGroup = new SysGroup[1];
+            final String[] tagAction = new String[1];
+            final ConfigurationItem[] exists = new ConfigurationItem[1];
+            String result;
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(EndPointSN.ConfigurationItem().concat(sparmOffSet));
+                result = rest.responseByEndPoint(EndPointSN.ConfigurationItem().concat(sparmOffSet));
                 System.out.println(tag.concat("(".concat(EndPointSN.ConfigurationItem().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListSnConfigurationItemJson = new JSONArray();
-
+                ListSnConfigurationItemJson.clear();
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
                     ListSnConfigurationItemJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnConfigurationItemJson.stream().forEach(snConfigurationItemJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SnConfigurationItem snConfigurationItem = new SnConfigurationItem();
+                    snConfigurationItem[0] = new SnConfigurationItem();
                     try {
-                        snConfigurationItem = objectMapper.readValue(snConfigurationItemJson.toString(), SnConfigurationItem.class);
-                        snConfigurationItems.add(snConfigurationItem);
-                        ConfigurationItem configurationItem = new ConfigurationItem();
-                        configurationItem.setName(snConfigurationItem.getName());
-                        configurationItem.setIntegrationId(snConfigurationItem.getSys_id());
-                        configurationItem.setDescription(snConfigurationItem.getDescription());
-                        configurationItem.setStatus(snConfigurationItem.getStatus());
-                        configurationItem.setUpdated(snConfigurationItem.getUpdated());
-                        configurationItem.setCreatedBy(snConfigurationItem.getSys_created_by());
-                        configurationItem.setAssetTag(snConfigurationItem.getAsset_tag());
-                        configurationItem.setAssigned(snConfigurationItem.getAssigned());
-                        configurationItem.setCategory(snConfigurationItem.getCategory());
-                        configurationItem.setComments(snConfigurationItem.getComments());
-                        configurationItem.setCorrelationId(snConfigurationItem.getCorrelation_id());
-                        configurationItem.setCostCurrency(snConfigurationItem.getCost_cc());
-                        configurationItem.setCreated(snConfigurationItem.getSys_created_on());
-                        configurationItem.setHostname(snConfigurationItem.getHostname());
-                        configurationItem.setImpact(snConfigurationItem.getImpact());
-                        configurationItem.setInstalled(snConfigurationItem.getInstalled());
-                        configurationItem.setModelNumber(snConfigurationItem.getModel_number());
-                        configurationItem.setMonitor(snConfigurationItem.getMonitor());
-                        configurationItem.setOperationalStatus(snConfigurationItem.getOperational_status());
-                        configurationItem.setSerialNumber(snConfigurationItem.getSerial_number());
-                        configurationItem.setSpecialInstruction(snConfigurationItem.getSpecial_instruction());
-                        configurationItem.setSubcategory(snConfigurationItem.getSubcategory());
-                        configurationItem.setUpdatedBy(snConfigurationItem.getSys_updated_by());
+                        snConfigurationItem[0] = mapper.readValue(snConfigurationItemJson.toString(), SnConfigurationItem.class);
+                        snConfigurationItems.add(snConfigurationItem[0]);
+                        configurationItem[0] = new ConfigurationItem();
+                        configurationItem[0].setName(snConfigurationItem[0].getName());
+                        configurationItem[0].setIntegrationId(snConfigurationItem[0].getSys_id());
+                        configurationItem[0].setDescription(snConfigurationItem[0].getDescription());
+                        configurationItem[0].setStatus(snConfigurationItem[0].getStatus());
+                        configurationItem[0].setUpdated(snConfigurationItem[0].getUpdated());
+                        configurationItem[0].setCreatedBy(snConfigurationItem[0].getSys_created_by());
+                        configurationItem[0].setAssetTag(snConfigurationItem[0].getAsset_tag());
+                        configurationItem[0].setAssigned(snConfigurationItem[0].getAssigned());
+                        configurationItem[0].setCategory(snConfigurationItem[0].getCategory());
+                        configurationItem[0].setComments(snConfigurationItem[0].getComments());
+                        configurationItem[0].setCorrelationId(snConfigurationItem[0].getCorrelation_id());
+                        configurationItem[0].setCostCurrency(snConfigurationItem[0].getCost_cc());
+                        configurationItem[0].setCreated(snConfigurationItem[0].getSys_created_on());
+                        configurationItem[0].setHostname(snConfigurationItem[0].getHostname());
+                        configurationItem[0].setImpact(snConfigurationItem[0].getImpact());
+                        configurationItem[0].setInstalled(snConfigurationItem[0].getInstalled());
+                        configurationItem[0].setModelNumber(snConfigurationItem[0].getModel_number());
+                        configurationItem[0].setMonitor(snConfigurationItem[0].getMonitor());
+                        configurationItem[0].setOperationalStatus(snConfigurationItem[0].getOperational_status());
+                        configurationItem[0].setSerialNumber(snConfigurationItem[0].getSerial_number());
+                        configurationItem[0].setSpecialInstruction(snConfigurationItem[0].getSpecial_instruction());
+                        configurationItem[0].setSubcategory(snConfigurationItem[0].getSubcategory());
+                        configurationItem[0].setUpdatedBy(snConfigurationItem[0].getSys_updated_by());
 
-                        Company company = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Company.get(), App.Value()));
-                        if (company != null) configurationItem.setCompany(company);
+                        company[0] = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Company.get(), App.Value()));
+                        if (company[0] != null) configurationItem[0].setCompany(company[0]);
 
-                        Location location = Util.filterLocation(locations, Util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Location.get(), App.Value()));
-                        if (location != null) configurationItem.setLocation(location);
+                        location[0] = Util.filterLocation(locations, Util.getIdByJson((JSONObject) snConfigurationItemJson, SnTable.Location.get(), App.Value()));
+                        if (location[0] != null) configurationItem[0].setLocation(location[0]);
 
-                        Company manufacturer = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snConfigurationItemJson, "manufacturer", App.Value()));
-                        if (manufacturer != null) configurationItem.setManufacturer(manufacturer);
+                        manufacturer[0] = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snConfigurationItemJson, "manufacturer", App.Value()));
+                        if (manufacturer[0] != null) configurationItem[0].setManufacturer(manufacturer[0]);
 
-                        SysUser assignedTo = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snConfigurationItemJson, "assigned_to", App.Value()));
-                        if (assignedTo != null) configurationItem.setAssignedTo(assignedTo);
+                        assignedTo[0] = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snConfigurationItemJson, "assigned_to", App.Value()));
+                        if (assignedTo[0] != null) configurationItem[0].setAssignedTo(assignedTo[0]);
 
-                        SysUser ownedBy = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snConfigurationItemJson, "owned_by", App.Value()));
-                        if (ownedBy != null) configurationItem.setOwnedBy(ownedBy);
+                        ownedBy[0] = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snConfigurationItemJson, "owned_by", App.Value()));
+                        if (ownedBy[0] != null) configurationItem[0].setOwnedBy(ownedBy[0]);
 
-                        Domain domain = Util.filterDomain(domains, Util.getIdByJson((JSONObject) snConfigurationItemJson, "sys_domain", App.Value()));
-                        if (domain != null)
-                            configurationItem.setDomain(domain);
+                        domain[0] = Util.filterDomain(domains, Util.getIdByJson((JSONObject) snConfigurationItemJson, "sys_domain", App.Value()));
+                        if (domain[0] != null)
+                            configurationItem[0].setDomain(domain[0]);
 
-                        SysGroup supportGroup = Util.filterSysGroup(sysGroups, Util.getIdByJson((JSONObject) snConfigurationItemJson, "support_group", App.Value()));
-                        if (supportGroup != null)
-                            configurationItem.setSupportGroup(supportGroup);
-                        String tagAction = App.CreateConsole();
-                        ConfigurationItem exists = configurationItemService.findByIntegrationId(configurationItem.getIntegrationId());
-                        if (exists != null) {
-                            configurationItem.setId(exists.getId());
-                            tagAction = App.UpdateConsole();
+                        supportGroup[0] = Util.filterSysGroup(sysGroups, Util.getIdByJson((JSONObject) snConfigurationItemJson, "support_group", App.Value()));
+                        if (supportGroup[0] != null)
+                            configurationItem[0].setSupportGroup(supportGroup[0]);
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = configurationItemService.findByIntegrationId(configurationItem[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            configurationItem[0].setId(exists[0].getId());
+                            tagAction[0] = App.UpdateConsole();
                         }
-                        configurationItemService.save(configurationItem);
-                        Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(configurationItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
+                        configurationItemService.save(configurationItem[0]);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(configurationItem[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
 
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
@@ -153,7 +159,6 @@ public class SnConfigurationItemController {
                 });
 
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
                 status.setUri(EndPointSN.Location());
                 status.setUserAPI(App.SNUser());
                 status.setPasswordAPI(App.SNPassword());
@@ -163,7 +168,6 @@ public class SnConfigurationItemController {
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }

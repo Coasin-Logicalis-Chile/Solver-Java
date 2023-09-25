@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -9,7 +8,6 @@ import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.enums.SnTable;
 import com.logicalis.apisolver.model.servicenow.SnCiService;
 import com.logicalis.apisolver.services.*;
-import com.logicalis.apisolver.services.servicenow.ISnCiServiceService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import org.json.simple.JSONArray;
@@ -28,8 +26,6 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/v1")
 public class SnCiServiceController {
-	@Autowired
-	private ISnCiServiceService snCiServiceService;
 	@Autowired
 	private ICiServiceService ciServiceService;
 	@Autowired
@@ -69,90 +65,97 @@ public class SnCiServiceController {
 			System.out.println(tag.concat("(Get All Sys Groups)"));
 			startTime = System.currentTimeMillis();
 			final int[] count = {1};
+			String result;
+			ObjectMapper mapper = new ObjectMapper();
+			mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+			JSONParser parser = new JSONParser();
+			JSONObject resultJson = new JSONObject();
+			JSONArray ListSnCiServiceJson = new JSONArray();
+			final SnCiService[] snCiService = {new SnCiService()};
+			final CiService[] ciService = {new CiService()};
+			final Company[] company = new Company[1];
+			final Location[] location = new Location[1];
+			final Company[] manufacturer = new Company[1];
+			final SysUser[] assignedTo = new SysUser[1];
+			final SysUser[] ownedBy = new SysUser[1];
+			final Domain[] domain = new Domain[1];
+			final SysGroup[] supportGroup = new SysGroup[1];
+			final CiService[] exists = new CiService[1];
+			final String[] tagAction = new String[1];
+			APIExecutionStatus status = new APIExecutionStatus();;
 			for (String sparmOffSet : sparmOffSets) {
-				String result = rest.responseByEndPoint(EndPointSN.CiService().concat(sparmOffSet));
+				result = rest.responseByEndPoint(EndPointSN.CiService().concat(sparmOffSet));
 				System.out.println(tag.concat("(".concat(EndPointSN.CiService().concat(sparmOffSet)).concat(")")));
-				ObjectMapper mapper = new ObjectMapper();
-				mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-				JSONParser parser = new JSONParser();
-				JSONObject resultJson = new JSONObject();
-				JSONArray ListSnCiServiceJson = new JSONArray();
-
 				resultJson = (JSONObject) parser.parse(result);
+				ListSnCiServiceJson.clear();
 				if (resultJson.get("result") != null)
 					ListSnCiServiceJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
 				ListSnCiServiceJson.stream().forEach(snCiServiceJson -> {
-					ObjectMapper objectMapper = new ObjectMapper();
-					objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-					SnCiService snCiService = new SnCiService();
+
+					snCiService[0] = new SnCiService();
 					try {
-						snCiService = objectMapper.readValue(snCiServiceJson.toString(), SnCiService.class);
-						snCiServices.add(snCiService);
-						CiService ciService = new CiService();
-						ciService.setName(Util.isNull(snCiService.getName()));
-						ciService.setIntegrationId(Util.isNull(snCiService.getSys_id()));
-						ciService.setShortDescription(Util.isNull(snCiService.getShort_description()));
-						ciService.setStatus(Util.isNull(snCiService.getStatus()));
-						ciService.setUpdated(Util.isNull(snCiService.getUpdated()));
-						ciService.setCreatedBy(Util.isNull(snCiService.getCreated_by()));
-						ciService.setAssetTag(Util.isNull(snCiService.getAsset_tag()));
-						ciService.setCategory(Util.isNull(snCiService.getCategory()));
-						ciService.setComments(Util.isNull(snCiService.getComments()));
-						ciService.setCorrelationId(Util.isNull(snCiService.getCorrelation_id()));
-						ciService.setCostCurrency(Util.isNull(snCiService.getCost_cc()));
-						ciService.setCreated(Util.isNull(snCiService.getCreated()));
-						ciService.setHostname(Util.isNull(snCiService.getHostname()));
-						ciService.setImpact(Util.isNull(snCiService.getImpact()));
-						ciService.setInstalled(Util.isNull(snCiService.getInstalled()));
-						ciService.setModelNumber(Util.isNull(snCiService.getModel_number()));
-						ciService.setMonitor(Util.isNull(snCiService.getMonitor()));
-						ciService.setOperationalStatus(Util.isNull(snCiService.getOperational_status()));
-						ciService.setSerialNumber(Util.isNull(snCiService.getSerial_number()));
-						ciService.setSpecialInstruction(Util.isNull(snCiService.getSpecial_instruction()));
-						ciService.setSubcategory(Util.isNull(snCiService.getSubcategory()));
-						ciService.setUpdatedBy(Util.isNull(snCiService.getUpdated_by()));
+						snCiService[0] = mapper.readValue(snCiServiceJson.toString(), SnCiService.class);
+						snCiServices.add(snCiService[0]);
+						ciService[0] = new CiService();
+						ciService[0].setName(Util.isNull(snCiService[0].getName()));
+						ciService[0].setIntegrationId(Util.isNull(snCiService[0].getSys_id()));
+						ciService[0].setShortDescription(Util.isNull(snCiService[0].getShort_description()));
+						ciService[0].setStatus(Util.isNull(snCiService[0].getStatus()));
+						ciService[0].setUpdated(Util.isNull(snCiService[0].getUpdated()));
+						ciService[0].setCreatedBy(Util.isNull(snCiService[0].getCreated_by()));
+						ciService[0].setAssetTag(Util.isNull(snCiService[0].getAsset_tag()));
+						ciService[0].setCategory(Util.isNull(snCiService[0].getCategory()));
+						ciService[0].setComments(Util.isNull(snCiService[0].getComments()));
+						ciService[0].setCorrelationId(Util.isNull(snCiService[0].getCorrelation_id()));
+						ciService[0].setCostCurrency(Util.isNull(snCiService[0].getCost_cc()));
+						ciService[0].setCreated(Util.isNull(snCiService[0].getCreated()));
+						ciService[0].setHostname(Util.isNull(snCiService[0].getHostname()));
+						ciService[0].setImpact(Util.isNull(snCiService[0].getImpact()));
+						ciService[0].setInstalled(Util.isNull(snCiService[0].getInstalled()));
+						ciService[0].setModelNumber(Util.isNull(snCiService[0].getModel_number()));
+						ciService[0].setMonitor(Util.isNull(snCiService[0].getMonitor()));
+						ciService[0].setOperationalStatus(Util.isNull(snCiService[0].getOperational_status()));
+						ciService[0].setSerialNumber(Util.isNull(snCiService[0].getSerial_number()));
+						ciService[0].setSpecialInstruction(Util.isNull(snCiService[0].getSpecial_instruction()));
+						ciService[0].setSubcategory(Util.isNull(snCiService[0].getSubcategory()));
+						ciService[0].setUpdatedBy(Util.isNull(snCiService[0].getUpdated_by()));
 
-						Company company = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snCiServiceJson, SnTable.Company.get(), App.Value()));
-						if (company != null) ciService.setCompany(company);
+						company[0] = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snCiServiceJson, SnTable.Company.get(), App.Value()));
+						if (company[0] != null) ciService[0].setCompany(company[0]);
 
-						Location location = Util.filterLocation(locations, Util.getIdByJson((JSONObject) snCiServiceJson, SnTable.Location.get(), App.Value()));
-						if (location != null) ciService.setLocation(location);
+						location[0] = Util.filterLocation(locations, Util.getIdByJson((JSONObject) snCiServiceJson, SnTable.Location.get(), App.Value()));
+						if (location[0] != null) ciService[0].setLocation(location[0]);
 
-						Company manufacturer = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snCiServiceJson, "manufacturer", App.Value()));
-						if (manufacturer != null) ciService.setManufacturer(manufacturer);
+						manufacturer[0] = Util.filterCompany(companies, Util.getIdByJson((JSONObject) snCiServiceJson, "manufacturer", App.Value()));
+						if (manufacturer[0] != null) ciService[0].setManufacturer(manufacturer[0]);
 
-						SysUser assignedTo = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snCiServiceJson, "assigned_to", App.Value()));
-						if (assignedTo != null) ciService.setAssignedTo(assignedTo);
+						assignedTo[0] = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snCiServiceJson, "assigned_to", App.Value()));
+						if (assignedTo[0] != null) ciService[0].setAssignedTo(assignedTo[0]);
 
-						SysUser ownedBy = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snCiServiceJson, "owned_by", App.Value()));
-						if (ownedBy != null) ciService.setOwnedBy(ownedBy);
+						ownedBy[0] = Util.filterSysUser(sysUsers, Util.getIdByJson((JSONObject) snCiServiceJson, "owned_by", App.Value()));
+						if (ownedBy[0] != null) ciService[0].setOwnedBy(ownedBy[0]);
 
-						Domain domain = Util.filterDomain(domains, Util.getIdByJson((JSONObject) snCiServiceJson, "sys_domain", App.Value()));
-						if (domain != null) ciService.setDomain(domain);
+						domain[0] = Util.filterDomain(domains, Util.getIdByJson((JSONObject) snCiServiceJson, "sys_domain", App.Value()));
+						if (domain[0] != null) ciService[0].setDomain(domain[0]);
 
-						SysGroup supportGroup = Util.filterSysGroup(sysGroups, Util.getIdByJson((JSONObject) snCiServiceJson, "support_group", App.Value()));
-						if (supportGroup != null) ciService.setSupportGroup(supportGroup);
+						supportGroup[0] = Util.filterSysGroup(sysGroups, Util.getIdByJson((JSONObject) snCiServiceJson, "support_group", App.Value()));
+						if (supportGroup[0] != null) ciService[0].setSupportGroup(supportGroup[0]);
 
-
-						CiService exists = ciServiceService.findByIntegrationId(ciService.getIntegrationId());
-						String tagAction = App.CreateConsole();
-						if (exists!= null) {
-							ciService.setId(exists.getId());
-							tagAction = App.UpdateConsole();
+						exists[0] = ciServiceService.findByIntegrationId(ciService[0].getIntegrationId());
+						tagAction[0] = App.CreateConsole();
+						if (exists[0] != null) {
+							ciService[0].setId(exists[0].getId());
+							tagAction[0] = App.UpdateConsole();
 						}
-						ciServiceService.save(ciService);
-						Util.printData(tag, count[0],  tagAction.concat(Util.getFieldDisplay(ciService)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
-
-
+						ciServiceService.save(ciService[0]);
+						Util.printData(tag, count[0],  tagAction[0].concat(Util.getFieldDisplay(ciService[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
 						count[0] = count[0] + 1;
 					} catch (Exception e) {
 						System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
 					}
 				});
-
 				apiResponse = mapper.readValue(result, APIResponse.class);
-				APIExecutionStatus status = new APIExecutionStatus();
 				status.setUri(EndPointSN.Location());
 				status.setUserAPI(App.SNUser());
 				status.setPasswordAPI(App.SNPassword());
@@ -169,5 +172,4 @@ public class SnCiServiceController {
 		System.out.println(App.End());
 		return snCiServices;
 	}
-
 }

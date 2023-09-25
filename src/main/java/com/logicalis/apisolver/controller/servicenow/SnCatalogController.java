@@ -11,7 +11,6 @@ import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.servicenow.SnCatalog;
 import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.ICatalogService;
-import com.logicalis.apisolver.services.servicenow.ISnCatalogService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import org.json.simple.JSONArray;
@@ -58,7 +57,7 @@ public class SnCatalogController {
             ObjectMapper objectMapper = new ObjectMapper();
             objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             final SnCatalog[] snCatalog = new SnCatalog[1];
-            Catalog catalog = new Catalog();
+            final Catalog[] catalog = {new Catalog()};
             final Catalog[] exists = new Catalog[1];
             final String[] tagAction = new String[1];
             if (resultJson.get("result") != null)
@@ -68,18 +67,19 @@ public class SnCatalogController {
                 try {
                     snCatalog[0] = objectMapper.readValue(snCatalogJson.toString(), SnCatalog.class);
                     snCatalogs.add(snCatalog[0]);
-                    catalog.setActive(snCatalog[0].isActive());
-                    catalog.setTitle(snCatalog[0].getTitle());
-                    catalog.setDescription(snCatalog[0].getDescription());
-                    catalog.setIntegrationId(snCatalog[0].getSys_id());
-                    exists[0] = catalogService.findByIntegrationId(catalog.getIntegrationId());
+                    catalog[0] = new Catalog();
+                    catalog[0].setActive(snCatalog[0].isActive());
+                    catalog[0].setTitle(snCatalog[0].getTitle());
+                    catalog[0].setDescription(snCatalog[0].getDescription());
+                    catalog[0].setIntegrationId(snCatalog[0].getSys_id());
+                    exists[0] = catalogService.findByIntegrationId(catalog[0].getIntegrationId());
                     tagAction[0] = App.CreateConsole();
                     if (exists[0] != null) {
-                        catalog.setId(exists[0].getId());
+                        catalog[0].setId(exists[0].getId());
                         tagAction[0] = App.UpdateConsole();
                     }
-                    Util.printData(tag, count[0], tagAction[0].concat(catalog != null ? catalog.getTitle() != "" ? catalog.getTitle() : App.Title() : App.Title()));
-                    catalogService.save(catalog);
+                    Util.printData(tag, count[0], tagAction[0].concat(catalog[0] != null ? catalog[0].getTitle() != "" ? catalog[0].getTitle() : App.Title() : App.Title()));
+                    catalogService.save(catalog[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));

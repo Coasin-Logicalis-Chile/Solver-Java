@@ -32,8 +32,6 @@ import java.util.List;
 @RequestMapping("/api/v1")
 public class SnGroupController {
     @Autowired
-    private ISnGroupService snGroupService;
-    @Autowired
     private ISysGroupService groupService;
     @Autowired
     private IAPIExecutionStatusService statusService;
@@ -61,47 +59,46 @@ public class SnGroupController {
             JSONParser parser = new JSONParser();
             JSONObject resultJson = (JSONObject) parser.parse(result);
             JSONArray ListSnGroupJson = new JSONArray();
+            final SysGroup[] group = {new SysGroup()};
+            final Domain[] domain = new Domain[1];
+            final Company[] company = new Company[1];
+            final String[] tagAction = new String[1];
+            final SysGroup[] exists = new SysGroup[1];
+            final SysGroup[] current = new SysGroup[1];
+            APIExecutionStatus status = new APIExecutionStatus();
+            final SnGroup[] snGroup = new SnGroup[1];
             if (resultJson.get("result") != null)
                 ListSnGroupJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListSnGroupJson.forEach(snGroupJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    SnGroup snGroup = objectMapper.readValue(snGroupJson.toString(), SnGroup.class);
-                    snGroups.add(snGroup);
-                    SysGroup group = new SysGroup();
-                    group.setActive(snGroup.isActive());
-                    group.setName(snGroup.getName());
-                    group.setIntegrationId(snGroup.getSys_id());
-                    group.setSolver(snGroup.getU_solver());
-                    Domain domain = getDomainByIntegrationId((JSONObject) snGroupJson, SnTable.Domain.get(), App.Value());
-                    if (domain != null)
-                        group.setDomain(domain);
-
-                    Company company = getCompanyByIntegrationId((JSONObject) snGroupJson, SnTable.Company.get(), App.Value());
-
-                    if (company != null)
-                        group.setCompany(company);
-
-                    String tagAction = App.CreateConsole();
-                    SysGroup exists = groupService.findByIntegrationId(group.getIntegrationId());
-                    if (exists != null) {
-                        group.setId(exists.getId());
-                        tagAction = App.UpdateConsole();
+                    snGroup[0] = mapper.readValue(snGroupJson.toString(), SnGroup.class);
+                    snGroups.add(snGroup[0]);
+                    group[0] = new SysGroup();
+                    group[0].setActive(snGroup[0].isActive());
+                    group[0].setName(snGroup[0].getName());
+                    group[0].setIntegrationId(snGroup[0].getSys_id());
+                    group[0].setSolver(snGroup[0].getU_solver());
+                    domain[0] = getDomainByIntegrationId((JSONObject) snGroupJson, SnTable.Domain.get(), App.Value());
+                    if (domain[0] != null)
+                        group[0].setDomain(domain[0]);
+                    company[0] = getCompanyByIntegrationId((JSONObject) snGroupJson, SnTable.Company.get(), App.Value());
+                    if (company[0] != null)
+                        group[0].setCompany(company[0]);
+                    tagAction[0] = App.CreateConsole();
+                    exists[0] = groupService.findByIntegrationId(group[0].getIntegrationId());
+                    if (exists[0] != null) {
+                        group[0].setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
-                    SysGroup current = groupService.save(group);
-                    Util.printData(tag, count[0], tagAction.concat(Util.getFieldDisplay(current)), Util.getFieldDisplay(company), Util.getFieldDisplay(domain));
-
+                    current[0] = groupService.save(group[0]);
+                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(current[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
-
             apiResponse = mapper.readValue(result, APIResponse.class);
-
-            APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Group());
             status.setUserAPI(App.SNUser());
             status.setPasswordAPI(App.SNPassword());
@@ -109,8 +106,6 @@ public class SnGroupController {
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
             statusService.save(status);
-
-
         } catch (Exception e) {
             System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
