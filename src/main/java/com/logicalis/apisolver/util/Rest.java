@@ -7,6 +7,7 @@ import com.logicalis.apisolver.model.enums.App;
 import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.servicenow.SnAttachment;
 import com.logicalis.apisolver.view.JournalRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.hibernate.engine.jdbc.StreamUtils;
 import org.json.simple.JSONObject;
@@ -32,9 +33,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
-
+@Slf4j
 public class Rest {
-    //public Util util = new Util();
     @Autowired
     @Qualifier("solverRestTemplate")
     RestTemplate restTemplate;
@@ -99,7 +99,7 @@ public class Rest {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
-            System.out.println("file upload status code: " + response.getStatusCode());
+            log.info("file upload status code: " + response.getStatusCode());
 
         } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
@@ -154,7 +154,6 @@ public class Rest {
             Domain domain = new Domain();
             domain.setIntegrationId(domainJson.get("value").getAsString());
             attachment.setDomain(domain);
-
         } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
             e.printStackTrace();
             return null;
@@ -166,7 +165,7 @@ public class Rest {
         File file = restTemplate.execute(attachment.getDownload_link(), HttpMethod.GET, null, clientHttpResponse -> {
             File fileRest = new File(attachmentDir.concat(attachment.getSys_id().concat(".".concat(FilenameUtils.getExtension(attachment.getFile_name())))));
             StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(fileRest));
-            System.out.println(fileRest.getAbsolutePath());
+            log.info(fileRest.getAbsolutePath());
             return fileRest;
         });
         return file;
@@ -179,7 +178,7 @@ public class Rest {
             File fileRest = new File(finalFilePath);
             StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(fileRest));
             String tag = "[Attachment] ";
-            System.out.println(tag.concat(fileRest.getAbsolutePath()));
+            log.info(tag.concat(fileRest.getAbsolutePath()));
             return fileRest;
         });
         return file;
@@ -202,7 +201,6 @@ public class Rest {
         }
         return filePath;
     }
-
 
     public String getPathDirectory(Attachment attachment, String filePath) {
         String[] date = attachment.getSysCreatedOn().split(" ")[0].split("-");
@@ -228,7 +226,7 @@ public class Rest {
             filePath = getPathDirectory(attachment, filePath);
             Path path = Paths.get(getPathDirectory(attachment, filePath));
             Files.createDirectories(path);
-            System.out.println(path);
+            log.info(path.toString());
             filePath = getFilePathDirectory(attachment, filePath);
 
         } catch (IOException e) {
@@ -237,11 +235,11 @@ public class Rest {
         }
         String finalFilePath = filePath;
         File file = restTemplate.execute(attachment.getDownloadLinkSN(), HttpMethod.GET, null, clientHttpResponse -> {
-            System.out.println(finalFilePath);
+            log.info(finalFilePath);
             File fileRest = new File(finalFilePath);
-            System.out.println(finalFilePath);
+            log.info(finalFilePath);
             StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(fileRest));
-            System.out.println(fileRest.getAbsolutePath());
+            log.info(fileRest.getAbsolutePath());
             return fileRest;
         });
         return file;

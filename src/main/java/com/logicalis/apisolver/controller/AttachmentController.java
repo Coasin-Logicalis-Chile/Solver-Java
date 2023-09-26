@@ -12,6 +12,7 @@ import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.AttachmentRequest;
 import com.logicalis.apisolver.view.AttachmentSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FilenameUtils;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;

@@ -9,6 +9,7 @@ import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.JournalRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -32,6 +33,7 @@ import java.util.regex.Pattern;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class JournalController {
     @Autowired
     private IJournalService journalService;
@@ -281,6 +283,7 @@ public class JournalController {
 
     @PostMapping("/journal")
     public ResponseEntity<?> create(@RequestBody String json) {
+        log.info("Init creating Jornal");
         Map<String, Object> response = new HashMap<>();
         Journal addJournal = new Journal();
         try {
@@ -304,10 +307,12 @@ public class JournalController {
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+            log.error("Error creating Journal, message {}",response);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("journal", addJournal);
+        log.info("Journal created ok");
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 

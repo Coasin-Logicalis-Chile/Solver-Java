@@ -227,7 +227,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "           AND    b.sys_user = ?7\n" +
             "           and    b.company = a.company))", nativeQuery = true)
     public Long countIncidentsByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean closed, Long assignedToGroup, boolean open);
-    
+
     @Query(value = "SELECT count(*) \n" +
             "from view_incidentes vw\n" +
             "     INNER JOIN (  SELECT distinct a.id AS incident, b.stage\n" +

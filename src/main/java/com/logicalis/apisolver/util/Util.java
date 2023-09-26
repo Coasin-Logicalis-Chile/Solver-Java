@@ -2,21 +2,16 @@ package com.logicalis.apisolver.util;
 
 import com.logicalis.apisolver.model.*;
 import com.logicalis.apisolver.model.enums.App;
-import com.logicalis.apisolver.model.servicenow.SnAttachment;
+import lombok.extern.slf4j.Slf4j;
 import net.schmizz.sshj.SSHClient;
-import net.schmizz.sshj.sftp.SFTPClient;
 import net.schmizz.sshj.transport.verification.PromiscuousVerifier;
-import net.schmizz.sshj.xfer.FileSystemFile;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 
-import java.io.File;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -25,7 +20,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
+@Slf4j
 public class Util {
     //private String remoteHost = "portalsolver.westus2.cloudapp.azure.com";
     private final static String remoteHost = "10.10.0.5";
@@ -34,10 +29,6 @@ public class Util {
     private final static String Date_REGEX = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$";
     private final static Pattern Date_PATTERN = Pattern.compile(Date_REGEX);
     //COLORS
-    /*
-    @Autowired
-    private Environment environment;
-    */
     public final static String ANSI_RESET = "\u001B[0m";
 
     // Declaring the color
@@ -50,27 +41,10 @@ public class Util {
     }
 
     public static String getInstanceServiceNow() {
-        System.out.println("PATH_INSTANCE_SERVICENOW");
-        System.out.println(System.getenv("PATH_INSTANCE_SERVICENOW"));
+        log.info("PATH_INSTANCE_SERVICENOW");
+        log.info(System.getenv("PATH_INSTANCE_SERVICENOW"));
         return System.getenv("PATH_INSTANCE_SERVICENOW");
     }
-
-    /*
-    public void uploadFile(File localFile, SnAttachment snAttachment) throws IOException {
-        SSHClient sshClient = setupSshj();
-        SFTPClient sftpClient = sshClient.newSFTPClient();
-        String tag = "[Upload File]";
-        try {
-            System.out.println(environment.getProperty("setting.attachments.dir").concat(snAttachment.getSys_id().concat(".").concat(snAttachment.getFile_name().split("\\s*[.]+")[1])));
-            sftpClient.put(new FileSystemFile(localFile), environment.getProperty("remote.dir").concat(snAttachment.getSys_id().concat(".").concat(snAttachment.getFile_name().split("\\s*[.]+")[1])));
-        } catch (Exception e) {
-            System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-            e.printStackTrace();
-        }
-        sftpClient.close();
-        sshClient.disconnect();
-    }
-     */
 
     private static SSHClient setupSshj() throws IOException {
         SSHClient client = new SSHClient();
@@ -255,22 +229,22 @@ public class Util {
     }
 
     public static void printData(String tag, int count, String levelOne) {
-        System.out.print(tag);
-        System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
+        log.info(tag);
+        log.info("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne));
     }
 
     public static void printData(String tag, int count, String levelOne, String levelTwo) {
-        System.out.print(tag);
-        System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
+        log.info(tag);
+        log.info("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne)
                 .concat(" | ")
                 .concat(levelTwo));
     }
 
     public static void printData(String tag, int count, String levelOne, String levelTwo, String levelThree) {
-        System.out.print(tag);
-        System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
+        log.info(tag);
+        log.info("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne)
                 .concat(" | ")
                 .concat(levelTwo)
@@ -279,8 +253,8 @@ public class Util {
     }
 
     public static void printData(String tag, String levelOne, String levelTwo, String levelThree) {
-        System.out.print("\u001B[37m".concat(tag));
-        System.out.println(String.valueOf(levelOne).concat(" ")
+        log.info("\u001B[37m".concat(tag));
+        log.info(String.valueOf(levelOne).concat(" ")
                 .concat(" ")
                 .concat(levelTwo)
                 .concat(" | ")
@@ -288,14 +262,13 @@ public class Util {
     }
 
     public static void printData(String tag, String levelOne) {
-        System.out.print(tag);
-        System.out.println("\u001B[37m(".concat(String.valueOf(levelOne)).concat(" "));
+        log.info(tag);
+        log.info("\u001B[37m(".concat(String.valueOf(levelOne)).concat(" "));
     }
 
-
     public static void printData(String tag, int count, String levelOne, String levelTwo, String levelThree, String levelFour) {
-        System.out.print(tag);
-        System.out.println("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
+        log.info(tag);
+        log.info("\u001B[37m(".concat(String.valueOf(count)).concat(") ")
                 .concat(levelOne)
                 .concat(" | ")
                 .concat(levelTwo)
@@ -514,13 +487,6 @@ public class Util {
         return response;
     }
 
-    /* public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo){
-         String integrationId = getIdByJson(jsonObject, levelOne, levelTwo);
-         if (util.hasData(integrationId)) {
-             return sysUserService.findByIntegrationId(integrationId);
-         } else
-             return null;
-     }*/
     public static String removeImg(String content) {
         Document document = Jsoup.parse(content);
         document.select("img").remove();
@@ -551,8 +517,8 @@ public class Util {
             }
             return content;
         } catch (Exception e) {
-            System.out.println("Error IMG: ".concat(e.getMessage()));
-            System.out.println("Error IMG Content: ".concat(content));
+            log.error("Error IMG: ".concat(e.getMessage()));
+            log.error("Error IMG Content: ".concat(content));
             return content;
         }
     }

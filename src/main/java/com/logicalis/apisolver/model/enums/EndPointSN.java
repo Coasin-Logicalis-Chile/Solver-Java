@@ -1,8 +1,6 @@
 package com.logicalis.apisolver.model.enums;
 
-
 public class EndPointSN {
-
     public static String Api() {
         return App.SNInstance().concat("/api/now/table/");
     }
@@ -191,9 +189,7 @@ public class EndPointSN {
     }
 
     public static String Journal() {
-        // return Api().concat("sys_journal_field?sysparm_query=name=sc_req_item^ORname=incident^ORname=sc_request&sysparm_limit=3000&sysparm_offset=");
         return Api().concat("sys_journal_field?sysparm_query=name=incident^ORname=sc_req_item^ORname=sc_request^ORname=sc_task&sysparm_limit=3000&sysparm_offset=");
-        //     return ApiSolver().concat("sys_journal_field");
     }
 
     public static String JournalByQuery() {

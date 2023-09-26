@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.services.impl;
 
 import com.logicalis.apisolver.dao.IIncidentDAO;
@@ -16,7 +15,6 @@ import java.util.List;
 
 @Service
 public class IncidentServiceImpl implements IIncidentService {
-
     @Autowired
     private IIncidentDAO dao;
 
@@ -36,7 +34,6 @@ public class IncidentServiceImpl implements IIncidentService {
     public Page<Incident> findAll(Pageable pageRequest) {
         return (Page<Incident>) dao.findAll(pageRequest);
     }
-
 
     @Override
     public Incident save(Incident incident) {
@@ -73,7 +70,6 @@ public class IncidentServiceImpl implements IIncidentService {
         return (List<IncidentFields>) dao.findIncidentsByFilters(filter, assignedTo, company, state, openUnassigned, solved, incidentParent, scRequestParent, scRequestItemParent, assignedToGroup, closed, open);
     }
 
-
     @Override
     public Long countIncidentsByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean closed, Long assignedToGroup, boolean open) {
         return (Long) dao.countIncidentsByFilters(assignedTo, company, state, openUnassigned, solved, closed, assignedToGroup, open);
@@ -83,11 +79,6 @@ public class IncidentServiceImpl implements IIncidentService {
     public Long countIncidentsSLAByFilters(Long company, Long assignedTo) {
         return (Long) dao.countIncidentsSLAByFilters(company, assignedTo);
     }
-
-    /*@Override
-    public Long countIncidentParentByFilters(String incidentParent) {
-        return (Long) dao.countIncidentParentByFilters(incidentParent);
-    }*/
 
     @Override
     public Incident findTopByActive(boolean active) {
@@ -108,6 +99,5 @@ public class IncidentServiceImpl implements IIncidentService {
     @Override
     public List<IncidentSummary> findBySummary(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String currentDate, String lastDate, Long closedBy) {
         return dao.findBySummary(assignedTo, company, state, openUnassigned, solved, currentDate, lastDate, closedBy);
-
     }
 }

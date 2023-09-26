@@ -11,6 +11,7 @@ import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.IncidentRequest;
 import com.logicalis.apisolver.view.IncidentSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -23,7 +24,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -35,15 +35,12 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class IncidentController {
     @Autowired
     private IIncidentService incidentService;
     @Autowired
     private IChoiceService choiceService;
-    @Autowired
-    private IJournalService journalService;
-    @Autowired
-    private IAttachmentService attachmentService;
     @Autowired
     private ISysUserService sysUserService;
     @Autowired
@@ -66,8 +63,6 @@ public class IncidentController {
     private IConfigurationItemService configurationItemService;
     @Autowired
     private ITaskSlaService taskSlaService;
-    @Autowired
-    private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private Rest rest;
 
@@ -457,7 +452,8 @@ public class IncidentController {
             incidentService.save(incident);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(incident)), Util.getFieldDisplay(incident.getCompany()), Util.getFieldDisplay(incident.getDomain()));
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            //System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -469,8 +465,12 @@ public class IncidentController {
     }
     @PutMapping("/incidentDelete")
     public ResponseEntity<?> delete(String element, String integrationId) {
+        /*
         System.out.println("element: ".concat(Util.isNull(element)));
         System.out.println("integrationId: ".concat(Util.isNull(integrationId)));
+         */
+        log.info("element: ".concat(Util.isNull(element)));
+        log.info("integrationId: ".concat(Util.isNull(integrationId)));
         Map<String, Object> response = new HashMap<>();
         try {
             if (SnTable.TaskSla.get().equals(element)) {
@@ -478,9 +478,11 @@ public class IncidentController {
                 if (taskSla != null) {
                     taskSla.setActive(false);
                     taskSlaService.save(taskSla);
-                    System.out.println("[TaskSla] (Disabled) ".concat(taskSla.getIntegrationId()));
+                    //System.out.println("[TaskSla] (Disabled) ".concat(taskSla.getIntegrationId()));
+                    log.info("[TaskSla] (Disabled) ".concat(taskSla.getIntegrationId()));
                 } else
-                    System.out.println("[TaskSla] (Not exist) ".concat(integrationId));
+                    //System.out.println("[TaskSla] (Not exist) ".concat(integrationId));
+                    log.info("[TaskSla] (Not exist) ".concat(integrationId));
             }
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionDelete.get());
