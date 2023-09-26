@@ -205,52 +205,47 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "AND COALESCE(b.active, TRUE) IS TRUE", nativeQuery = true)
     public List<IncidentFields> findIncidentsByFilters(String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String incidentParent, String scRequestParent, String scRequestItemParent, Long assignedToGroup, boolean closed, boolean open);
 
-    @Query(value = "SELECT DISTINCT\n" +
-            "count(a.number)\n" +
-            "FROM incident a\n" +
-            "INNER JOIN sys_group b ON a.assignment_group = b.id\n" +
-            "INNER JOIN sys_user_group c ON c.sys_group = b.id\n" +
-            "INNER JOIN choice d ON a.state = d.value AND  d.name = 'incident' AND d.element = 'state'\n" +
-            "INNER JOIN choice g ON a.incident_state = g.value AND  g.name = 'incident' AND g.element = 'incident_state'\n" +
-            "LEFT OUTER JOIN choice e ON a.priority = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
-            "LEFT OUTER JOIN sys_user f ON a.task_for = f.id\n" +
-            "WHERE (?1 = 0 OR a.assigned_to = ?1)\n" +
-            "AND (?2 = 0 OR a.company = ?2)\n" +
-            "AND (?3 = '' OR a.state = ?3)\n" +
-            "AND (?4 = false OR a.assigned_to IS null)\n" +
-            "AND (?5 = false OR UPPER(d.label) like '%RESUELTO%')\n" +
-            "AND (?6 = false OR UPPER(d.label) like '%CERRADO%')\n" +
-            "AND (?7 = 0 OR c.sys_user = ?7)\n" +
-            "AND (?8 = false OR (UPPER(d.label) NOT LIKE '%CERRADO%' AND UPPER(d.label) NOT LIKE '%CANCELADO%' AND UPPER(d.label) NOT LIKE '%RESUELTO%' AND UPPER(g.label) NOT LIKE '%RESUELTO%'))\n" +
-            "AND a.delete IS FALSE\n" +
-            "AND b.active IS TRUE", nativeQuery = true)
+    @Query(value = "SELECT count(*)\n" +
+            "FROM view_incidentes a\n" +
+            "      INNER JOIN choice d  ON a.state          = d.value  AND  d.name = 'incident' AND d.element = 'state'\n" +
+            "      INNER JOIN choice g  ON a.incident_state = g.value  AND  g.name = 'incident' AND g.element = 'incident_state'\n" +
+            "      LEFT OUTER JOIN choice e ON a.priority       = e.value  AND  e.name = 'task'     AND e.element = 'priority'\n" +
+            "      LEFT OUTER JOIN sys_user f  ON a.task_for = f.id\n" +
+            "  WHERE  (?3 = '' OR a.state = ?3)\n" +
+            "  AND (?1 = 0     OR a.assigned_to = ?1)\n" +
+            "  AND (?4 = false OR a.assigned_to is null)\n" +
+            "  AND a.delete IS FALSE\n" +
+            "  AND (?2 = 0  OR a.company =  ?2)\n" +
+            "  AND (?5 = false OR  UPPER(d.label) like '%RESUELTO%')\n" +
+            "  AND (?6 = false OR  UPPER(d.label) like '%CERRADO%')\n" +
+            "  AND (?8 = false OR (UPPER(d.label) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%', '%RESUELTO%%'])\n" +
+            "           AND UPPER(g.label) NOT LIKE '%RESUELTO%'))\n" +
+            "  AND (?7 = 0 or exists ( select 'x'\n" +
+            "                           from   vw_user b \n" +
+            "           where  b.id  = a.assignment_group\n" +
+            "           and    b.active is true\n" +
+            "           AND    b.sys_user = ?7\n" +
+            "           and    b.company = a.company))", nativeQuery = true)
     public Long countIncidentsByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean closed, Long assignedToGroup, boolean open);
-
-    @Query(value = "SELECT DISTINCT\n" +
-            "count(a.number)\n" +
-            "FROM   incident a\n" +
-            "INNER JOIN sys_group b ON a.assignment_group = b.id\n" +
-            "INNER JOIN sys_user_group c ON c.sys_group = b.id\n" +
-            "INNER JOIN choice d ON a.state = d.value AND d.NAME = 'incident' AND d.element = 'state'\n" +
-            "LEFT OUTER JOIN choice e ON a.priority = e.value AND e.NAME = 'task' AND e.element = 'priority'\n" +
-            "LEFT OUTER JOIN sys_user f ON a.task_for = f.id\n" +
-            "INNER JOIN (SELECT DISTINCT\n" +
-            "   a.id AS incident,\n" +
-            "   b.stage\n" +
-            "       FROM   incident a\n" +
-            "       INNER JOIN task_sla b ON a.id = b.incident\n" +
-            "       INNER JOIN choice d ON a.state = d.value AND d.NAME = 'incident' AND d.element = 'state'\n" +
-            "       WHERE  stage = 'in_progress'\n" +
-            "       AND b.percentage IS NOT NULL\n" +
-            "       AND b.percentage != ''\n" +
-            "       AND upper(d.label) NOT LIKE '%CERRADO%'\n" +
-            "       AND Cast(Split_part(COALESCE(b.percentage, '0'), '.', 1) AS INTEGER) > 90)\n" +
-            "  g ON COALESCE(g.incident,0) = a.id\n" +
-            "WHERE a.company = ?1\n" +
-            "AND c.sys_user = ?2\n" +
-            "AND upper(d.label) NOT LIKE '%CERRADO%'\n" +
-            "AND upper(d.label) NOT LIKE '%CANCELADO%'\n" +
-            "AND b.active IS TRUE", nativeQuery = true)
+    
+    @Query(value = "SELECT count(*) \n" +
+            "from view_incidentes vw\n" +
+            "     INNER JOIN (  SELECT distinct a.id AS incident, b.stage\n" +
+            "                   FROM   incident a\n" +
+            "                     INNER JOIN task_sla b ON a.id = b.incident AND b.percentage IS NOT null AND b.percentage != ''\n" +
+            "                     INNER JOIN choice   d ON a.state = d.value AND d.NAME = 'incident' AND d.element = 'state'\n" +
+            "                   WHERE  stage = 'in_progress'\n" +
+            "                   AND    upper(d.label) NOT LIKE '%CERRADO%'\n" +
+            "                   AND    Cast(Split_part(COALESCE(b.percentage, '0'), '.', 1) AS INTEGER) > 90) g\n" +
+            "            ON COALESCE(g.incident,0) = vw.id\n" +
+            "  where vw.company =  ?1\n" +
+            "  AND   UPPER(vw.dlabel) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%'])\n" +
+            "  and  ( exists ( select 'x' \n" +
+            "           from   vw_user b \n" +
+            "           where  b.id  = vw.assignment_group\n" +
+            "           and    b.active is true \n" +
+            "           AND    b.sys_user = ?2\n" +
+            "           and    b.company = vw.company ) ) ", nativeQuery = true)
     public Long countIncidentsSLAByFilters(Long company, Long assignedTo);
 
     @Query(value = "SELECT a.number,\n" +
