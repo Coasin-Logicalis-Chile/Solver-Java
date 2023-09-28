@@ -11,6 +11,7 @@ import com.logicalis.apisolver.model.servicenow.SnSysUser;
 import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,6 +28,7 @@ import java.util.Locale;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnSysUserController {
     @Autowired
     private ISysUserService sysUserService;
@@ -45,7 +47,7 @@ public class SnSysUserController {
 
     @GetMapping("/sn_sys_users")
     public List<SnSysUser> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
         String[] sparmOffSets = Util.offSets500000();
@@ -72,7 +74,7 @@ public class SnSysUserController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.SysUser().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.SysUser().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.SysUser().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnSysUserJson.clear();
                 if (resultJson.get("result") != null)
@@ -119,7 +121,7 @@ public class SnSysUserController {
                         Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysUser[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(location[0]), Util.getFieldDisplay(department[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -133,15 +135,15 @@ public class SnSysUserController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snSysUsers;
     }
 
     @GetMapping("/sn_sys_users_solver")
     public List<SnSysUser> show(boolean query) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
         String[] sparmOffSets = Util.offSets500000();
@@ -168,7 +170,7 @@ public class SnSysUserController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.SysUser().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.SysUser().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.SysUser().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnSysUserJson.clear();
                 if (resultJson.get("result") != null)
@@ -220,7 +222,7 @@ public class SnSysUserController {
                         Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysUser[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(location[0]), Util.getFieldDisplay(department[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -234,14 +236,14 @@ public class SnSysUserController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snSysUsers;
     }
     @GetMapping("/snSyUsersSolverByQuery")
     public List<SnSysUser> show(String query) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
         String[] sparmOffSets = Util.offSets500000();
@@ -269,7 +271,7 @@ public class SnSysUserController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.SysUserByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.SysUserByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.SysUserByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnSysUserJson.clear();
                 if (resultJson.get("result") != null)
@@ -317,7 +319,7 @@ public class SnSysUserController {
                         Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysUser[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(location[0]), Util.getFieldDisplay(department[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -331,9 +333,9 @@ public class SnSysUserController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snSysUsers;
     }
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {

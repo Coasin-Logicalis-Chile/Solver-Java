@@ -16,6 +16,7 @@ import com.logicalis.apisolver.services.ICompanyService;
 import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -31,6 +32,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnCompanyController {
     @Autowired
     private ICompanyService companyService;
@@ -43,7 +45,7 @@ public class SnCompanyController {
 
     @GetMapping("/sn_companies")
     public List<SnCompany> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnCompany> snCompanies = new ArrayList<>();
         long startTime = 0;
@@ -51,7 +53,7 @@ public class SnCompanyController {
         String tag = "[Company] ";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
+            log.info(tag.concat("(Get All Domains)"));
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(EndPointSN.Company());
             endTime = (System.currentTimeMillis() - startTime);
@@ -100,7 +102,7 @@ public class SnCompanyController {
                     companyService.save(company[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
 
@@ -114,9 +116,9 @@ public class SnCompanyController {
             statusService.save(status);
 
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snCompanies;
     }
 }

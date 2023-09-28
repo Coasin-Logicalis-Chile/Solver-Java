@@ -13,6 +13,7 @@ import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.services.ILocationService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,6 +29,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnLocationController {
     @Autowired
     private ILocationService locationService;
@@ -42,7 +44,7 @@ public class SnLocationController {
 
     @GetMapping("/sn_locations")
     public List<SnLocation> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnLocation> snLocations = new ArrayList<>();
         String[] sparmOffSets = Util.offSets500000();
@@ -51,9 +53,9 @@ public class SnLocationController {
         String tag = "[Location] ";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
+            log.info(tag.concat("(Get All Domains)"));
             List<Company> companies = companyService.findAll();
-            System.out.println(tag.concat("(Get All Companies)"));
+            log.info(tag.concat("(Get All Companies)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             ObjectMapper mapper = new ObjectMapper();
@@ -73,7 +75,7 @@ public class SnLocationController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.Location().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.Location().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.Location().concat(sparmOffSet)).concat(")")));
 
                 endTime = (System.currentTimeMillis() - startTime);
                 resultJson = (JSONObject) parser.parse(result);
@@ -111,7 +113,7 @@ public class SnLocationController {
                         Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(location[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -124,15 +126,15 @@ public class SnLocationController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snLocations;
     }
 
     @GetMapping("/sn_locationsSolverByQuery")
     public List<SnLocation> show(String query) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnLocation> snLocations = new ArrayList<>();
         String[] sparmOffSets = Util.offSets500000();
@@ -158,7 +160,7 @@ public class SnLocationController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 endTime = (System.currentTimeMillis() - startTime);
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnLocationJson.clear();
@@ -195,7 +197,7 @@ public class SnLocationController {
                         Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(location[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -208,9 +210,9 @@ public class SnLocationController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snLocations;
     }
 

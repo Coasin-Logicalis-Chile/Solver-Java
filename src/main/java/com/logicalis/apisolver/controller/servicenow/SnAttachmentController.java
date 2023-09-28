@@ -53,7 +53,7 @@ public class SnAttachmentController {
 
     @GetMapping("/snAttachment/{id}")
     public Object show(@PathVariable Long id) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         long startTime = 0;
         long endTime = 0;
@@ -67,16 +67,16 @@ public class SnAttachmentController {
                 File downloadFile;
                 if (!Util.isNullBool(attachment.getDownloadLink())) {
                     downloadFile = new File(attachment.getDownloadLink());
-                    System.out.println("LINUX");
-                    System.out.println(downloadFile.getAbsolutePath());
+                    log.info("LINUX");
+                    log.info(downloadFile.getAbsolutePath());
                 } else {
                     RestTemplate restTemplate = rest.restTemplateServiceNow();
                     downloadFile = rest.responseFileByEndPointSO(attachment, restTemplate, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
                     attachment.setDownloadLink(downloadFile.getAbsolutePath());
                     attachment = attachmentService.save(attachment);
 
-                    System.out.println("SERVICENOW");
-                    System.out.println(downloadFile.getAbsolutePath());
+                    log.info("SERVICENOW");
+                    log.info(downloadFile.getAbsolutePath());
                 }
 
                 byte[] fileByte = Files.readAllBytes(downloadFile.toPath());
@@ -84,9 +84,9 @@ public class SnAttachmentController {
                 attachmentResource[0] = new InputStreamResource(inputStream);
 
             } catch (JsonProcessingException e) {
-                System.out.println(tag.concat("/snAttachment/{id} JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                log.error(tag.concat("/snAttachment/{id} JsonProcessingException (I) : ").concat(String.valueOf(e)));
             } catch (IOException e) {
-                System.out.println(tag.concat("/snAttachment/{id} IOException (I) : ").concat(String.valueOf(e)));
+                log.error(tag.concat("/snAttachment/{id} IOException (I) : ").concat(String.valueOf(e)));
                 e.printStackTrace();
             }
             endTime = (System.currentTimeMillis() - startTime);
@@ -103,14 +103,14 @@ public class SnAttachmentController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
         return attachmentResource[0];
     }
 
     @GetMapping("/findAttachmentByIntegration/{integration_id}")
     public Object findAttachmentByIntegration(@PathVariable String integration_id) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         long startTime = 0;
         long endTime = 0;
@@ -123,23 +123,23 @@ public class SnAttachmentController {
                 File downloadFile;
                 if (!Util.isNullBool(attachment.getDownloadLink())) {
                     downloadFile = new File(attachment.getDownloadLink());
-                    System.out.println("LINUX");
-                    System.out.println(downloadFile.getAbsolutePath());
+                    log.info("LINUX");
+                    log.info(downloadFile.getAbsolutePath());
                 } else {
                     RestTemplate restTemplate = rest.restTemplateServiceNow();
                     downloadFile = rest.responseFileByEndPointSO(attachment, restTemplate, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
                     attachment.setDownloadLink(downloadFile.getAbsolutePath());
                     attachment = attachmentService.save(attachment);
-                    System.out.println("SERVICENOW");
-                    System.out.println(downloadFile.getAbsolutePath());
+                    log.info("SERVICENOW");
+                    log.info(downloadFile.getAbsolutePath());
                 }
                 byte[] fileByte = Files.readAllBytes(downloadFile.toPath());
                 ByteArrayInputStream inputStream = new ByteArrayInputStream(fileByte);
                 attachmentResource[0] = new InputStreamResource(inputStream);
             } catch (JsonProcessingException e) {
-                System.out.println(tag.concat("/snAttachment/{id} JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                log.error(tag.concat("/snAttachment/{id} JsonProcessingException (I) : ").concat(String.valueOf(e)));
             } catch (IOException e) {
-                System.out.println(tag.concat("/snAttachment/{id} IOException (I) : ").concat(String.valueOf(e)));
+                log.error(tag.concat("/snAttachment/{id} IOException (I) : ").concat(String.valueOf(e)));
                 e.printStackTrace();
             }
             endTime = (System.currentTimeMillis() - startTime);
@@ -157,14 +157,14 @@ public class SnAttachmentController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
         return attachmentResource[0];
     }
 
     @GetMapping("/attachments/{integrationId}")
     public List<Attachment> show(@PathVariable String integrationId) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnAttachment> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
@@ -244,9 +244,9 @@ public class SnAttachmentController {
                     Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])), Util.getFieldDisplay(domain[0]));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                 } catch (IOException e) {
-                    System.out.println(tag.concat("IOException (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("IOException (I) : ").concat(String.valueOf(e)));
                     e.printStackTrace();
                 }
             });
@@ -260,7 +260,7 @@ public class SnAttachmentController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
         }
         return attachments;
     }

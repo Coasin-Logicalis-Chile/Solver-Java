@@ -17,6 +17,7 @@ import com.logicalis.apisolver.services.IScCategoryService;
 import com.logicalis.apisolver.services.servicenow.ISnScCategoryService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -32,6 +33,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnScCategoryController {
     @Autowired
     private IScCategoryService scCategoryService;
@@ -44,7 +46,7 @@ public class SnScCategoryController {
 
     @GetMapping("/sn_sc_categories")
     public List<SnScCategory> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnScCategory> snCatalogs = new ArrayList<>();
         long startTime = 0;
@@ -92,7 +94,7 @@ public class SnScCategoryController {
                     Util.printData(tag, count[0], tagAction[0].concat(scCategory[0] != null ? scCategory[0].getTitle() != "" && scCategory[0].getTitle() != null ? scCategory[0].getTitle() : App.Title() : App.Title()));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = mapper.readValue(result, APIResponse.class);
@@ -104,9 +106,9 @@ public class SnScCategoryController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snCatalogs;
     }
 

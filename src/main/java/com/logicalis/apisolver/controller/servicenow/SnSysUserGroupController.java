@@ -10,6 +10,7 @@ import com.logicalis.apisolver.model.servicenow.SnSysUserGroup;
 import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -25,6 +26,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnSysUserGroupController {
     @Autowired
     private ISysUserGroupService sysUserGroupService;
@@ -39,7 +41,7 @@ public class SnSysUserGroupController {
 
     @GetMapping("/sn_sys_user_groups")
     public List<SnSysUserGroup> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUserGroup> snSysUserGroups = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -65,7 +67,7 @@ public class SnSysUserGroupController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.SysUserGroup().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.SysUserGroup().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.SysUserGroup().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnSysUserGroupJson.clear();
                 if (resultJson.get("result") != null)
@@ -96,7 +98,7 @@ public class SnSysUserGroupController {
                         sysUserGroupService.save(sysUserGroup[0]);
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -110,9 +112,9 @@ public class SnSysUserGroupController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snSysUserGroups;
     }
 

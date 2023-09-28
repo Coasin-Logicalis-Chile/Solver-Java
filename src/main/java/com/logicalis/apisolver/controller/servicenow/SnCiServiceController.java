@@ -10,6 +10,7 @@ import com.logicalis.apisolver.model.servicenow.SnCiService;
 import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -25,6 +26,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnCiServiceController {
 	@Autowired
 	private ICiServiceService ciServiceService;
@@ -45,7 +47,7 @@ public class SnCiServiceController {
 
 	@GetMapping("/sn_ci_services")
 	public List<SnCiService> show() {
-		System.out.println(App.Start());
+		log.info(App.Start());
 		APIResponse apiResponse = null;
 		List<SnCiService> snCiServices = new ArrayList<>();
 		String[] sparmOffSets =  Util.offSets99000();
@@ -54,15 +56,15 @@ public class SnCiServiceController {
 		String tag = "[CiService] ";
 		try {
 			List<Domain> domains = domainService.findAll();
-			System.out.println(tag.concat("(Get All Domains)"));
+			log.info(tag.concat("(Get All Domains)"));
 			List<Company> companies = companyService.findAll();
-			System.out.println(tag.concat("(Get All Companies)"));
+			log.info(tag.concat("(Get All Companies)"));
 			List<Location> locations = locationService.findAll();
-			System.out.println(tag.concat("(Get All Locations)"));
+			log.info(tag.concat("(Get All Locations)"));
 			List<SysUser> sysUsers = sysUserService.findAll();
-			System.out.println(tag.concat("(Get All Sys Users)"));
+			log.info(tag.concat("(Get All Sys Users)"));
 			List<SysGroup> sysGroups = sysGroupService.findAll();
-			System.out.println(tag.concat("(Get All Sys Groups)"));
+			log.info(tag.concat("(Get All Sys Groups)"));
 			startTime = System.currentTimeMillis();
 			final int[] count = {1};
 			String result;
@@ -85,7 +87,7 @@ public class SnCiServiceController {
 			APIExecutionStatus status = new APIExecutionStatus();;
 			for (String sparmOffSet : sparmOffSets) {
 				result = rest.responseByEndPoint(EndPointSN.CiService().concat(sparmOffSet));
-				System.out.println(tag.concat("(".concat(EndPointSN.CiService().concat(sparmOffSet)).concat(")")));
+				log.info(tag.concat("(".concat(EndPointSN.CiService().concat(sparmOffSet)).concat(")")));
 				resultJson = (JSONObject) parser.parse(result);
 				ListSnCiServiceJson.clear();
 				if (resultJson.get("result") != null)
@@ -152,7 +154,7 @@ public class SnCiServiceController {
 						Util.printData(tag, count[0],  tagAction[0].concat(Util.getFieldDisplay(ciService[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
 						count[0] = count[0] + 1;
 					} catch (Exception e) {
-						System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+						log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
 					}
 				});
 				apiResponse = mapper.readValue(result, APIResponse.class);
@@ -167,9 +169,9 @@ public class SnCiServiceController {
 			}
 
 		} catch (Exception e) {
-			System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+			log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
 		}
-		System.out.println(App.End());
+		log.info(App.End());
 		return snCiServices;
 	}
 }

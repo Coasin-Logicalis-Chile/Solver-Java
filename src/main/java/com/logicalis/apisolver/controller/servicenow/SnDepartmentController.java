@@ -14,6 +14,7 @@ import com.logicalis.apisolver.services.IDepartmentService;
 import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,6 +30,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnDepartmentController {
     @Autowired
     private IDepartmentService departmentService;
@@ -43,7 +45,7 @@ public class SnDepartmentController {
 
     @GetMapping("/sn_departments")
     public List<SnDepartment> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnDepartment> snDepartments = new ArrayList<>();
         long startTime = 0;
@@ -51,9 +53,9 @@ public class SnDepartmentController {
         String tag = "[Department] ";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
+            log.info(tag.concat("(Get All Domains)"));
             List<Company> companies = companyService.findAll();
-            System.out.println(tag.concat("(Get All Companies)"));
+            log.info(tag.concat("(Get All Companies)"));
 
             startTime = System.currentTimeMillis();
             String result = rest.responseByEndPoint(EndPointSN.Department());
@@ -110,7 +112,7 @@ public class SnDepartmentController {
                     departmentService.save(department[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = mapper.readValue(result, APIResponse.class);
@@ -122,9 +124,9 @@ public class SnDepartmentController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snDepartments;
     }
 }

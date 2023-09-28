@@ -13,6 +13,7 @@ import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -26,6 +27,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnDomainController {
     @Autowired
     private IDomainService domainService;
@@ -37,7 +39,7 @@ public class SnDomainController {
 
     @GetMapping("/sn_domains")
     public List<SnDomain> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnDomain> snDomains = new ArrayList<>();
         long startTime = 0;
@@ -78,7 +80,7 @@ public class SnDomainController {
                     domainService.save(domain[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = mapper.readValue(result, APIResponse.class);
@@ -90,9 +92,9 @@ public class SnDomainController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snDomains;
     }
 }

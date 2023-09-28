@@ -12,6 +12,7 @@ import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.services.servicenow.ISnScRequestService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,6 +28,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnScRequestController {
     @Autowired
     private IScRequestService scRequestService;
@@ -51,7 +53,7 @@ public class SnScRequestController {
 
     @GetMapping("/sn_requests_by_solver")
     public List<SnScRequest> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnScRequest> snScRequests = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -82,7 +84,7 @@ public class SnScRequestController {
             final String[] tagAction = new String[1];
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ScRequest().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ScRequest().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ScRequest().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnScRequestJson.clear();
                 if (resultJson.get("result") != null)
@@ -157,7 +159,7 @@ public class SnScRequestController {
                         scRequestService.save(scRequest[0]);
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
 
@@ -172,15 +174,15 @@ public class SnScRequestController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snScRequests;
     }
 
     @GetMapping("/snRequestsBySolverAndQuery")
     public List<SnScRequest> show(String query) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnScRequest> snScRequests = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -213,7 +215,7 @@ public class SnScRequestController {
             final String[] tagAction = new String[1];
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnScRequestJson.clear();
@@ -288,7 +290,7 @@ public class SnScRequestController {
                         scRequestService.save(scRequest[0]);
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
 
@@ -304,9 +306,9 @@ public class SnScRequestController {
             }
 
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snScRequests;
     }
 

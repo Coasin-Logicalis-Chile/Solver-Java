@@ -15,6 +15,7 @@ import com.logicalis.apisolver.services.IChoiceService;
 import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -27,6 +28,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnChoiceController {
     @Autowired
     private IChoiceService choiceService;
@@ -39,7 +41,7 @@ public class SnChoiceController {
 
     @GetMapping("/sn_choices_incidents")
     public List<SnChoice> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnChoice> snChoices = new ArrayList<>();
         long startTime = 0;
@@ -47,11 +49,11 @@ public class SnChoiceController {
         String tag = "[Choice] ";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
+            log.info(tag.concat("(Get All Domains)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             String result = rest.responseByEndPoint(EndPointSN.ChoiceIncident());
-            System.out.println(tag.concat("(".concat(EndPointSN.ChoiceIncident())));
+            log.info(tag.concat("(".concat(EndPointSN.ChoiceIncident())));
             JSONParser parser = new JSONParser();
             JSONObject resultJson = new JSONObject();
             JSONArray ListSnChoiceJson = new JSONArray();
@@ -98,7 +100,7 @@ public class SnChoiceController {
                     Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(choice[0])), Util.getFieldDisplay(domain[0]));
                     count[0] = count[0] + 1;
                 } catch (Exception e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = objectMapper.readValue(result, APIResponse.class);
@@ -111,15 +113,15 @@ public class SnChoiceController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snChoices;
     }
 
     @GetMapping("/sn_choices_by_filter")
     public List<SnChoice> show(String query) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnChoice> snChoices = new ArrayList<>();
         String[] sparmOffSets = Util.offSets50000();
@@ -129,7 +131,7 @@ public class SnChoiceController {
         String result = "";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
+            log.info(tag.concat("(Get All Domains)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             ObjectMapper mapper = new ObjectMapper();
@@ -148,7 +150,7 @@ public class SnChoiceController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 ListSnChoiceJson.clear();
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
@@ -184,7 +186,7 @@ public class SnChoiceController {
                         Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(choice[0])), Util.getFieldDisplay(domain[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
             }
@@ -198,9 +200,9 @@ public class SnChoiceController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snChoices;
     }
 }

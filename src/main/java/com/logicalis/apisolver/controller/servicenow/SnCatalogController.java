@@ -13,6 +13,7 @@ import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.ICatalogService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,6 +29,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnCatalogController {
     @Autowired
     private ICatalogService catalogService;
@@ -38,7 +40,7 @@ public class SnCatalogController {
 
     @GetMapping("/sn_catalogs")
     public List<SnCatalog> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnCatalog> snCatalogs = new ArrayList<>();
         long startTime = 0;
@@ -82,7 +84,7 @@ public class SnCatalogController {
                     catalogService.save(catalog[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = mapper.readValue(result, APIResponse.class);
@@ -94,9 +96,9 @@ public class SnCatalogController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snCatalogs;
     }
 }

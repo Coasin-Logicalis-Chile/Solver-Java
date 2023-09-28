@@ -15,6 +15,7 @@ import com.logicalis.apisolver.services.ISysGroupService;
 import com.logicalis.apisolver.services.servicenow.ISnGroupService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,6 +31,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnGroupController {
     @Autowired
     private ISysGroupService groupService;
@@ -44,7 +46,7 @@ public class SnGroupController {
 
     @GetMapping("/sn_groups")
     public List<SnGroup> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnGroup> snGroups = new ArrayList<>();
         long startTime = 0;
@@ -95,7 +97,7 @@ public class SnGroupController {
                     Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(current[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = mapper.readValue(result, APIResponse.class);
@@ -107,9 +109,9 @@ public class SnGroupController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snGroups;
     }
 

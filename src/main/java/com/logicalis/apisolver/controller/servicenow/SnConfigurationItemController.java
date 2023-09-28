@@ -10,6 +10,7 @@ import com.logicalis.apisolver.model.servicenow.SnConfigurationItem;
 import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -25,6 +26,7 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnConfigurationItemController {
     @Autowired
     private IConfigurationItemService configurationItemService;
@@ -45,7 +47,7 @@ public class SnConfigurationItemController {
 
     @GetMapping("/sn_configuration_items")
     public List<SnConfigurationItem> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnConfigurationItem> snConfigurationItems = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -54,15 +56,15 @@ public class SnConfigurationItemController {
         String tag = "[ConfigurationItem] ";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
+            log.info(tag.concat("(Get All Domains)"));
             List<Company> companies = companyService.findAll();
-            System.out.println(tag.concat("(Get All Companies)"));
+            log.info(tag.concat("(Get All Companies)"));
             List<Location> locations = locationService.findAll();
-            System.out.println(tag.concat("(Get All Locations)"));
+            log.info(tag.concat("(Get All Locations)"));
             List<SysUser> sysUsers = sysUserService.findAll();
-            System.out.println(tag.concat("(Get All Sys Users)"));
+            log.info(tag.concat("(Get All Sys Users)"));
             List<SysGroup> sysGroups = sysGroupService.findAll();
-            System.out.println(tag.concat("(Get All Sys Groups)"));
+            log.info(tag.concat("(Get All Sys Groups)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             ObjectMapper mapper = new ObjectMapper();
@@ -85,7 +87,7 @@ public class SnConfigurationItemController {
             String result;
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ConfigurationItem().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ConfigurationItem().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ConfigurationItem().concat(sparmOffSet)).concat(")")));
                 ListSnConfigurationItemJson.clear();
                 resultJson = (JSONObject) parser.parse(result);
                 if (resultJson.get("result") != null)
@@ -154,7 +156,7 @@ public class SnConfigurationItemController {
 
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
 
@@ -169,9 +171,9 @@ public class SnConfigurationItemController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snConfigurationItems;
     }
 
