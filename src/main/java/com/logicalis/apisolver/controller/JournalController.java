@@ -93,7 +93,7 @@ public class JournalController {
             journal.setValue(Util.reeplaceImg(journalRequest.getValue()));
             journalService.save(journal);
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -134,10 +134,10 @@ public class JournalController {
                     if (startIndex[0] != -1) {
                         builder[0].replace(startIndex[0], stopIndex[0], replacement[0]);
 
-                        System.out.println("IMG VALUE READ");
-                        System.out.println(builder[0].toString());
-                        System.out.println("IMG VALUE PROCESS");
-                        System.out.println(Util.reeplaceImg(builder[0].toString()));
+                        log.info("IMG VALUE READ");
+                        log.info(builder[0].toString());
+                        log.info("IMG VALUE PROCESS");
+                        log.info(Util.reeplaceImg(builder[0].toString()));
 
                         journal.setValue(Util.reeplaceImg(builder[0].toString()));
                         journal.setValue(builder[0].toString());
@@ -375,7 +375,7 @@ public class JournalController {
 
     @GetMapping("/journalsBySolver")
     public List<JournalRequest> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
         String[] sparmOffSets = Util.offSets1500000();
@@ -405,7 +405,7 @@ public class JournalController {
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.Journal().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.Journal().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.Journal().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnJournalJson.clear();
                 if (resultJson.get("result") != null)
@@ -468,7 +468,7 @@ public class JournalController {
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = objectMapper.readValue(result, APIResponse.class);
@@ -482,15 +482,15 @@ public class JournalController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return journalRequests;
     }
 
     @GetMapping("/journalsBySolverByQuery")
     public List<JournalRequest> show(String query, boolean flagQuery) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
         String[] sparmOffSets = Util.offSets1500000();
@@ -522,7 +522,7 @@ public class JournalController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
+                log.info(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnJournalJson.clear();
                 if (resultJson.get("result") != null)
@@ -583,7 +583,7 @@ public class JournalController {
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -597,15 +597,15 @@ public class JournalController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return journalRequests;
     }
 
     @GetMapping("/journalsBySolverAndQueryCreate")
     public List<JournalRequest> show(String query, boolean flagQuery, boolean flagA) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
         String[] sparmOffSets = Util.offSets1500000();
@@ -635,7 +635,7 @@ public class JournalController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
+                log.info(tag.concat("(".concat(EndPointSN.JournalByQuery().replace("QUERY", query).concat(sparmOffSet))));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnJournalJson.clear();
                 if (resultJson.get("result") != null)
@@ -696,7 +696,7 @@ public class JournalController {
                             }
                         }
                     } catch (Exception e) {
-                      // System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                      // log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -710,15 +710,15 @@ public class JournalController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-           // System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+           // log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return journalRequests;
     }
 
     @GetMapping("/journalsSNByElement")
     public List<JournalRequest> findJournalsSNByElement(String elementId) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<JournalRequest> journalRequests = new ArrayList<>();
         long startTime = 0;
@@ -747,7 +747,7 @@ public class JournalController {
         try {
             startTime = System.currentTimeMillis();
             result = rest.responseByEndPoint(EndPointSN.JournalByElement().concat(elementId));
-            System.out.println(tag.concat("(".concat(EndPointSN.JournalByElement().concat(elementId)).concat(")")));
+            log.info(tag.concat("(".concat(EndPointSN.JournalByElement().concat(elementId)).concat(")")));
             List<Attachment> attachments = attachmentService.findByElement(elementId);
             JSONParser parser = new JSONParser();
             JSONObject resultJson = new JSONObject();
@@ -832,7 +832,7 @@ public class JournalController {
                         count[0] = count[0] + 1;
                     }
                 } catch (Exception e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
 
@@ -846,9 +846,9 @@ public class JournalController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return journalRequests;
     }
 
