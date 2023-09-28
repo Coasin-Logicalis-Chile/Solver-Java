@@ -12,6 +12,7 @@ import com.logicalis.apisolver.services.ISysUserGroupService;
 import com.logicalis.apisolver.services.ISysUserService;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.SysUserGroupRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -27,6 +28,7 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SysUserGroupController {
     @Autowired
     private ISysUserGroupService sysUserGroupService;
@@ -106,7 +108,7 @@ public class SysUserGroupController {
             }
             sysUserGroupUpdated = sysUserGroupService.save(sysUserGroup);
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

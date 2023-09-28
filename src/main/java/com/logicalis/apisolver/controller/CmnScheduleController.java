@@ -14,6 +14,7 @@ import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.CmnScheduleSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -32,6 +33,7 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class CmnScheduleController {
     @Autowired
     private ICmnScheduleService cmnScheduleService;
@@ -143,7 +145,7 @@ public class CmnScheduleController {
 
     @GetMapping("/cmnSchedulesSN")
     public List<CmnScheduleSolver> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<CmnScheduleSolver> snCmnSchedulesSolver = new ArrayList<>();
         long startTime = 0;
@@ -203,7 +205,7 @@ public class CmnScheduleController {
                     cmnScheduleService.save(cmnSchedule[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = mapper.readValue(result, APIResponse.class);
@@ -215,9 +217,9 @@ public class CmnScheduleController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snCmnSchedulesSolver;
     }
 

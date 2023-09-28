@@ -36,6 +36,7 @@ import java.util.zip.Deflater;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class AttachmentController {
     @Autowired
     private IAttachmentService attachmentService;
@@ -183,7 +184,7 @@ public class AttachmentController {
             Util.printData(tag, tagAction, Util.getFieldDisplay(attachment), attachmentRequest.getTable_sys_id());
 
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -301,7 +302,7 @@ public class AttachmentController {
 
     @GetMapping("/findBySolver")
     public List<Attachment> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         final APIResponse[] apiResponse = {null};
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
@@ -399,7 +400,7 @@ public class AttachmentController {
                             Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])), Util.getFieldDisplay(domain[0]));
                             count[0] = count[0] + 1;
                         } catch (JsonProcessingException e) {
-                            System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                            log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                         }
                     });
                     apiResponse[0] = mapper.readValue(result[0], APIResponse.class);
@@ -411,7 +412,7 @@ public class AttachmentController {
                     status.setExecutionTime(endTime[0]);
                     statusService.save(status);
                 } catch (Exception e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
         //}
@@ -420,7 +421,7 @@ public class AttachmentController {
 
     @GetMapping("/findBySolverByQuery")
     public List<Attachment> show(String query, boolean flagQuery) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         final APIResponse[] apiResponse = {null};
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
@@ -504,7 +505,7 @@ public class AttachmentController {
                             Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])), Util.getFieldDisplay(domain[0]));
                             count[0] = count[0] + 1;
                         } catch (Exception e) {
-                            System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                            log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                         }
                     });
                 }
@@ -517,7 +518,7 @@ public class AttachmentController {
                 status.setExecutionTime(endTime[0]);
                 statusService.save(status);
             } catch (Exception e) {
-                System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
             }
         });
         return attachments;
@@ -525,7 +526,7 @@ public class AttachmentController {
 
     @GetMapping("/findBySolverByQueryCreate")
     public List<Attachment> show(String query, boolean flagQuery, boolean flagCreate) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         final APIResponse[] apiResponse = {null};
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
@@ -611,7 +612,7 @@ public class AttachmentController {
                                 count[0] = count[0] + 1;
                             }
                         } catch (Exception e) {
-                            //    System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                            //    log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                         }
                     });
                 }
@@ -625,7 +626,7 @@ public class AttachmentController {
                 status.setExecutionTime(endTime[0]);
                 statusService.save(status);
             } catch (Exception e) {
-                //  System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                //  log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
             }
         });
         return attachments;
@@ -633,7 +634,7 @@ public class AttachmentController {
 
     @GetMapping("/findByElement/{integrationId}")
     public List<Attachment> findByElement(@PathVariable String integrationId) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<AttachmentSolver> snAttachments = new ArrayList<>();
         List<Attachment> attachments = new ArrayList<>();
@@ -713,7 +714,7 @@ public class AttachmentController {
                     Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])), Util.getFieldDisplay(domain[0]));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                 }
             });
             apiResponse = mapper.readValue(result, APIResponse.class);
@@ -725,7 +726,7 @@ public class AttachmentController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
         }
         return attachments;
     }
@@ -803,7 +804,7 @@ public class AttachmentController {
             outputStream.close();
         } catch (IOException e) {
         }
-        System.out.println("Compressed Image Byte Size - " + outputStream.toByteArray().length);
+        log.info("Compressed Image Byte Size - " + outputStream.toByteArray().length);
         return outputStream.toByteArray();
     }
 

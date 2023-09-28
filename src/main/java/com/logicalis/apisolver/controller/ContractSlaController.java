@@ -11,6 +11,7 @@ import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.ContractSlaSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,6 +30,7 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class ContractSlaController {
     @Autowired
     private IContractSlaService contractSlaService;
@@ -139,7 +141,7 @@ public class ContractSlaController {
 
     @GetMapping("/contractsSlaSN")
     public List<ContractSlaSolver> show() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<ContractSlaSolver> snContractsSlaSolver = new ArrayList<>();
         long startTime = 0;
@@ -215,7 +217,7 @@ public class ContractSlaController {
                     contractSlaService.save(contractSla[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
 
@@ -228,15 +230,15 @@ public class ContractSlaController {
             status.setExecutionTime(endTime);
             statusService.save(status);
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return snContractsSlaSolver;
     }
 
     @GetMapping("/contractsSlaSolver")
     public List<ContractSlaSolver> show(String query) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<ContractSlaSolver> snContractsSlaSolver = new ArrayList<>();
         long startTime = 0;
@@ -316,7 +318,7 @@ public class ContractSlaController {
                         contractSlaService.save(contractSla[0]);
                         count[0] = count[0] + 1;
                     } catch (JsonProcessingException e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
 
@@ -329,9 +331,9 @@ public class ContractSlaController {
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             } catch (Exception e) {
-                System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+                log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
             }
-            System.out.println(App.End());
+            log.info(App.End());
         }
         return snContractsSlaSolver;
     }

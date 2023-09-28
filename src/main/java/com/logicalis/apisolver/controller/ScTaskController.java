@@ -10,6 +10,7 @@ import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.ScTaskRequest;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -33,6 +34,7 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class ScTaskController {
     @Autowired
     private IScTaskService scTaskService;
@@ -180,7 +182,7 @@ public class ScTaskController {
 
     @GetMapping("/scTaskBySolver")
     public List<ScTask> findByCompany() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<ScTask> scTasks = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -217,7 +219,7 @@ public class ScTaskController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ScTaskByCompany().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ScTaskByCompany().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ScTaskByCompany().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListScTaskJson.clear();
                 if (resultJson.get("result") != null)
@@ -346,7 +348,7 @@ public class ScTaskController {
                         scTasks.add(scTaskService.save(scTask[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -360,15 +362,15 @@ public class ScTaskController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return scTasks;
     }
 
     @GetMapping("/scTaskBySolverAndQuery")
     public List<ScTask> findByCompany(String query) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<ScTask> scTasks = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -405,7 +407,7 @@ public class ScTaskController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
                 result= rest.responseByEndPoint(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListScTaskJson.clear();
                 if (resultJson.get("result") != null)
@@ -529,7 +531,7 @@ public class ScTaskController {
                         scTasks.add(scTaskService.save(scTask[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -543,15 +545,15 @@ public class ScTaskController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return scTasks;
     }
 
     @GetMapping("/scTaskBySolverAndQueryCreate")
     public List<ScTask> show(String query, boolean flagCreate) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<ScTask> scTasks = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -589,7 +591,7 @@ public class ScTaskController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ScTaskByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListScTaskJson.clear();
                 if (resultJson.get("result") != null)
@@ -713,7 +715,7 @@ public class ScTaskController {
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {
-                        //   System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        //   log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -727,9 +729,9 @@ public class ScTaskController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            // System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            // log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return scTasks;
     }
 

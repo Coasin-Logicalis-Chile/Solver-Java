@@ -8,6 +8,7 @@ import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.ConfigurationItemSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -26,11 +27,10 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class ConfigurationItemController {
 	@Autowired
 	private IConfigurationItemService configurationItemService;
-	@Autowired
-	private IDomainService domainService;
 	@Autowired
 	private ILocationService locationService;
 	@Autowired
@@ -144,7 +144,7 @@ public class ConfigurationItemController {
 
 	@GetMapping("/configurationItemBySolverAndQuery")
 	public List<ConfigurationItem> show(String query, boolean flag) {
-		System.out.println(App.Start());
+		log.info(App.Start());
 		APIResponse apiResponse = null;
 		List<ConfigurationItem> configurationItems = new ArrayList<>();
 		String[] sparmOffSets = Util.offSets50000();
@@ -173,7 +173,7 @@ public class ConfigurationItemController {
 			final int[] count = {1};
 			for (String sparmOffSet : sparmOffSets) {
 				result = rest.responseByEndPoint(EndPointSN.ConfigurationItemByQuery().replace("QUERY", query).concat(sparmOffSet));
-				System.out.println(tag.concat("(".concat(EndPointSN.ConfigurationItemByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+				log.info(tag.concat("(".concat(EndPointSN.ConfigurationItemByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
 				resultJson = (JSONObject) parser.parse(result);
 				ListSnConfigurationItemJson.clear();
 				if (resultJson.get("result") != null)
@@ -236,7 +236,7 @@ public class ConfigurationItemController {
 						Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(configurationItem[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(company[0].getDomain()));
 						count[0] = count[0] + 1;
 					} catch (Exception e) {
-						System.out.println(tag.concat("Exception (I) (").concat(String.valueOf(count[0])).concat(") ").concat(String.valueOf(e)));
+						log.error(tag.concat("Exception (I) (").concat(String.valueOf(count[0])).concat(") ").concat(String.valueOf(e)));
 					}
 				});
 			}
@@ -250,9 +250,9 @@ public class ConfigurationItemController {
 			status.setExecutionTime(endTime);
 			statusService.save(status);
 		} catch (Exception e) {
-			System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+			log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
 		}
-		System.out.println(App.End());
+		log.info(App.End());
 		return configurationItems;
 	}
 }

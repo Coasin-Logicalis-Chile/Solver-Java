@@ -11,6 +11,7 @@ import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.SysUserCode;
 import com.logicalis.apisolver.view.SysUserRequest;
 import com.logicalis.apisolver.view.SysUserSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -26,6 +27,7 @@ import java.util.*;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SysUserController {
     @Autowired
     private ISysUserService sysUserService;
@@ -167,7 +169,6 @@ public class SysUserController {
             sysUser.setUserType(sysUserRequest.getU_user_type());
             sysUser.setSolver(sysUserRequest.getU_solver());
             String pass = passwordEncoder.encode(sysUserRequest.getU_solver_password());
-            System.out.println(sysUserRequest.getU_solver_password());
             sysUser.setPassword(pass);
             Company company = companyService.findByIntegrationId(sysUserRequest.getCompany());
             sysUser.setCompany(company);
@@ -198,7 +199,7 @@ public class SysUserController {
             sysUserUpdated = sysUserService.save(sysUser);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(sysUser)), Util.getFieldDisplay(sysUser.getCompany()), Util.getFieldDisplay(sysUser.getDomain()));
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -223,7 +224,7 @@ public class SysUserController {
             sysUserCurrent.setCode(code);
             sysUserUpdated = sysUserService.save(sysUserCurrent);
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -245,7 +246,7 @@ public class SysUserController {
             sysUserCurrent = sysUserService.findById(id);
             rest.putSysUser(EndPointSN.PutSysUser(), sysUserCurrent);
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -306,8 +307,7 @@ public class SysUserController {
     public ResponseEntity<SysUser> getCodeByEmailAndSolver(@NotNull @RequestParam(value = "email", required = true, defaultValue = "0") String email,
                                                            @NotNull @RequestParam(value = "solver", required = true, defaultValue = "true") boolean solver,
                                                            @NotNull @RequestParam(value = "code", required = true, defaultValue = "") String code) {
-        System.out.println(code);
-        System.out.println(code);
+        log.info(code);
         SysUser sysUser = sysUserService.findByEmailAndSolver(email, solver);
         BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
         SysUser currentRecord = null;

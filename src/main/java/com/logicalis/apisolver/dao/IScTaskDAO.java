@@ -221,7 +221,24 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND (?10 = false OR ((UPPER(f.label) NOT LIKE '%CERRADO%') AND (UPPER(f.label) NOT LIKE '%CANCELADO%')))\n" +
             "AND d.active IS TRUE\n" +
             "AND e.active IS TRUE", nativeQuery = true)
-
+    /*
+    @Query(value = "SELECT COUNT(*)\n" +
+            "FROM view_request a\n" +
+            " WHERE (?1 = 0 OR a.assigned_to = ?1)\n" +
+            " AND (?2 = 0 OR a.company = ?2)\n" +
+            " AND (?3 = '' OR a.state = ?3)\n" +
+            " AND (?4 = false OR a.assigned_to is NULL)\n" +
+            " AND (?9 = false OR UPPER(a.label) like '%CERRADO%')\n" +
+            " AND (?5 = false OR UPPER(a.label) like '%RESUELTO%')\n" +
+            " AND (?10 = false OR ((UPPER(a.label) NOT LIKE '%CERRADO%') AND (UPPER(a.label) NOT LIKE '%CANCELADO%')))\n" +
+            " AND (?8 = 0 OR ?8 = ?8)\n" +
+            " AND (?6 = false OR (a.scaling IS TRUE \n" +
+            "                         AND a.active  IS true\n" +
+            "                         and exists (  select 'x' \n" +
+            "                                       from  vw_user_req t \n" +
+            "                                       where t.sys_group = a.scaling_assignment_group\n" +
+            "                                       and   t.sys_user  = ?7)))", nativeQuery = true)
+     */
     public Long countScTasksByFilters(Long assigned_to, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
 
     @Query(value = "SELECT DISTINCT \n" +

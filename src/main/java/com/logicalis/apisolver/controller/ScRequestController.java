@@ -11,6 +11,7 @@ import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.ScRequestRequest;
 import com.logicalis.apisolver.view.ScRequestSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -34,6 +35,7 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class ScRequestController {
     @Autowired
     private IScRequestService scRequestService;
@@ -233,7 +235,7 @@ public class ScRequestController {
             scRequestService.save(scRequest);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(scRequest)), Util.getFieldDisplay(scRequest.getCompany()), Util.getFieldDisplay(scRequest.getDomain()));
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -245,7 +247,7 @@ public class ScRequestController {
 
     @GetMapping("/scRequestBySolver")
     public List<ScRequest> findByCompany() {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<ScRequest> scRequests = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -276,7 +278,7 @@ public class ScRequestController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ScRequestByCompany().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ScRequestByCompany().concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ScRequestByCompany().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnScRequestJson.clear();
                 if (resultJson.get("result") != null)
@@ -348,7 +350,7 @@ public class ScRequestController {
                         scRequests.add(scRequestService.save(scRequest[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -362,15 +364,15 @@ public class ScRequestController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return scRequests;
     }
 
     @GetMapping("/scRequestBySolverQueryCreate")
     public List<ScRequest> show(String query, boolean flagCreate) {
-        System.out.println(App.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<ScRequest> scRequests = new ArrayList<>();
         String[] sparmOffSets = Util.offSets99000();
@@ -402,7 +404,7 @@ public class ScRequestController {
             final int[] count = {1};
             for (String sparmOffSet : sparmOffSets) {
                 result = rest.responseByEndPoint(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                log.info(tag.concat("(".concat(EndPointSN.ScRequestByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
                 ListSnScRequestJson.clear();
                 if (resultJson.get("result") != null)
@@ -469,7 +471,7 @@ public class ScRequestController {
                             count[0] = count[0] + 1;
                         }
                     } catch (Exception e) {
-                        //  System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        //  log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
                 apiResponse = mapper.readValue(result, APIResponse.class);
@@ -483,9 +485,9 @@ public class ScRequestController {
                 statusService.save(status);
             }
         } catch (Exception e) {
-            //  System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            //  log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(App.End());
+        log.info(App.End());
         return scRequests;
     }
 
