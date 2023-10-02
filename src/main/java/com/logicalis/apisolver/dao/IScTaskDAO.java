@@ -72,7 +72,7 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND ((?16 = '' AND ?17 = '' ) OR (?16 != '' AND ?17 = '' AND (a.created_on BETWEEN TO_TIMESTAMP(?16,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP((CURRENT_DATE || ' 23:59:59'),'YYYY-MM-DD HH24:MI:SS'))) OR (?16 = '' AND ?17 != ''  AND (a.created_on BETWEEN TO_TIMESTAMP(('1900-01-01 00:00:00'),'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?17,'YYYY-MM-DD HH24:MI:SS'))) OR (?16 != '' AND ?17 != ''  AND (a.created_on BETWEEN TO_TIMESTAMP(?16,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?17,'YYYY-MM-DD HH24:MI:SS'))))\n" +
             "AND d.active IS TRUE\n" +
             "AND e.active IS TRUE", nativeQuery = true)
-    public Page<ScTaskFields> findPaginatedScTasksByFilters(Pageable pageRequest, String filter, Long assigned_to, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
+    public Page<ScTaskFields> findPaginatedScTasksByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
     @Query(value = "SELECT DISTINCT a.id AS id,\n" +
             "a.number AS number,\n" +
@@ -196,8 +196,9 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND UPPER(f.label) NOT LIKE '%CERRADO%'\n" +
             "AND UPPER(f.label) NOT LIKE '%CANCELADO%'\n" +
             "AND e.active IS TRUE", nativeQuery = true)
-    public Page<ScTaskFields> findPaginatedScTasksSLAByFilters(Pageable pageRequest, String filter, Long assigned_to, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
+    public Page<ScTaskFields> findPaginatedScTasksSLAByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
+    /*
     @Query(value = "SELECT COUNT(DISTINCT a.number)\n" +
             "FROM sc_task a\n" +
             "INNER JOIN sc_request    b ON a.sc_request = b.id\n" +
@@ -221,25 +222,25 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND (?10 = false OR ((UPPER(f.label) NOT LIKE '%CERRADO%') AND (UPPER(f.label) NOT LIKE '%CANCELADO%')))\n" +
             "AND d.active IS TRUE\n" +
             "AND e.active IS TRUE", nativeQuery = true)
-    /*
-    @Query(value = "SELECT COUNT(*)\n" +
-            "FROM view_request a\n" +
-            " WHERE (?1 = 0 OR a.assigned_to = ?1)\n" +
-            " AND (?2 = 0 OR a.company = ?2)\n" +
-            " AND (?3 = '' OR a.state = ?3)\n" +
-            " AND (?4 = false OR a.assigned_to is NULL)\n" +
-            " AND (?9 = false OR UPPER(a.label) like '%CERRADO%')\n" +
-            " AND (?5 = false OR UPPER(a.label) like '%RESUELTO%')\n" +
-            " AND (?10 = false OR ((UPPER(a.label) NOT LIKE '%CERRADO%') AND (UPPER(a.label) NOT LIKE '%CANCELADO%')))\n" +
-            " AND (?8 = 0 OR ?8 = ?8)\n" +
-            " AND (?6 = false OR (a.scaling IS TRUE \n" +
-            "                         AND a.active  IS true\n" +
-            "                         and exists (  select 'x' \n" +
-            "                                       from  vw_user_req t \n" +
-            "                                       where t.sys_group = a.scaling_assignment_group\n" +
-            "                                       and   t.sys_user  = ?7)))", nativeQuery = true)
-     */
-    public Long countScTasksByFilters(Long assigned_to, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
+    */
+
+    @Query(value = "select count(*)\n" +
+            "from  vw_countScTasksByFilters a\n" +
+            "where (?1 = 0 OR a.assigned_to = ?1)\n" +
+            "AND (?2 = 0 OR a.company = ?2)\n" +
+            "AND (?3 = '' OR a.state = ?3)\n" +
+            "AND (?4 = false OR a.assigned_to IS null)\n" +
+            "AND (?5 = false OR UPPER(a.label) like '%RESUELTO%')\n" +
+            "AND (?9 = false OR UPPER(a.label) like '%CERRADO%')\n" +
+            "AND (?6 = false OR (a.scaling IS TRUE AND a.dactive IS TRUE\n" +
+            "AND exists (select 'x' \n" +
+            "            from sys_user_group u\n" +
+            "            where u.sys_group = a.scaling_assignment_group and u.sys_user = ?7)))\n" +
+            "AND (?8 = 0 OR a.sys_user = ?8)\n" +
+            "AND (?10 = false OR ((UPPER(a.label) NOT LIKE '%CERRADO%') AND (UPPER(a.label) NOT LIKE '%CANCELADO%')))\n" +
+            "            AND a.dactive IS TRUE \n" +
+            "            AND a.eactive IS true", nativeQuery = true)
+    public Long countScTasksByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
 
     /*
     @Query(value = "SELECT DISTINCT \n" +
@@ -270,24 +271,9 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND e.active IS TRUE", nativeQuery = true)
 
      */
-    @Query(value = "SELECT count(*)\n" +
-            "FROM sc_task a  \n" +
-            "    INNER JOIN sc_request            b ON a.sc_request = b.id and  a.company = ?1\n" +
-            "               INNER JOIN sc_request_item    c ON a.sc_request_item = c.id \n" +
-            "               INNER JOIN sys_group     d ON a.assignment_group = d.id AND d.active IS TRUE \n" +
-            "               INNER JOIN sys_user_group   e ON e.sys_group = d.id  AND e.active IS TRUE  AND e.sys_user =  ?2\n" +
-            "               INNER JOIN choice       f ON a.state = f.value    AND f.NAME = 'task' AND f.element = 'state'  \n" +
-            "                                  AND  UPPER(f.label) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%'])  \n" +
-            "               LEFT OUTER JOIN choice     g ON a.priority = g.value   AND g.NAME = 'task' AND g.element = 'priority' \n" +
-            "               LEFT OUTER JOIN sys_user   h ON a.task_for = h.id \n" +
-            "               INNER JOIN (SELECT DISTINCT  a1.id AS sc_task,  b1.stage \n" +
-            "                           FROM   sc_task a1 \n" +
-            "                                  INNER JOIN task_sla b1 ON a1.id = b1.sc_task and a1.company = ?1\n" +
-            "                           WHERE  stage = 'in_progress' \n" +
-            "                           AND     b1.percentage IS NOT NULL \n" +
-            "                           AND     b1.percentage != '' \n" +
-            "                           AND   Cast(Split_part(COALESCE(b1.percentage, '0'), '.', 1) AS INTEGER) > 90)  \n" +
-            "                             i ON i.sc_task = a.id", nativeQuery = true)
+    @Query(value = "select count\n" +
+            "from vw_countTaskSLAByFilters v where v.company=?1\n" +
+            "and v.sys_user=?2", nativeQuery = true)
     public Long countTaskSLAByFilters(Long company, Long assignedTo);
 
     List<ScTask> findByScRequestItem(ScRequestItem scRequestItem);
