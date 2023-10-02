@@ -241,6 +241,7 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
      */
     public Long countScTasksByFilters(Long assigned_to, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
 
+    /*
     @Query(value = "SELECT DISTINCT \n" +
             "count(a.number)\n" +
             "FROM sc_task a\n" +
@@ -267,6 +268,26 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND UPPER(f.label) NOT LIKE '%CERRADO%'\n" +
             "AND UPPER(f.label) NOT LIKE '%CANCELADO%'\n" +
             "AND e.active IS TRUE", nativeQuery = true)
+
+     */
+    @Query(value = "SELECT count(*)\n" +
+            "FROM sc_task a  \n" +
+            "    INNER JOIN sc_request            b ON a.sc_request = b.id and  a.company = ?1\n" +
+            "               INNER JOIN sc_request_item    c ON a.sc_request_item = c.id \n" +
+            "               INNER JOIN sys_group     d ON a.assignment_group = d.id AND d.active IS TRUE \n" +
+            "               INNER JOIN sys_user_group   e ON e.sys_group = d.id  AND e.active IS TRUE  AND e.sys_user =  ?2\n" +
+            "               INNER JOIN choice       f ON a.state = f.value    AND f.NAME = 'task' AND f.element = 'state'  \n" +
+            "                                  AND  UPPER(f.label) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%'])  \n" +
+            "               LEFT OUTER JOIN choice     g ON a.priority = g.value   AND g.NAME = 'task' AND g.element = 'priority' \n" +
+            "               LEFT OUTER JOIN sys_user   h ON a.task_for = h.id \n" +
+            "               INNER JOIN (SELECT DISTINCT  a1.id AS sc_task,  b1.stage \n" +
+            "                           FROM   sc_task a1 \n" +
+            "                                  INNER JOIN task_sla b1 ON a1.id = b1.sc_task and a1.company = ?1\n" +
+            "                           WHERE  stage = 'in_progress' \n" +
+            "                           AND     b1.percentage IS NOT NULL \n" +
+            "                           AND     b1.percentage != '' \n" +
+            "                           AND   Cast(Split_part(COALESCE(b1.percentage, '0'), '.', 1) AS INTEGER) > 90)  \n" +
+            "                             i ON i.sc_task = a.id", nativeQuery = true)
     public Long countTaskSLAByFilters(Long company, Long assignedTo);
 
     List<ScTask> findByScRequestItem(ScRequestItem scRequestItem);
