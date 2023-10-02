@@ -198,32 +198,6 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND e.active IS TRUE", nativeQuery = true)
     public Page<ScTaskFields> findPaginatedScTasksSLAByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
-    /*
-    @Query(value = "SELECT COUNT(DISTINCT a.number)\n" +
-            "FROM sc_task a\n" +
-            "INNER JOIN sc_request    b ON a.sc_request = b.id\n" +
-            "INNER JOIN sc_request_item  c ON a.sc_request_item = c.id\n" +
-            "INNER JOIN sys_group d ON a.assignment_group = d.id\n" +
-            "INNER JOIN sys_user_group e ON e.sys_group = d.id\n" +
-            "LEFT OUTER JOIN choice     f ON a.state = f.value AND  f.name = 'task' AND f.element = 'state'\n" +
-            "LEFT OUTER JOIN choice     g ON a.priority = g.value AND g.name = 'task' AND g.element = 'priority'\n" +
-            "LEFT OUTER JOIN ci_service    h ON a.ci_service = h.id\n" +
-            "LEFT OUTER JOIN configuration_item i ON a.configuration_item = i.id\n" +
-            "LEFT OUTER JOIN sys_user   j ON a.task_for = j.id\n" +
-            "LEFT OUTER JOIN sys_user   k ON a.assigned_to = k.id\n" +
-            "WHERE (?1 = 0 OR a.assigned_to = ?1)\n" +
-            "AND (?2 = 0 OR a.company = ?2)\n" +
-            "AND (?3 = '' OR a.state = ?3)\n" +
-            "AND (?4 = false OR a.assigned_to IS null)\n" +
-            "AND (?5 = false OR UPPER(f.label) like '%RESUELTO%')\n" +
-            "AND (?6 = false OR (a.scaling IS TRUE AND a.active IS TRUE AND a.scaling_assignment_group IN (SELECT sys_group FROM sys_user_group WHERE sys_user = ?7)))\n" +
-            "AND (?8 = 0 OR e.sys_user = ?8)\n" +
-            "AND (?9 = false OR UPPER(f.label) like '%CERRADO%')\n" +
-            "AND (?10 = false OR ((UPPER(f.label) NOT LIKE '%CERRADO%') AND (UPPER(f.label) NOT LIKE '%CANCELADO%')))\n" +
-            "AND d.active IS TRUE\n" +
-            "AND e.active IS TRUE", nativeQuery = true)
-    */
-
     @Query(value = "select count(*)\n" +
             "from  vw_countScTasksByFilters a\n" +
             "where (?1 = 0 OR a.assigned_to = ?1)\n" +
@@ -241,36 +215,7 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "            AND a.dactive IS TRUE \n" +
             "            AND a.eactive IS true", nativeQuery = true)
     public Long countScTasksByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
-
-    /*
-    @Query(value = "SELECT DISTINCT \n" +
-            "count(a.number)\n" +
-            "FROM sc_task a\n" +
-            "INNER JOIN sc_request    b ON a.sc_request = b.id\n" +
-            "INNER JOIN sc_request_item  c ON a.sc_request_item = c.id\n" +
-            "INNER JOIN sys_group d ON a.assignment_group = d.id\n" +
-            "INNER JOIN sys_user_group e ON e.sys_group = d.id\n" +
-            "INNER JOIN choice f ON a.state = f.value AND f.NAME = 'task' AND f.element = 'state' \n" +
-            "LEFT OUTER JOIN choice g ON a.priority = g.value AND g.NAME = 'task' AND g.element = 'priority'\n" +
-            "LEFT OUTER JOIN sys_user h ON a.task_for = h.id\n" +
-            "INNER JOIN (SELECT DISTINCT \n" +
-            "\t\t\t\t\t\t\t   a.id AS sc_task,\n" +
-            "\t\t\t\t\t\t\t   b.stage\n" +
-            "                               FROM   sc_task a\n" +
-            "                               INNER JOIN task_sla b ON a.id = b.sc_task\n" +
-            "                               WHERE  stage = 'in_progress'\n" +
-            "                                      AND b.percentage IS NOT NULL\n" +
-            "                                      AND b.percentage != ''\n" +
-            "                                      AND Cast(Split_part(COALESCE(b.percentage, '0'), '.', 1) AS INTEGER) > 90) \n" +
-            "              i ON i.sc_task = a.id\n" +
-            "WHERE a.company = ?1\n" +
-            "AND e.sys_user = ?2\n" +
-            "AND d.active IS TRUE\n" +
-            "AND UPPER(f.label) NOT LIKE '%CERRADO%'\n" +
-            "AND UPPER(f.label) NOT LIKE '%CANCELADO%'\n" +
-            "AND e.active IS TRUE", nativeQuery = true)
-
-     */
+    
     @Query(value = "select count\n" +
             "from vw_countTaskSLAByFilters v where v.company=?1\n" +
             "and v.sys_user=?2", nativeQuery = true)
