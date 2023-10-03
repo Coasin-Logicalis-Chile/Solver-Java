@@ -349,13 +349,13 @@ public class AttachmentController {
                     result[0] = rest.responseByEndPoint(EndPointSN.Attachment().concat(i.getIntegrationId()));
                     endTime[0] = (System.currentTimeMillis() - startTime[0]);
                     resultJson[0] = (JSONObject) parser.parse(result[0]);
+                    ListSnAttachmentJson[0].clear();
                     if (resultJson[0].get("result") != null)
                         ListSnAttachmentJson[0] = (JSONArray) parser.parse(resultJson[0].get("result").toString());
                     count[0] = 1;
                     ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                         tagAction[0] = App.CreateConsole();
                         try {
-                            //AttachmentSolver attachmentSolver = objectMapper.readValue(snAttachmentJson.toString(), AttachmentSolver.class);
                             attachmentSolver[0] = mapper.readValue(snAttachmentJson.toString(), AttachmentSolver.class);
                             attachment[0] = new Attachment();
                             attachment[0].setActive(attachmentSolver[0].getActive());

@@ -21,12 +21,6 @@
         </Console>
     </Appenders>
     <Loggers>
-        <!--
-        <Logger name="Solver-Java" level="info" additivity="false">
-            <AppenderRef ref="file" />
-            <AppenderRef ref="ABC" />
-        </Logger>
-        -->
         <Root level="info">
             <AppenderRef ref="Console" />
             <AppenderRef ref="file" />

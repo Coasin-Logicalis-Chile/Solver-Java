@@ -198,22 +198,20 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "AND e.active IS TRUE", nativeQuery = true)
     public Page<ScTaskFields> findPaginatedScTasksSLAByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
-    @Query(value = "select count(*)\n" +
+    @Query(value = "select count(DISTINCT a.number)\n" +
             "from  vw_countScTasksByFilters a\n" +
-            "where (?1 = 0 OR a.assigned_to = ?1)\n" +
-            "AND (?2 = 0 OR a.company = ?2)\n" +
-            "AND (?3 = '' OR a.state = ?3)\n" +
-            "AND (?4 = false OR a.assigned_to IS null)\n" +
-            "AND (?5 = false OR UPPER(a.label) like '%RESUELTO%')\n" +
-            "AND (?9 = false OR UPPER(a.label) like '%CERRADO%')\n" +
-            "AND (?6 = false OR (a.scaling IS TRUE AND a.dactive IS TRUE\n" +
-            "AND exists (select 'x' \n" +
-            "            from sys_user_group u\n" +
-            "            where u.sys_group = a.scaling_assignment_group and u.sys_user = ?7)))\n" +
-            "AND (?8 = 0 OR a.sys_user = ?8)\n" +
-            "AND (?10 = false OR ((UPPER(a.label) NOT LIKE '%CERRADO%') AND (UPPER(a.label) NOT LIKE '%CANCELADO%')))\n" +
-            "            AND a.dactive IS TRUE \n" +
-            "            AND a.eactive IS true", nativeQuery = true)
+            "where (?1 = 0  OR a.assigned_to = ?1)\n" +
+            "AND   (?2 = 0  OR a.company = ?2)\n" +
+            "AND   (?8 = 0   OR a.sys_user = ?8)\n" +
+            "AND   (?3 = '' OR a.state = ?3)\n" +
+            "AND   (?4 = false OR a.assigned_to IS null)\n" +
+            "AND   (?5 = false OR UPPER(a.label) like '%RESUELTO%')\n" +
+            "AND   (?9 = false OR UPPER(a.label) like '%CERRADO%')\n" +
+            "AND   (?10 = false OR UPPER(a.label) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%'] ))\n" +
+            "AND   (?6  = false OR (a.scaling IS TRUE AND a.active IS TRUE\n" +
+            "                    AND exists (select 'x' \n" +
+            "                            from sys_user_group u \n" +
+            "                            where u.sys_group = a.scaling_assignment_group and u.sys_user = ?7)))", nativeQuery = true)
     public Long countScTasksByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
     
     @Query(value = "select count\n" +
