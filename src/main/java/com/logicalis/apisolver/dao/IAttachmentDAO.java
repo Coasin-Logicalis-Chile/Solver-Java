@@ -45,7 +45,7 @@ public interface IAttachmentDAO extends CrudRepository<Attachment, Long> {
             "FROM attachment a\n" +
             "INNER JOIN sc_request_item b ON a.sc_request_item = b.id\n" +
             "INNER JOIN sc_request c ON b.sc_request = c.id\n" +
-            "INNER JOIN incident d ON c.sc_request_parent = d.integration_id\n" +
+            "INNER JOIN incident d ON c.integration_id = d.sc_request_parent\n" +
             "WHERE (?1 = '' OR d.integration_id = ?1)\n" +
             "AND (?2 = '' OR c.integration_id = ?2)", nativeQuery = true)
     List<AttachmentInfo> findAttachmentsByIncidentOrScRequestItem(String incident, String scRequestItem);
