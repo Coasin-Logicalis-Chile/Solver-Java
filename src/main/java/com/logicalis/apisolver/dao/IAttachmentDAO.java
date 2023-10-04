@@ -50,15 +50,6 @@ public interface IAttachmentDAO extends CrudRepository<Attachment, Long> {
             "AND (?2 = '' OR c.integration_id = ?2)", nativeQuery = true)
     List<AttachmentInfo> findAttachmentsByIncidentOrScRequestItem(String incident, String scRequestItem);
 
-    /* @Query(value = "SELECT id, \n" +
-             "content_type AS contentType,\n" +
-             "element,\n" +
-             "download_linksn AS downloadLinkSN, \n" +
-             "file_name AS fileName, \n" +
-             "integration_id AS integrationId, \n" +
-             "sc_task AS scTask\n" +
-             "FROM attachment\n" +
-             "WHERE (?1 = 0 OR sc_task = ?1)", nativeQuery = true)*/
     @Query(value = "SELECT A.ID,\n" +
             "A.CONTENT_TYPE AS CONTENTTYPE,\n" +
             "A.ELEMENT,\n" +
@@ -89,6 +80,4 @@ public interface IAttachmentDAO extends CrudRepository<Attachment, Long> {
     public List<Attachment> findByElement(String integrationId);
 
     public List<Attachment> findSolverByElement(String integrationId);
-
-    //public Attachment uploadFile(MultipartFile file_name, String element);
 }

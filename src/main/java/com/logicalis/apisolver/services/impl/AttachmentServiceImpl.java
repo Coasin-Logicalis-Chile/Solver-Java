@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.services.impl;
 
 import com.logicalis.apisolver.dao.IAttachmentDAO;
@@ -13,7 +12,6 @@ import java.util.List;
 
 @Service
 public class AttachmentServiceImpl implements IAttachmentService {
-
     @Autowired
     private IAttachmentDAO dao;
 
@@ -53,7 +51,6 @@ public class AttachmentServiceImpl implements IAttachmentService {
         return (Attachment) dao.findByIntegrationId(integrationId);
     }
 
-
     @Override
     public List<AttachmentInfo> findAttachmentsByIncident(Long id) {
         return dao.findAttachmentsByIncident(id);
@@ -82,9 +79,4 @@ public class AttachmentServiceImpl implements IAttachmentService {
     public List<Attachment> findSolverByElement(String integrationId) {
         return dao.findByElement(integrationId);
     }
-    /*@Override
-    public Attachment uploadFile(MultipartFile file_name, String element) {
-        return uploadFile(file_name, element);
-    }*/
-
 }

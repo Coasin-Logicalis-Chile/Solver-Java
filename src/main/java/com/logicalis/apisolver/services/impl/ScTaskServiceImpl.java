@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.services.impl;
 
 import com.logicalis.apisolver.dao.IScTaskDAO;
@@ -16,7 +15,6 @@ import java.util.List;
 
 @Service
 public class ScTaskServiceImpl implements IScTaskService {
-
     @Autowired
     private IScTaskDAO dao;
 
@@ -67,7 +65,6 @@ public class ScTaskServiceImpl implements IScTaskService {
         return dao.findPaginatedScTasksByFilters(pageRequest, filter, assignedTo, company, state, openUnassigned, solved, scaling, scalingAssignedTo, assignedToGroup, closed, open, sysGroups, sysUsers, states, priorities, createdOnFrom, createdOnTo);
     }
 
-
     @Override
     public Long countScTasksByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open) {
         return dao.countScTasksByFilters(assignedTo, company, state, openUnassigned, solved, scaling, scalingAssignedTo, assignedToGroup, closed, open);
@@ -83,11 +80,8 @@ public class ScTaskServiceImpl implements IScTaskService {
         return dao.findPaginatedScTasksSLAByFilters(pageRequest, filter, assignedTo, company, state, openUnassigned, solved, scaling, scalingAssignedTo, assignedToGroup, closed, open, sysGroups, sysUsers, states, priorities, createdOnFrom, createdOnTo);
     }
 
-
     @Override
     public Page<ScTaskFields> findPaginatedScTasksScalingByFilters(Pageable pageRequest, String filter, Long company, Long sysUser, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo) {
         return dao.findPaginatedScTasksScalingByFilters(pageRequest, filter, company, sysUser, sysGroups, sysUsers, states, priorities, createdOnFrom, createdOnTo);
     }
-
-
 }

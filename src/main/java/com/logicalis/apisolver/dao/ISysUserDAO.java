@@ -12,15 +12,6 @@ import java.util.List;
 public interface ISysUserDAO extends PagingAndSortingRepository<SysUser, Long> {
 
     public SysUser findByEmail(String email);
-   /* @Query(value = "SELECT DISTINCT a.id,\n" +
-            "a.integration_id as integrationId,\n" +
-            "a.name\n" +
-            "FROM sys_user a\n" +
-            "WHERE a.email = ?1\n" +
-            "AND a.solver IS TRUE\n" +
-            "AND a.active IS TRUE\n" +
-            "limit (1)", nativeQuery = true)
-    public SysUserFields findByEmailAndSolver(String email);*/
 
     public SysUser findByEmailAndSolver(String email, boolean solver);
 
