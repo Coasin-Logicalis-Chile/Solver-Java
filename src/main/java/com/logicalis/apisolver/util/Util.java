@@ -59,7 +59,7 @@ public class Util {
         try {
             return ((JSONObject) parser.parse(((JSONObject) parser.parse(journal)).get(levelOne).toString())).get(levelTwo).toString();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         return "";
     }
@@ -69,7 +69,7 @@ public class Util {
         try {
             return ((JSONObject) parser.parse(journal)).get(levelOne).toString();
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         return "";
     }
@@ -79,7 +79,7 @@ public class Util {
         try {
             return Boolean.parseBoolean(((JSONObject) parser.parse(((JSONObject) parser.parse(journal)).get(levelOne).toString())).get(levelTwo).toString());
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         return false;
     }
@@ -89,7 +89,7 @@ public class Util {
         try {
             return (Long) ((JSONObject) parser.parse(((JSONObject) parser.parse(journal)).get(levelOne).toString())).get(levelTwo);
         } catch (ParseException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         return Long.valueOf(0);
     }

@@ -56,7 +56,7 @@ public class Rest {
         try {
             uri = new URI(endPoint);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
@@ -102,7 +102,7 @@ public class Rest {
             log.info("file upload status code: " + response.getStatusCode());
 
         } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
     }
 
@@ -155,7 +155,7 @@ public class Rest {
             domain.setIntegrationId(domainJson.get("value").getAsString());
             attachment.setDomain(domain);
         } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
-            e.printStackTrace();
+            log.error("Context", e);
             return null;
         }
         return attachment;
@@ -196,8 +196,7 @@ public class Rest {
             return getFilePathDirectory(attachment, filePath);
 
         } catch (IOException e) {
-            e.printStackTrace();
-
+            log.error("Context", e);
         }
         return filePath;
     }
@@ -230,8 +229,7 @@ public class Rest {
             filePath = getFilePathDirectory(attachment, filePath);
 
         } catch (IOException e) {
-            e.printStackTrace();
-
+            log.error("Context", e);
         }
         String finalFilePath = filePath;
         File file = restTemplate.execute(attachment.getDownloadLinkSN(), HttpMethod.GET, null, clientHttpResponse -> {
@@ -260,7 +258,7 @@ public class Rest {
         try {
             uri = new URI(endPoint);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
         restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
@@ -278,7 +276,7 @@ public class Rest {
         try {
             uri = new URI(endPoint);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         JSONObject json = new JSONObject();
         json.put("assignmentGroup", Util.isNullIntegration(incident.getAssignmentGroup()));
@@ -316,7 +314,7 @@ public class Rest {
         try {
             uri = new URI(endPoint);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         JSONObject json = new JSONObject();
         json.put("code", sysUser.getCode());
@@ -338,7 +336,7 @@ public class Rest {
         try {
             uri = new URI(endPoint);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         JSONObject json = new JSONObject();
         json.put("assignmentGroup", scRequestItem.getAssignmentGroup().getIntegrationId());
@@ -360,7 +358,7 @@ public class Rest {
         try {
             uri = new URI(endPoint);
         } catch (URISyntaxException e) {
-            e.printStackTrace();
+            log.error("Context", e);
         }
         JSONObject json = new JSONObject();
         json.put("solverId",scTask.getId());

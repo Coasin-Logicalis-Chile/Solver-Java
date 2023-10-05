@@ -87,7 +87,6 @@ public class SnAttachmentController {
                 log.error(tag.concat("/snAttachment/{id} JsonProcessingException (I) : ").concat(String.valueOf(e)));
             } catch (IOException e) {
                 log.error(tag.concat("/snAttachment/{id} IOException (I) : ").concat(String.valueOf(e)));
-                e.printStackTrace();
             }
             endTime = (System.currentTimeMillis() - startTime);
             HttpHeaders headers = new HttpHeaders();
@@ -140,7 +139,6 @@ public class SnAttachmentController {
                 log.error(tag.concat("/snAttachment/{id} JsonProcessingException (I) : ").concat(String.valueOf(e)));
             } catch (IOException e) {
                 log.error(tag.concat("/snAttachment/{id} IOException (I) : ").concat(String.valueOf(e)));
-                e.printStackTrace();
             }
             endTime = (System.currentTimeMillis() - startTime);
             HttpHeaders headers = new HttpHeaders();
@@ -247,7 +245,6 @@ public class SnAttachmentController {
                     log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                 } catch (IOException e) {
                     log.error(tag.concat("IOException (I) : ").concat(String.valueOf(e)));
-                    e.printStackTrace();
                 }
             });
 
