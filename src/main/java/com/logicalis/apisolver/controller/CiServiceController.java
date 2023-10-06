@@ -19,10 +19,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -63,7 +60,7 @@ public class CiServiceController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (ciService == null) {
+        if (Objects.isNull(ciService)) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -82,7 +79,7 @@ public class CiServiceController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (ciService == null) {
+        if (Objects.isNull(ciService)) {
             response.put("mensaje", Messages.notExist.get(integrationId));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }

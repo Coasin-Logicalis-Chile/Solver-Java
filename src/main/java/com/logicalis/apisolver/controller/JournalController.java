@@ -23,10 +23,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -59,7 +56,7 @@ public class JournalController {
         Journal currentJournal = new Journal();
         Journal journalUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        if (currentJournal == null) {
+        if (Objects.isNull(currentJournal)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(journalRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }

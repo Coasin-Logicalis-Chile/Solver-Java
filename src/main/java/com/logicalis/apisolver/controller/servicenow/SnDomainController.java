@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @RestController
 @RequestMapping("/api/v1")
@@ -76,7 +77,7 @@ public class SnDomainController {
                         domain[0].setId(exists[0].getId());
                         tagAction[0] = App.UpdateConsole();
                     }
-                    Util.printData(tag, count[0], tagAction[0].concat(domain[0] != null ? domain[0].getName() != "" ? domain[0].getName() : App.Name() : App.Name()));
+                    Util.printData(tag, count[0], tagAction[0].concat(domain[0] != null ? (!Objects.isNull(domain[0].getName()) && !domain[0].getName().equals("")) ? domain[0].getName() : App.Name() : App.Name()));
                     domainService.save(domain[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {

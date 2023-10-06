@@ -26,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -106,8 +107,8 @@ public class SnDepartmentController {
 
                     Util.printData(tag,
                             count[0],
-                            tagAction[0].concat((department[0] != null ? department[0].getName() != "" ? department[0].getName() : App.Name() : App.Name())),
-                            (company[0] != null ? company[0].getName() != "" ? company[0].getName() : App.Company() : App.Company()));
+                            tagAction[0].concat((department[0] != null ? (!Objects.isNull(department[0].getName()) && !department[0].getName().equals("")) ? department[0].getName() : App.Name() : App.Name())),
+                            (company[0] != null ? (!Objects.isNull(company[0].getName()) && !company[0].getName().equals("")) ? company[0].getName() : App.Company() : App.Company()));
 
                     departmentService.save(department[0]);
                     count[0] = count[0] + 1;

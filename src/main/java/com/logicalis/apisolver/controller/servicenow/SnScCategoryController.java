@@ -29,6 +29,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -81,17 +82,17 @@ public class SnScCategoryController {
                     scCategory[0].setIntegrationId(snScCategory[0].getSys_id());
 
                     catalog[0] = getCatalogByIntegrationId((JSONObject) snCatalogJson, SnTable.Catalog.get(), App.Value());
-                    if (catalog[0] != null)
+                    if (!Objects.isNull(catalog[0]))
                         scCategory[0].setCatalog(catalog[0]);
 
                     exists[0] = scCategoryService.findByIntegrationId(scCategory[0].getIntegrationId());
                     tagAction[0] = App.CreateConsole();
-                    if (exists[0] != null) {
+                    if (!Objects.isNull(exists[0])) {
                         scCategory[0].setId(exists[0].getId());
                         tagAction[0] = App.UpdateConsole();
                     }
                     scCategoryService.save(scCategory[0]);
-                    Util.printData(tag, count[0], tagAction[0].concat(scCategory[0] != null ? scCategory[0].getTitle() != "" && scCategory[0].getTitle() != null ? scCategory[0].getTitle() : App.Title() : App.Title()));
+                    Util.printData(tag, count[0], tagAction[0].concat(scCategory[0] != null ? !Objects.isNull(scCategory[0].getTitle()) && !scCategory[0].getTitle().equals("") ? scCategory[0].getTitle() : App.Title() : App.Title()));
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
                     log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));

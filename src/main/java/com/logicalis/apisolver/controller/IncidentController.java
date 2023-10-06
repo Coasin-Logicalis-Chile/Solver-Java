@@ -313,7 +313,7 @@ public class IncidentController {
             currentIncident.setUrgency(Util.parseJson(json, levelOne,Field.Urgency.get()));
             currentIncident.setPriority(Util.parseJson(json, levelOne, Field.Priority.get()));
             String knowledge = Util.parseJson(json, levelOne, Field.Knowledge.get());
-            currentIncident.setKnowledge(Boolean.parseBoolean(knowledge != null && knowledge != "" ? knowledge : "false"));
+            currentIncident.setKnowledge(Boolean.parseBoolean(knowledge != null && !knowledge.equals("") ? knowledge : "false"));
             incidentUpdated = incidentService.save(currentIncident);
             Incident incidentServiceNow = rest.putIncident(EndPointSN.PutIncident(), currentIncident);
         } catch (DataAccessException e) {
@@ -606,7 +606,7 @@ public class IncidentController {
                             }
                         }
                         element[0] = Util.getIdByJson((JSONObject) snIncidentJson, "parent", App.Value());
-                        if (element[0] != "") {
+                        if (!element[0].equals("")) {
                             scRequest[0] = scRequestService.findByIntegrationId(element[0]);
                             if (scRequest[0] != null)
                                 incident[0].setScRequestParent(element[0]);
@@ -801,7 +801,7 @@ public class IncidentController {
                             }
                         }
                         element[0] = Util.getIdByJson((JSONObject) snIncidentJson, "parent", App.Value());
-                        if (element[0] != "") {
+                        if (!element[0].equals("")) {
                             scRequest[0] = scRequestService.findByIntegrationId(element[0]);
                             if (scRequest[0] != null)
                                 incident[0].setScRequestParent(element[0]);
@@ -1003,7 +1003,7 @@ public class IncidentController {
                                 }
                             }
                             element[0] = Util.getIdByJson((JSONObject) snIncidentJson, "parent", App.Value());
-                            if (element[0] != "") {
+                            if (!element[0].equals("")) {
                                 scRequest[0] = scRequestService.findByIntegrationId(element[0]);
                                 if (scRequest[0] != null)
                                     incident[0].setScRequestParent(element[0]);

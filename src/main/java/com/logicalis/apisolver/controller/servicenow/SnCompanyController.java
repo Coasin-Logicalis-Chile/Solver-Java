@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -89,15 +90,15 @@ public class SnCompanyController {
 
                     exists[0] = companyService.findByIntegrationId(company[0].getIntegrationId());
                     tagAction[0] = App.CreateConsole();
-                    if (exists[0] != null) {
+                    if (!Objects.isNull(exists[0])) {
                         company[0].setId(exists[0].getId());
                         tagAction[0] = App.UpdateConsole();
                     }
 
                     Util.printData(tag,
                             count[0],
-                            tagAction[0].concat(company[0] != null ? company[0].getName() != "" ? company[0].getName() : App.Name() : App.Name()),
-                            (domain[0] != null ? domain[0].getName() != "" ? domain[0].getName() : App.Domain() : App.Domain()));
+                            tagAction[0].concat(!Objects.isNull(company[0])? ( !Objects.isNull(company[0].getName()) && !company[0].getName().equals("")) ? company[0].getName() : App.Name() : App.Name()),
+                            (!Objects.isNull(domain[0]) ? (!Objects.isNull(domain[0].getName()) && !domain[0].getName().equals("")) ? domain[0].getName() : App.Domain() : App.Domain()));
 
                     companyService.save(company[0]);
                     count[0] = count[0] + 1;

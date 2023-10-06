@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -40,7 +41,7 @@ public class CatalogController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		if(catalog == null){
+		if(Objects.isNull(catalog)){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
@@ -73,7 +74,7 @@ public class CatalogController {
 		
 		Map<String, Object> response = new HashMap<>();
 
-		if (currentCatalog == null) {
+		if (Objects.isNull(currentCatalog)) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
@@ -118,7 +119,7 @@ public class CatalogController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		if(catalog == null){
+		if(Objects.isNull(catalog)){
 			response.put("mensaje", "El registro ".concat(integration_id.concat(" no existe en la base de datos!")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}

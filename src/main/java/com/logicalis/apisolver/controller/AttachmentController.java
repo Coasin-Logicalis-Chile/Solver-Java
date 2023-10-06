@@ -95,7 +95,7 @@ public class AttachmentController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (attachment == null) {
+        if (Objects.isNull(attachment)) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -126,7 +126,7 @@ public class AttachmentController {
         Map<String, Object> response = new HashMap<>();
         String tagAction = App.CreateConsole();
         String tag = "[Attachment] ";
-        if (currentAttachment == null) {
+        if (Objects.isNull(currentAttachment)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(attachmentRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -163,7 +163,7 @@ public class AttachmentController {
                     attachment.setDomain(scTask.getCompany().getDomain());
                 }
             }
-            if (attachment.getDomain() == null) {
+            if (Objects.isNull(attachment.getDomain())) {
                 Domain domain = domainService.findByIntegrationId(attachmentRequest.getDomain());
                 attachment.setDomain(domain);
 
@@ -198,7 +198,7 @@ public class AttachmentController {
         ScTask currentScTask = new ScTask();
         ScRequest currentScRequest;
         ScRequest scRequest = scRequestService.findByIntegrationId(attachment.getRequest_sys_id());
-        if (scRequest == null) {
+        if (Objects.isNull(scRequest)) {
             scRequest = new ScRequest();
             scRequest.setIntegrationId(attachment.getRequest_sys_id());
             scRequest.setNumber(attachment.getRequest_number());
@@ -209,7 +209,7 @@ public class AttachmentController {
         currentScTask.setScRequest(currentScRequest);
         ScRequestItem currentScRequestItem;
         ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(attachment.getRequest_item_sys_id());
-        if (scRequestItem == null) {
+        if (Objects.isNull(scRequestItem)) {
             scRequestItem = new ScRequestItem();
             scRequestItem.setIntegrationId(attachment.getRequest_item_sys_id());
             scRequestItem.setNumber(attachment.getRequest_item_number());
@@ -228,7 +228,7 @@ public class AttachmentController {
         ScRequestItem currentScRequestItem = new ScRequestItem();
         ScRequest currentScRequest;
         ScRequest scRequest = scRequestService.findByIntegrationId(attachment.getRequest_sys_id());
-        if (scRequest == null) {
+        if (Objects.isNull(scRequest)) {
             scRequest = new ScRequest();
             scRequest.setIntegrationId(attachment.getRequest_sys_id());
             scRequest.setNumber(attachment.getRequest_number());
@@ -248,7 +248,7 @@ public class AttachmentController {
         Attachment currentAttachment = attachmentService.findById(id);
         Attachment attachmentUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        if (currentAttachment == null) {
+        if (Objects.isNull(currentAttachment)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -293,7 +293,7 @@ public class AttachmentController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (attachment == null) {
+        if (Objects.isNull(attachment)) {
             response.put("mensaje", "El registro ".concat(integration_id.concat(" no existe en la base de datos!")));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -757,7 +757,7 @@ public class AttachmentController {
                 attachmentService.save(current);
                 Util.printData(tag, tagAction.concat("BD"), Util.getFieldDisplay(current), current.getElement());
                 attachment = rest.sendFileToServiceNow(element, file, type, file.getOriginalFilename());
-                if (attachment != null)
+                if (!Objects.isNull(attachment))
                     Util.printData(tag, tagAction.concat("(ServiceNow)"), Util.getFieldDisplay(current), current.getElement());
                 attachment.setId(current.getId());
                 attachment.setExtension(current.getExtension());

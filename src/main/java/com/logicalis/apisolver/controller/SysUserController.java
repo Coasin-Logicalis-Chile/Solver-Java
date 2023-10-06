@@ -76,7 +76,7 @@ public class SysUserController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (sysUser == null) {
+        if (Objects.isNull(sysUser)) {
             response.put("mensaje", Messages.notExist.get(integrationId));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -94,7 +94,7 @@ public class SysUserController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        if (sysUser == null) {
+        if (Objects.isNull(sysUser)) {
             response.put("mensaje", Messages.notExist.get(userName));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -148,7 +148,7 @@ public class SysUserController {
         SysUser currentSysUser = new SysUser();
         SysUser sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        if (currentSysUser == null) {
+        if (Objects.isNull(currentSysUser)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -192,7 +192,7 @@ public class SysUserController {
                     sysUser.setLocation(location);
             }
             SysUser exists = sysUserService.findByIntegrationId(sysUser.getIntegrationId());
-            if (exists != null) {
+            if (!Objects.isNull(exists)) {
                 sysUser.setId(exists.getId());
                 tagAction = App.UpdateConsole();
             }
@@ -214,7 +214,7 @@ public class SysUserController {
         SysUser currentSysUser = new SysUser();
         SysUser sysUserCurrent, sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        if (currentSysUser == null) {
+        if (Objects.isNull(currentSysUser)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserSolver.getId().toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -238,7 +238,7 @@ public class SysUserController {
     public ResponseEntity<?> update(@RequestBody SysUserCode sysUserCode, @PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
         SysUser sysUserCurrent = null;
-        if (id == null) {
+        if (Objects.isNull(id)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -262,7 +262,7 @@ public class SysUserController {
         SysUser currentSysUser = sysUserService.findById(id);
         SysUser sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        if (currentSysUser == null) {
+        if (Objects.isNull(currentSysUser)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }

@@ -24,6 +24,7 @@ import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -82,7 +83,7 @@ public class SysUserGroupController {
         SysUserGroup currentSysUserGroup = new SysUserGroup();
         SysUserGroup sysUserGroupUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        if (currentSysUserGroup == null) {
+        if (Objects.isNull(currentSysUserGroup)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }

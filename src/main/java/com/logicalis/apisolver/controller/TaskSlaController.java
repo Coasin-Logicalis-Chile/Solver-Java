@@ -211,7 +211,7 @@ public class TaskSlaController {
                             table[0] = Util.getFieldDisplay(scTask[0]);
                         }
                         tagAction[0] = "(Not Exist) ";
-                        if (table[0] != "") {
+                        if (!table[0].equals("")) {
                             snTaskSlasSolver.add(taskSlaSolver[0]);
                             taskSla[0].setPauseDuration(Util.isNull(taskSlaSolver[0].getPause_duration()));
                             taskSla[0].setPauseTime(Util.isNull(taskSlaSolver[0].getPause_time()));
@@ -343,7 +343,7 @@ public class TaskSlaController {
                             table[0] = Util.getFieldDisplay(scTask[0]);
                         }
                         tagAction[0] = "(Not Exist) ";
-                        if (table[0] != "") {
+                        if (!table[0].equals("")) {
                             snTaskSlasSolver.add(taskSlaSolver[0]);
                             taskSla[0].setPauseDuration(Util.isNull(taskSlaSolver[0].getPause_duration()));
                             taskSla[0].setPauseTime(Util.isNull(taskSlaSolver[0].getPause_time()));

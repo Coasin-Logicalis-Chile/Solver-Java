@@ -12,10 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -41,7 +38,7 @@ public class ChoiceController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (choice == null) {
+        if (Objects.isNull(choice)) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -61,7 +58,7 @@ public class ChoiceController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (choice == null) {
+        if (Objects.isNull(choice)) {
             response.put("mensaje", Messages.notExist.get(integrationId.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -92,7 +89,7 @@ public class ChoiceController {
         Choice currentChoice = choiceService.findById(id);
         Choice choiceUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        if (currentChoice == null) {
+        if (Objects.isNull(currentChoice)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
