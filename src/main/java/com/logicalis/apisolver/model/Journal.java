@@ -77,9 +77,7 @@ public class Journal implements Serializable {
     }
 
     public void setValue(String value) {
-        // value = value.replace("[code]", "");
-        //  value = value.replace("Correo Original del Usuario: ", "");
-        if (value != null && value != "")
+        if (value != null && !value.equals("") )
             if (value.toLowerCase().contains("<html>")) {
                 value = "<html>".concat(value.split("<html>")[1]);
             }

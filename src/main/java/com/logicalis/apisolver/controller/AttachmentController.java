@@ -769,13 +769,15 @@ public class AttachmentController {
                 String pathDirectory = rest.generatePathDirectory(attachment, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
                 InputStream initialStream = file.getInputStream();
                 byte[] buffer = new byte[initialStream.available()];
-                initialStream.read(buffer);
-                File targetFile = new File(pathDirectory);
-                try (OutputStream outStream = new FileOutputStream(targetFile)) {
-                    outStream.write(buffer);
-                    outStream.close();
-                    Util.printData(tag, tagAction.concat("(SO)"), Util.getFieldDisplay(current), current.getElement());
-                    attachment.setDownloadLink(pathDirectory);
+                int count = initialStream.read(buffer);
+                if(count > 0){
+                    File targetFile = new File(pathDirectory);
+                    try (OutputStream outStream = new FileOutputStream(targetFile)) {
+                        outStream.write(buffer);
+                        outStream.close();
+                        Util.printData(tag, tagAction.concat("(SO)"), Util.getFieldDisplay(current), current.getElement());
+                        attachment.setDownloadLink(pathDirectory);
+                    }
                 }
                 tagAction = App.UpdateConsole();
                 attachmentService.save(attachment);

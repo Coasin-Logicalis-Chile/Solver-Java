@@ -18,6 +18,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 @Slf4j
@@ -47,11 +48,15 @@ public class Util {
     }
 
     private static SSHClient setupSshj() throws IOException {
-        SSHClient client = new SSHClient();
-        client.addHostKeyVerifier(new PromiscuousVerifier());
-        client.connect(remoteHost);
-        client.authPassword(username, password);
-        return client;
+        try (SSHClient client = new SSHClient()) {
+            client.addHostKeyVerifier(new PromiscuousVerifier());
+            client.connect(remoteHost);
+            client.authPassword(username, password);
+            return client;
+        } catch (IOException e) {
+            log.error(e.toString());
+            return null;
+        }
     }
 
     public static String parseJson(String journal, String levelOne, String levelTwo) {
@@ -136,11 +141,11 @@ public class Util {
     }
 
     public static String isNull(String a) {
-        return a == null || a.trim() == "" ? "" : a.trim();
+        return a == null || a.trim().equals("") ? "" : a.trim();
     }
 
     public static boolean isNullBool(String a) {
-        return a == null || a == "";
+        return a == null || a.equals("");
     }
 
     public static String isNull(String a, String b) {
@@ -162,7 +167,7 @@ public class Util {
     }
 
     public static boolean hasData(String a) {
-        return a == null || a == "" ? false : true;
+        return a == null || a.equals("") ? false : true;
     }
 
     public static boolean hasData(Object a) {
@@ -279,19 +284,19 @@ public class Util {
     }
 
     public static String getFieldDisplay(SysAudit sysAudit) {
-        return sysAudit != null ? sysAudit.getDocumentkey() != "" ? sysAudit.getDocumentkey() : "SysAudit" : "SysAudit";
+        return sysAudit != null ? !sysAudit.getDocumentkey().equals("") ? sysAudit.getDocumentkey() : "SysAudit" : "SysAudit";
     }
 
     public static String getFieldDisplay(SysDocumentation sysDocumentation) {
-        return sysDocumentation != null ? sysDocumentation.getUniqueIdentifier() != "" ? sysDocumentation.getUniqueIdentifier() : "SysDocumentation" : "SysDocumentation";
+        return sysDocumentation != null ? !sysDocumentation.getUniqueIdentifier().equals("") ? sysDocumentation.getUniqueIdentifier() : "SysDocumentation" : "SysDocumentation";
     }
 
     public static String getFieldDisplay(SysGroup group) {
-        return group != null ? group.getName() != "" ? group.getName() : "SysGroup" : "SysGroup";
+        return group != null ? !group.getName().equals("") ? group.getName() : "SysGroup" : "SysGroup";
     }
 
     public static String getFieldDisplay(ScTask scTask) {
-        return scTask != null ? scTask.getNumber() != "" ? scTask.getNumber() : "ScTask" : "ScTask";
+        return scTask != null ? !scTask.getNumber().equals("") ? scTask.getNumber() : "ScTask" : "ScTask";
     }
 
     public static String getFieldDisplay(TaskSla taskSla) {
@@ -299,23 +304,23 @@ public class Util {
     }
 
     public static String getFieldDisplay(Choice choice) {
-        return choice != null ? choice.getName() != "" ? choice.getName() : "Choice" : "Choice";
+        return choice != null ? !choice.getName().equals("") ? choice.getName() : "Choice" : "Choice";
     }
 
     public static String getFieldDisplay(ContractSla contractSla) {
-        return contractSla != null ? contractSla.getName() != "" ? contractSla.getName() : App.ContractSla() : App.ContractSla();
+        return contractSla != null ? !contractSla.getName().equals("") ? contractSla.getName() : App.ContractSla() : App.ContractSla();
     }
 
     public static String getFieldDisplay(CmnSchedule cmnSchedule) {
-        return cmnSchedule != null ? cmnSchedule.getName() != "" ? cmnSchedule.getName() : App.CmnSchedule() : App.CmnSchedule();
+        return cmnSchedule != null ? !cmnSchedule.getName().equals("") ? cmnSchedule.getName() : App.CmnSchedule() : App.CmnSchedule();
     }
 
     public static String getFieldDisplay(Incident incident) {
-        return incident != null ? incident.getNumber() != "" ? incident.getNumber() : App.Incident() : App.Incident();
+        return incident != null ? !incident.getNumber().equals("") ? incident.getNumber() : App.Incident() : App.Incident();
     }
 
     public static String getFieldDisplay(Attachment attachment) {
-        return attachment != null ? attachment.getFileName() != "" ? attachment.getFileName() : "Attachment" : "Attachment";
+        return attachment != null ? !attachment.getFileName().equals("") ? attachment.getFileName() : "Attachment" : "Attachment";
     }
 
     public static String getFieldDisplay(SysUserGroup sysUserGroup) {
@@ -323,34 +328,34 @@ public class Util {
     }
 
     public static String getFieldDisplay(CatalogLine catalogLine) {
-        return catalogLine != null ? catalogLine.getNumber() != "" ? catalogLine.getNumber() : App.CatalogLine() : App.CatalogLine();
+        return catalogLine != null ? !catalogLine.getNumber().equals("")  ? catalogLine.getNumber() : App.CatalogLine() : App.CatalogLine();
     }
 
     public static String getFieldDisplay(ScRequest scRequest) {
-        return scRequest != null ? scRequest.getNumber() != "" ? scRequest.getNumber() : App.ScRequest() : App.ScRequest();
+        return scRequest != null ? !scRequest.getNumber().equals("") ? scRequest.getNumber() : App.ScRequest() : App.ScRequest();
     }
 
     public static String getFieldDisplay(ScRequestItem scRequestItem) {
-        return scRequestItem != null ? scRequestItem.getNumber() != "" ? scRequestItem.getNumber() : App.ScRequestItem() : App.ScRequestItem();
+        return scRequestItem != null ? !scRequestItem.getNumber().equals("") ? scRequestItem.getNumber() : App.ScRequestItem() : App.ScRequestItem();
     }
 
     public static String getFieldDisplay(Company company) {
-        return company != null ? company.getName() != "" ? company.getName() : App.Company() : App.Company();
+        return company != null ? !company.getName().equals("") ? company.getName() : App.Company() : App.Company();
     }
 
     public static String getFieldDisplay(Domain domain) {
-        return domain != null ? domain.getName() != "" ? domain.getName() : App.Domain() : App.Domain();
+        return domain != null ? domain.getName().equals("") ? domain.getName() : App.Domain() : App.Domain();
     }
 
     public static String getFieldDisplay(SysUser sysUser) {
-        return sysUser != null ? sysUser.getName() != "" ? sysUser.getName() : App.SysUser() : App.SysUser();
+        return sysUser != null ? !sysUser.getName().equals("") ? sysUser.getName() : App.SysUser() : App.SysUser();
     }
 
     private static ZoneId UTC_ZONE = ZoneId.of("UTC");
     private static ZoneId LOCAL_ZONE = ZoneId.of("America/Santiago");
 
     public static LocalDateTime getLocalDateTime(String data) {
-        if (data != "" && data != null) {
+        if (!data.equals("") && data != null) {
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
             LocalDateTime dateTime = LocalDateTime.parse(data, formatter);
             return dateTime.atZone(UTC_ZONE).withZoneSameInstant(LOCAL_ZONE).toLocalDateTime();
@@ -367,23 +372,23 @@ public class Util {
     }
 
     public static String getFieldDisplay(Location location) {
-        return location != null ? location.getName() != "" ? location.getName() : App.Location() : App.Location();
+        return location != null ? !location.getName().equals("") ? location.getName() : App.Location() : App.Location();
     }
 
     public static String getFieldDisplay(Department department) {
-        return department != null ? department.getName() != "" ? department.getName() : App.Department() : App.Department();
+        return department != null ? !department.getName().equals("") ? department.getName() : App.Department() : App.Department();
     }
 
     public static String getFieldDisplay(ConfigurationItem configurationItem) {
-        return configurationItem != null ? configurationItem.getName() != "" ? configurationItem.getName() : App.ConfigurationItem() : App.ConfigurationItem();
+        return configurationItem != null ? !configurationItem.getName().equals("")? configurationItem.getName() : App.ConfigurationItem() : App.ConfigurationItem();
     }
 
     public static String getFieldDisplay(CiService ciService) {
-        return ciService != null ? ciService.getName() != "" ? ciService.getName() : App.CiService() : App.CiService();
+        return ciService != null ? !ciService.getName().equals("") ? ciService.getName() : App.CiService() : App.CiService();
     }
 
     public static String getFieldDisplay(Journal journal) {
-        return journal != null ? journal.getElement() != "" ? journal.getElement() : App.Journal() : App.Journal();
+        return journal != null ? !journal.getElement().equals("") ? journal.getElement() : App.Journal() : App.Journal();
     }
 
     public static String[] offSets65000() {

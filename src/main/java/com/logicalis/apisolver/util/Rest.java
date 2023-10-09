@@ -251,7 +251,7 @@ public class Rest {
         journalRequest.setElement(journal.getOrigin());
         journalRequest.setElement_id(journal.getElement());
         journalRequest.setName(journal.getName());
-        journalRequest.setValue(createBy != "" ? createBy.concat(": ").concat(journal.getValue()) : journal.getValue());
+        journalRequest.setValue(!createBy.equals("") ? createBy.concat(": ").concat(journal.getValue()) : journal.getValue());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
         URI uri = null;
@@ -286,7 +286,7 @@ public class Rest {
         json.put("shortDescription", incident.getShortDescription());
         json.put("closeNotes", incident.getCloseNotes());
         json.put("closeCode", incident.getCloseCode());
-        json.put("resolvedAt", incident.getResolvedAt() != null && incident.getResolvedAt() != "" ? incident.getResolvedAt().replace("T", " ") : "");
+        json.put("resolvedAt", incident.getResolvedAt() != null && !incident.getResolvedAt().equals("") ? incident.getResolvedAt().replace("T", " ") : "");
         json.put("resolvedBy", Util.isNullIntegration(incident.getResolvedBy()));
         json.put("state", incident.getState());
         json.put("incidentState", incident.getIncidentState());
@@ -373,7 +373,7 @@ public class Rest {
         json.put("state", scTask.getState());
         json.put("priority",scTask.getPriority());
         json.put("closeNotes", scTask.getCloseNotes());
-        json.put("closedAt", scTask.getClosedAt() != null && scTask.getClosedAt() != "" ? scTask.getClosedAt().replace("T", " ") : "");
+        json.put("closedAt", scTask.getClosedAt() != null && !scTask.getClosedAt().equals("") ? scTask.getClosedAt().replace("T", " ") : "");
         json.put("closedBy", Util.isNullIntegration(scTask.getClosedBy()));
         json.put("reasonPending", scTask.getReasonPending());
         HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);

@@ -25,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -94,7 +95,7 @@ public class SnScCategoryItemController {
                         tagAction[0] = App.UpdateConsole();
                     }
 
-                    Util.printData(tag, count[0],  tagAction[0].concat(scCategoryItem[0] != null ? scCategoryItem[0].getName() != "" &&  scCategoryItem[0].getName() != null  ? scCategoryItem[0].getName() : App.Title() : App.Title()));
+                    Util.printData(tag, count[0],  tagAction[0].concat(!Objects.isNull(scCategoryItem[0]) ? !scCategoryItem[0].getName().equals("") &&  scCategoryItem[0].getName() != null  ? scCategoryItem[0].getName() : App.Title() : App.Title()));
                     scCategoryItemService.save(scCategoryItem[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {

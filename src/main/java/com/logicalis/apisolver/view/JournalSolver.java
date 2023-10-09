@@ -31,7 +31,7 @@ public class JournalSolver implements Serializable {
     }
 
     public void setValue(String value) {
-        if (value != null && value != "")
+        if (value != null && !value.equals(""))
             if (value.toLowerCase().contains("<html>")) {
                 value = "<html>".concat(value.split("<html>")[1]);
             }
