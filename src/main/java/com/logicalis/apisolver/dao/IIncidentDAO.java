@@ -79,7 +79,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "AND ((?17 = '' AND ?18 = '' ) OR (?17 != '' AND ?18 = '' AND (a.created_on BETWEEN TO_TIMESTAMP(?17,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP((CURRENT_DATE || ' 23:59:59'),'YYYY-MM-DD HH24:MI:SS'))) OR (?17 = '' AND ?18 != ''  AND (a.created_on BETWEEN TO_TIMESTAMP(('1900-01-01 00:00:00'),'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?18,'YYYY-MM-DD HH24:MI:SS'))) OR (?17 != '' AND ?18 != ''  AND (a.created_on BETWEEN TO_TIMESTAMP(?17,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?18,'YYYY-MM-DD HH24:MI:SS'))))\n" +
             "AND a.delete IS FALSE\n" +
             "AND b.active IS TRUE", nativeQuery = true)
-    /*
+
     @Query(value = "SELECT  distinct  a.id   AS id, \n" +
             "                   a.number AS number, \n" +
             "                   a.short_description AS short_description, \n" +
@@ -155,7 +155,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "                                      and    b.active is TRUE\n" +
             "                                      and    c.sys_user = ?10 ) )", nativeQuery = true)
 
-     */
+    */
     @Query(value = "SELECT distinct a.id   AS id\n" +
             ",      a.number AS number\n" +
             ",      a.short_description AS short_description\n" +
@@ -182,7 +182,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "     INNER JOIN choice         d ON a.state            = d.value AND  d.name = 'incident' AND d.element = 'state' \n" +
             "     INNER JOIN choice         g ON a.incident_state   = g.value AND  g.name = 'incident' AND g.element = 'incident_state' \n" +
             "     INNER join sys_group      b on  a.assignment_group=  b.id  and     b.active is TRUE \n" +
-            "     LEFT  OUTER JOIN choice   e ON a.priority         = e.value AND  e.name = 'incident' AND e.element = 'priority'\n" +
+            "     LEFT  OUTER JOIN choice   e ON a.priority         = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
             "     LEFT  OUTER JOIN sys_user f ON a.task_for         = f.id \n" +
             "     LEFT  OUTER JOIN sys_user h ON a.assigned_to      = h.id \n" +
             "     LEFT  OUTER JOIN incident i ON a.incident_parent  = i.integration_id \n" +
@@ -447,7 +447,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "                                                      INNER JOIN sys_user_group c ON c.sys_group = b.id  \n" +
             "                                                   where  b.id = a.assignment_group \n" +
             "                                                   and    b.active is TRUE \n" +
-            "                                                   and    c.sys_user = 76045) )  \n" +
+            "                                                   and    c.sys_user = ?9) )  \n" +
             "             AND ((COALESCE(?10) IS NULL) OR a.assignment_group IN (?10)) \n" +
             "             AND ((COALESCE(?11) IS NULL) OR a.assigned_to IN (?11) ) \n" +
             "             AND ((COALESCE(?12) IS NULL) OR UPPER(d.label) IN (?12))  \n" +
@@ -488,7 +488,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "FROM incident a\n" +
             "LEFT OUTER JOIN sys_group b ON a.assignment_group = b.id\n" +
             "LEFT OUTER JOIN choice d ON a.state = d.value AND  d.name = 'incident' AND d.element = 'state'\n" +
-            "LEFT OUTER JOIN choice e ON a.priority = e.value AND  e.name = 'incident' AND e.element = 'priority'\n" +
+            "LEFT OUTER JOIN choice e ON a.priority = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
             "LEFT OUTER JOIN sys_user f ON a.task_for = f.id\n" +
             "LEFT OUTER JOIN sys_user h ON a.assigned_to = h.id\n" +
             "LEFT OUTER JOIN incident i ON a.incident_parent = i.integration_id\n" +
