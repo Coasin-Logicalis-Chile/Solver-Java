@@ -76,10 +76,12 @@ public interface IJournalDAO extends CrudRepository<Journal, Long> {
             "SELECT  a.id, a.created_on\n" +
             "FROM journal a\n" +
             "INNER JOIN sc_request_item b ON a.sc_request_item = b.id \n" +
-            "WHERE b.sc_request IN (SELECT DISTINCT sc_request \n" +
-            "\t\t\t\t\t   FROM sc_request_item \n" +
-            "\t\t\t\t\t   WHERE incident_parent IS NOT null\n" +
-            "\t\t\t\t\t   AND ((?1 = '' AND incident_parent = '-1') OR incident_parent = ?1))\n" +
+            "WHERE EXISTS (SELECT 'x' \n" +
+            "\t\t\t\t\t   FROM sc_request_item ri \n" +
+            "\t\t\t\t\t   WHERE " +
+            "             b.sc_request = ri.sc_request" +
+            "             AND ri.incident_parent IS NOT null\n" +
+            "\t\t\t\t\t   AND ((?1 = '' AND ri.incident_parent = '-1') OR ri.incident_parent = ?1))\n" +
             "\t\t\t\t\t   \n" +
             "UNION\n" +
             "\n" +
@@ -99,20 +101,21 @@ public interface IJournalDAO extends CrudRepository<Journal, Long> {
             "\t\t\tSELECT a.id, a.created_on\n" +
             "            FROM journal a\n" +
             "            INNER JOIN sc_request_item b ON a.sc_request_item = b.id\n" +
-            "\t\t\tWHERE b.sc_request IN (SELECT DISTINCT b.sc_request\n" +
-            "            FROM journal a\n" +
-            "            INNER JOIN sc_request_item b ON a.sc_request_item = b.id\n" +
-            "\t\t\tWHERE ((?2 = '' AND b.integration_id = '-1') OR b.integration_id = ?2))\n" +
+            "\t\t\tWHERE " +
+            "      EXISTS (SELECT 'x'\n" +
+            "            FROM journal a1\n" +
+            "            INNER JOIN sc_request_item b1 ON a1.sc_request_item = b1.id\n" +
+            "\t\t\tWHERE b1.sc_request = b.sc_request =  AND ((?2 = '' AND b1.integration_id = '-1') OR b1.integration_id = ?2))\n" +
             "\t\t\t\n" +
             "\t\t\tUNION\n" +
             "\t\t\t\n" +
             "\t\t\tSELECT a.id, a.created_on\n" +
             "\t\t\tFROM journal a\n" +
             "\t\t\tINNER JOIN incident b ON a.incident = b.id\n" +
-            "\t\t\tWHERE b.integration_id IN (SELECT DISTINCT b.incident_parent\n" +
-            "            FROM journal a\n" +
-            "            INNER JOIN sc_request_item b ON a.sc_request_item = b.id\n" +
-            "\t\t\tWHERE ((?2 = '' AND b.integration_id = '-1') OR b.integration_id = ?2))\n" +
+            "\t\t\tWHERE EXISTS (SELECT 'x' \n" +
+            "            FROM journal a1\n" +
+            "            INNER JOIN sc_request_item b1 ON a1.sc_request_item = b1.id\n" +
+            "\t\t\tWHERE b1.incident_parent = b.integration_id AND ((?2 = '' AND b1.integration_id = '-1') OR b1.integration_id = ?2))\n" +
             "\t\t\t" +
             "ORDER BY created_on DESC", nativeQuery = true)
     public List<JournalInfo> findInfoByIncidentOrScRequestItem(String incident, String scRequestItem);
@@ -129,10 +132,11 @@ public interface IJournalDAO extends CrudRepository<Journal, Long> {
             "SELECT  a.id, a.created_on\n" +
             "FROM journal a\n" +
             "INNER JOIN sc_request_item b ON a.sc_request_item = b.id \n" +
-            "WHERE b.sc_request IN (SELECT DISTINCT sc_request \n" +
-            "\t\t\t\t\t   FROM sc_request_item \n" +
-            "\t\t\t\t\t   WHERE incident_parent IS NOT null\n" +
-            "\t\t\t\t\t   AND ((?1 = '' AND incident_parent = '-1') OR incident_parent = ?1))\n" +
+            "WHERE exists (SELECT 'c' \n" +
+            "\t\t\t\t\t   FROM sc_request_item b1 \n" +
+            "\t\t\t\t\t   WHERE b1.sc_request = b.sc_request" +
+            "                 b1.incident_parent IS NOT null\n" +
+            "\t\t\t\t\t   AND ((?1 = '' AND b1.incident_parent = '-1') OR b1.incident_parent = ?1))\n" +
             "\t\t\t\t\t   \n" +
             "UNION\n" +
             "\n" +
@@ -153,20 +157,22 @@ public interface IJournalDAO extends CrudRepository<Journal, Long> {
             "\t\t\tSELECT a.id, a.created_on\n" +
             "            FROM journal a\n" +
             "            INNER JOIN sc_request_item b ON a.sc_request_item = b.id\n" +
-            "\t\t\tWHERE b.sc_request IN (SELECT DISTINCT b.sc_request\n" +
-            "            FROM journal a\n" +
-            "            INNER JOIN sc_request_item b ON a.sc_request_item = b.id\n" +
-            "\t\t\tWHERE b.integration_id = ?1)\n" +
+            "WHERE exists (SELECT 'x'\n" +
+            "                         FROM journal a1 \n" +
+            "                         INNER JOIN sc_request_item b1 ON a1.sc_request_item = b1.id \n" +
+            "                        WHERE b1.sc_request  = b.sc_request\n" +
+            "                        and b1.integration_id = ?1) \n" +
             "\t\t\t\n" +
             "\t\t\tUNION\n" +
             "\t\t\t\n" +
             "\t\t\tSELECT a.id, a.created_on\n" +
             "\t\t\tFROM journal a\n" +
             "\t\t\tINNER JOIN incident b ON a.incident = b.id\n" +
-            "\t\t\tWHERE b.integration_id IN (SELECT DISTINCT b.incident_parent\n" +
-            "            FROM journal a\n" +
-            "            INNER JOIN sc_request_item b ON a.sc_request_item = b.id\n" +
-            "\t\t\tWHERE b.integration_id = ?1)\n" +
+            "      WHERE exists (SELECT 'x'\n" +
+            "               FROM journal a1 \n" +
+            "                    INNER JOIN sc_request_item b1 ON a1.sc_request_item = b1.id \n" +
+            "               WHERE b1.incident_parent  = b.integration_id\n" +
+            "               and  b1.integration_id = ?1) \n" +
             "\t\t\t" +
             "ORDER BY created_on DESC", nativeQuery = true)
     public List<JournalInfo> findInfoByScRequestRelatedNotes(String scRequestItem);
