@@ -79,7 +79,7 @@ public interface IJournalDAO extends CrudRepository<Journal, Long> {
             "WHERE EXISTS (SELECT 'x' \n" +
             "\t\t\t\t\t   FROM sc_request_item ri \n" +
             "\t\t\t\t\t   WHERE " +
-            "             b.sc_request = ri.sc_request" +
+            "             ri.sc_request = b.sc_request" +
             "             AND ri.incident_parent IS NOT null\n" +
             "\t\t\t\t\t   AND ((?1 = '' AND ri.incident_parent = '-1') OR ri.incident_parent = ?1))\n" +
             "\t\t\t\t\t   \n" +
@@ -105,7 +105,7 @@ public interface IJournalDAO extends CrudRepository<Journal, Long> {
             "      EXISTS (SELECT 'x'\n" +
             "            FROM journal a1\n" +
             "            INNER JOIN sc_request_item b1 ON a1.sc_request_item = b1.id\n" +
-            "\t\t\tWHERE b1.sc_request = b.sc_request =  AND ((?2 = '' AND b1.integration_id = '-1') OR b1.integration_id = ?2))\n" +
+            "\t\t\tWHERE b1.sc_request = b.sc_request AND ((?2 = '' AND b1.integration_id = '-1') OR b1.integration_id = ?2))\n" +
             "\t\t\t\n" +
             "\t\t\tUNION\n" +
             "\t\t\t\n" +
