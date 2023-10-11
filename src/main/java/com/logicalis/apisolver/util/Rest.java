@@ -46,8 +46,8 @@ public class Rest {
 
     @PostConstruct
     public void init(){
-        App.environment = environment;
-        Util.environment = environment;
+        App.setEnvironment(environment);
+        Util.setEnvironment(environment);
     }
     public RestTemplate restTemplateServiceNow() {
         this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));

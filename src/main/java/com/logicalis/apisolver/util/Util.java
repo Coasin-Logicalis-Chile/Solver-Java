@@ -23,6 +23,7 @@ import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 @Slf4j
@@ -30,7 +31,7 @@ public class Util {
     //private String remoteHost = "portalsolver.westus2.cloudapp.azure.com";
     private final static String Date_REGEX = "^([0-9]{4})-([0-1][0-9])-([0-3][0-9])\\s([0-1][0-9]|[2][0-3]):([0-5][0-9]):([0-5][0-9])$";
     private final static Pattern Date_PATTERN = Pattern.compile(Date_REGEX);
-    public static Environment environment;
+    private static Environment environment;
     //COLORS
     public final static String ANSI_RESET = "\u001B[0m";
 
@@ -57,22 +58,35 @@ public class Util {
             return client;
         } catch (IOException e) {
             log.error(e.toString());
-            return null;
+            throw new IOException(e);
         }
     }
 
+    public static Environment getEnvironment() {
+        return environment;
+    }
+
+    public static void setEnvironment(Environment pEnv) {
+        environment = pEnv;
+    }
+
     public void uploadFile(File localFile, SnAttachment snAttachment) throws IOException {
-        SSHClient sshClient = setupSshj();
-        SFTPClient sftpClient = sshClient.newSFTPClient();
         String tag = "[Upload File]";
-        try {
-            log.info(environment.getProperty("setting.attachments.dir").concat(snAttachment.getSys_id().concat(".").concat(snAttachment.getFile_name().split("\\s*[.]+")[1])));
-            sftpClient.put(new FileSystemFile(localFile), environment.getProperty("remote.dir").concat(snAttachment.getSys_id().concat(".").concat(snAttachment.getFile_name().split("\\s*[.]+")[1])));
-        } catch (Exception e) {
-            log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+        SSHClient sshClient = setupSshj();
+        if(!Objects.isNull(sshClient)) {
+            try {
+                SFTPClient sftpClient = sshClient.newSFTPClient();
+                if (!Objects.isNull(sftpClient)) {
+                    log.info(environment.getProperty("setting.attachments.dir").concat(snAttachment.getSys_id().concat(".").concat(snAttachment.getFile_name().split("\\s*[.]+")[1])));
+                    sftpClient.put(new FileSystemFile(localFile), environment.getProperty("remote.dir").concat(snAttachment.getSys_id().concat(".").concat(snAttachment.getFile_name().split("\\s*[.]+")[1])));
+                    sftpClient.close();
+                }
+            }catch(IOException e){
+                log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+            }finally {
+                sshClient.disconnect();
+            }
         }
-        sftpClient.close();
-        sshClient.disconnect();
     }
 
     public static String parseJson(String journal, String levelOne, String levelTwo) {

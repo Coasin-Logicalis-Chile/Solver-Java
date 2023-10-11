@@ -18,7 +18,11 @@ public class App {
         return "lalogicalis";
     }
 
-    public static Environment environment;
+    private static Environment environment;
+
+    public static void setEnvironment(Environment pEnv) {
+        environment = pEnv;
+    }
 
     public static String SNInstance() {
         return "https://".concat(Util.getInstanceServiceNow()).concat(".service-now.com");
