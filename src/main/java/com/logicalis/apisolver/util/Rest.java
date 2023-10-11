@@ -13,6 +13,7 @@ import org.hibernate.engine.jdbc.StreamUtils;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.core.env.Environment;
 import org.springframework.http.*;
 import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.scheduling.annotation.Async;
@@ -21,6 +22,7 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -37,8 +39,16 @@ import java.nio.file.Paths;
 public class Rest {
     @Autowired
     @Qualifier("solverRestTemplate")
-    RestTemplate restTemplate;
+    private RestTemplate restTemplate;
 
+    @Autowired
+    Environment environment;
+
+    @PostConstruct
+    public void init(){
+        App.environment = environment;
+        Util.environment = environment;
+    }
     public RestTemplate restTemplateServiceNow() {
         this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
         return restTemplate;

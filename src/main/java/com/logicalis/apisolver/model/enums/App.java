@@ -1,6 +1,7 @@
 package com.logicalis.apisolver.model.enums;
 
 import com.logicalis.apisolver.util.Util;
+import org.springframework.core.env.Environment;
 
 import java.util.Base64;
 
@@ -17,16 +18,18 @@ public class App {
         return "lalogicalis";
     }
 
+    public static Environment environment;
+
     public static String SNInstance() {
         return "https://".concat(Util.getInstanceServiceNow()).concat(".service-now.com");
     }
 
     public static String SNUser() {
-        return "solver";
+        return environment.getProperty("app.servicenow.user");
     }
 
     public static String SNPassword() {
-        return new String(Base64.getDecoder().decode("U1ZlbFVPMCFMLVdXcFZBMF1FJEskdSM0YlI="));
+        return new String(Base64.getDecoder().decode(environment.getProperty("app.servicenow.password")));
     }
 
     public static String Name() {
