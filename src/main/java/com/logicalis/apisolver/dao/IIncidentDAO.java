@@ -277,40 +277,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "               and    b.sys_user = ?2\n" +
             "               and    b.company = a.company) ",nativeQuery = true)
     public Long countIncidentsSLAByFilters(Long company, Long assignedTo);
-
-    /*
-    @Query(value = "SELECT a.number,\n" +
-            "to_char(a.closed, 'day') AS day,\n" +
-            "a.closed_at\n" +
-            "FROM   incident AS a\n" +
-            "INNER JOIN choice   AS b ON a.state = b.value\n" +
-            "INNER JOIN sys_group c ON a.assignment_group = c.id\n" +
-            "INNER JOIN sys_user_group d ON d.sys_group = c.id\n" +
-            "WHERE (?1 = 0 OR a.assigned_to = ?1)\n" +
-            "AND (?2 = 0 OR a.company = ?2)\n" +
-            "AND (?3 = '' OR a.state = ?3)\n" +
-            "AND (?4 = false OR a.assigned_to IS null)\n" +
-            "AND (?5 = false OR UPPER(b.label) like '%CERRADO%')\n" +
-            "AND ((?6 = '' AND ?7 = '') OR (a.closed BETWEEN TO_TIMESTAMP(?6,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?7,'YYYY-MM-DD HH24:MI:SS')))\n" +
-            "AND (?8 = 0 OR a.closed_by = ?8)\n" +
-            "AND c.active IS TRUE", nativeQuery = true)
-
-    @Query(value = "SELECT count(*) from view_incidentes a\n" +
-            "  where (?3 = '' OR a.state = ?3)\n" +
-            "  and (?1= 0 OR a.assigned_to = ?1)\n" +
-            "  AND (?2 = 0 OR a.company = ?2)\n" +
-            "  AND (?4 = false OR a.assigned_to is null)\n" +
-            "  AND (?5 = false OR  UPPER(a.dlabel) like '%RESUELTO%')\n" +
-            "  AND (?6 = false OR  UPPER(a.dlabel) like '%CERRADO%')\n" +
-            "  AND (false = false OR (UPPER(a.dlabel) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%', '%RESUELTO%%'])\n" +
-            "            AND UPPER(a.glabel) NOT LIKE '%RESUELTO%'))\n" +
-            "  and (?7 = 0 or exists ( select 'x'\n" +
-            "           from   vw_user b\n" +
-            "           where  b.id  = a.assignment_group\n" +
-            "           and    b.active is true\n" +
-            "           AND    b.sys_user = ?7\n" +
-            "           and    b.company = a.company))", nativeQuery = true)
-    */
+    
     @Query(value = "SELECT a.number,to_char(a.closed, 'day') AS day, a.closed, a.closed_at\n" +
             " FROM   incident  a \n" +
             " INNER JOIN choice     AS b ON            a.state = b.value\n" +
