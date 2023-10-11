@@ -182,9 +182,12 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "                            where u.sys_group = a.scaling_assignment_group and u.sys_user = ?7)))", nativeQuery = true)
     public Long countScTasksByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
     
-    @Query(value = "select count\n" +
-            "from vw_countTaskSLAByFilters v where v.company=?1\n" +
-            "and v.sys_user=?2", nativeQuery = true)
+    @Query(value = "select case when t.count IS NULL then 0 else t.count end as count\n" +
+            "from(\n" +
+            "select \n" +
+            "sum(count) as count\n" +
+            "from vw_countTaskSLAByFilters v where v.company = ?1 and v.sys_user= ?2\n" +
+            ") t", nativeQuery = true)
     public Long countTaskSLAByFilters(Long company, Long assignedTo);
 
     List<ScTask> findByScRequestItem(ScRequestItem scRequestItem);
