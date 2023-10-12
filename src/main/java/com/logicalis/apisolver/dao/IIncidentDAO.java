@@ -277,7 +277,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "               and    b.sys_user = ?2\n" +
             "               and    b.company = a.company) ",nativeQuery = true)
     public Long countIncidentsSLAByFilters(Long company, Long assignedTo);
-    
+
     @Query(value = "SELECT a.number,to_char(a.closed, 'day') AS day, a.closed, a.closed_at\n" +
             " FROM   incident  a \n" +
             " INNER JOIN choice     AS b ON            a.state = b.value\n" +
