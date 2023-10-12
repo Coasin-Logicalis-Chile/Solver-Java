@@ -2,6 +2,7 @@ package com.logicalis.apisolver.controller;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.logicalis.apisolver.dto.JournalInput;
 import com.logicalis.apisolver.model.*;
 import com.logicalis.apisolver.model.enums.*;
 import com.logicalis.apisolver.model.utilities.AttachmentInfo;
@@ -315,7 +316,7 @@ public class JournalController {
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/journal/{id}")
-    public ResponseEntity<?> update(@RequestBody Journal journal, @PathVariable Long id) {
+    public ResponseEntity<?> update(@RequestBody JournalInput journal, @PathVariable Long id) {
         Journal currentJournal = journalService.findById(id);
         Journal journalUpdated = null;
         Map<String, Object> response = new HashMap<>();

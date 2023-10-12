@@ -3,6 +3,7 @@ package com.logicalis.apisolver.controller;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.logicalis.apisolver.dto.ScTaskInput;
 import com.logicalis.apisolver.model.*;
 import com.logicalis.apisolver.model.enums.*;
 import com.logicalis.apisolver.model.utilities.SortedUnpaged;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
@@ -62,6 +64,8 @@ public class ScTaskController {
     private IConfigurationItemService configurationItemService;
     @Autowired
     private Rest rest;
+    @Autowired
+    ModelMapper modelMapper;
 
     @GetMapping("/scTasks")
     public List<ScTask> index() {
@@ -88,10 +92,11 @@ public class ScTaskController {
 
     @Secured("ROLE_ADMIN")
     @PostMapping("/scTask")
-    public ResponseEntity<?> create(@RequestBody ScTask scTask) {
+    public ResponseEntity<?> create(@RequestBody ScTaskInput scTaskInput) {
         ScTask newScTask = null;
         Map<String, Object> response = new HashMap<>();
         try {
+            ScTask scTask = modelMapper.map(scTaskInput, ScTask.class);
             newScTask = scTaskService.save(scTask);
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
