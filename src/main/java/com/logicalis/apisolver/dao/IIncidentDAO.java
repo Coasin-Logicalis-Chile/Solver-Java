@@ -226,7 +226,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "                            and    b.active is TRUE\n" +
             "                            and    c.sys_user = ?10 ) ) " +
             "AND (?11 = false OR UPPER(d.label) like '%CERRADO%')\n" +
-            "AND (?12 = false OR OR (UPPER(d.label) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%'])))\n" +
+            "AND (?12 = false OR (UPPER(d.label) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%'])))\n" +
             "AND a.delete IS FALSE\n" +
             "AND COALESCE(b.active, TRUE) IS TRUE", nativeQuery = true)
     public List<IncidentFields> findIncidentsByFilters(String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String incidentParent, String scRequestParent, String scRequestItemParent, Long assignedToGroup, boolean closed, boolean open);
