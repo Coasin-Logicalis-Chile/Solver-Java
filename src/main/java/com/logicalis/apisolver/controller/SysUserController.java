@@ -28,10 +28,15 @@ import javax.validation.constraints.NotNull;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class SysUserController {
+
+    private final Logger logger = LoggerFactory.getLogger(SysUserController.class);
 
     @Autowired
     private PlatformTransactionManager transactionManager;
@@ -176,10 +181,14 @@ public class SysUserController {
 
     @PutMapping("/sysUserSN")
     public ResponseEntity<?> update(@RequestBody SysUserRequest sysUserRequest) {
+
+        logger.info("Solicitud PUT recibida para actualizar Usuario: {}", sysUserRequest.getSys_id());
+
         SysUser currentSysUser = new SysUser();
         SysUser sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
         Rest rest = new Rest();
+
         if (currentSysUser == null) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
@@ -189,6 +198,9 @@ public class SysUserController {
             SysUser sysUser = new SysUser();
             String tagAction = app.CreateConsole();
             String tag = "[SysUser] ";
+
+            logger.info("Estableciendo nuevos atributos al Objeto sysUser: {}", sysUserRequest.getSys_id());
+
             sysUser.setActive(sysUserRequest.getActive());
             sysUser.setEmail(sysUserRequest.getEmail().toLowerCase(Locale.ROOT));
             sysUser.setEmployeeNumber(sysUserRequest.getEmployee_number());
@@ -206,6 +218,7 @@ public class SysUserController {
             sysUser.setPassword(pass);
 
             Company company = companyService.findByIntegrationId(sysUserRequest.getCompany());
+            //logger.info("Vinculando objeto ScRequestItem: {} con su correspondiente Company: {} y Domain: {}",sysUserRequest.getCompany(), company.getIntegrationId(), company.getDomain().getIntegrationId());
             sysUser.setCompany(company);
             sysUser.setDomain(company.getDomain());
 
@@ -216,6 +229,7 @@ public class SysUserController {
             } else {
                 sysUser.setDomain(null);
             }*/
+
 
             if (util.hasData(sysUserRequest.getManager())) {
                 SysUser manager = sysUserService.findByIntegrationId(sysUserRequest.getManager());
@@ -254,15 +268,20 @@ public class SysUserController {
                 tagAction = app.UpdateConsole();
             }
 
+            logger.info("Guardando Usuario en la Base de Datos: {}", sysUser.getIntegrationId());
             sysUserUpdated = sysUserService.save(sysUser);
             util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(sysUser.getCompany()), util.getFieldDisplay(sysUser.getDomain()));
 
+            logger.info("Usuario Actualizado correctamente: {}", sysUser.getIntegrationId());
+
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar Usuario: {}", e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("Usuario Actualizado correctamente: {}", sysUserRequest.getSys_id());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUser", sysUserUpdated);
 

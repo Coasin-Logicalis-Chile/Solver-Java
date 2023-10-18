@@ -37,10 +37,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class IncidentController {
+
+    private final Logger logger = LoggerFactory.getLogger(IncidentController.class);
 
     @Autowired
     private IIncidentService incidentService;
@@ -328,16 +333,19 @@ public class IncidentController {
 
     @PutMapping("/incident/{id}")
     public ResponseEntity<?> update(@RequestBody String json, @PathVariable Long id) {
+        logger.info("Solicitud PUT recibida para actualizar incidente con ID: {}", id);
         Incident currentIncident = incidentService.findById(id);
         Incident incidentUpdated = null;
         Map<String, Object> response = new HashMap<>();
         Rest rest = new Rest();
         if (currentIncident == null) {
+            logger.info("Incidente con ID {} no encontrado. No se puede actualizar.", id);
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
         try {
+            logger.info("Actualiz y estableciendo nuevos atributos, Incidente: {}", currentIncident.getNumber());
             String levelOne = SnTable.Incident.get();
             SysUser assignedTo = getSysUserByIntegrationId(util.parseJson(json, levelOne, Field.AssignedTo.get()));
             currentIncident.setAssignedTo(assignedTo);
@@ -358,14 +366,19 @@ public class IncidentController {
             currentIncident.setPriority(util.parseJson(json, levelOne, Field.Priority.get()));
             String knowledge = util.parseJson(json, levelOne, Field.Knowledge.get());
             currentIncident.setKnowledge(Boolean.parseBoolean(knowledge != null && knowledge != "" ? knowledge : "false"));
+            logger.info("Guardando Incidente en la Base de Datos: {}", currentIncident.getNumber());
             incidentUpdated = incidentService.save(currentIncident);
             Incident incidentServiceNow = rest.putIncident(endPointSN.PutIncident(), currentIncident);
             //currentIncident.setState(addIncident.getState());
+            logger.info("Incidente actualizado exitosamente: ", currentIncident.getNumber());
         } catch (DataAccessException e) {
+            logger.error("Error al actualizar Incidente: {}. Error: {}", currentIncident.getNumber(),e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("Incidente actualizado exitosamente: ", currentIncident.getNumber());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("incident", currentIncident);
 
@@ -565,21 +578,33 @@ public class IncidentController {
         }
 
         @Async*/
-    @PutMapping("/incidentSN")
+    @PutMapping("/incidentSN")   
     public ResponseEntity<?> update(@RequestBody IncidentRequest incidentRequest) {
         Incident incident = new Incident();
         Map<String, Object> response = new HashMap<>();
 
+        logger.info("Solicitud PUT recibida para actualizar Incidente: {}", incidentRequest.getNumber());
+
         try {
+            logger.debug("Actualizando incidente: {}", incidentRequest.getNumber());
             String tagAction = app.CreateConsole();
             String tag = "[Incident] ";
 
             Incident exists = incidentService.findByIntegrationId(incidentRequest.getSys_id());
+
+
+            
             if (exists != null) {
+                logger.info("El Incidente existe en la BD: {}",  exists.getNumber());
                 incident.setId(exists.getId());
                 incident.setScRequestParent(exists.getScRequestParent());
                 incident.setMaster(exists.getMaster());
-                tagAction = app.UpdateConsole();
+                tagAction = app.UpdateConsole();    
+
+                logger.info("Estableciendo atributos al Objeto incident: {}", exists.getNumber());
+            }else{
+                logger.info("El Incidente no existe en la BD: {}",  incidentRequest.getNumber());
+                logger.info("Estableciendo atributos al Objeto incident: {}", incidentRequest.getNumber());
             }
 
 
@@ -622,6 +647,7 @@ public class IncidentController {
             incident.setSysModCount(incidentRequest.getSys_mod_count());
             incident.setReopenCount(incidentRequest.getReopen_count());
 
+            logger.info("Buscando y asignado la categoria correspondiente: {}", incidentRequest.getNumber());
             incident.setCategory(incidentRequest.getCategory());
             Choice category = choiceService.findByValueAndElementAndName(incident.getCategory(), Field.Category.get(), SnTable.Incident.get());
             if (category != null) {
@@ -635,12 +661,12 @@ public class IncidentController {
             incident.setSolverFlagAssignedTo(incidentRequest.getU_solver_flag_assigned_to());
             incident.setSolverFlagResolvedBy(incidentRequest.getU_solver_flag_resolved_by());
 
-
+            logger.info("Asociando Incidente con la compañia correspondiente: {}", incident.getNumber());
             Company company = companyService.findByIntegrationId(incidentRequest.getCompany());
             incident.setCompany(company);
             incident.setDomain(company.getDomain());
 
-
+            logger.info("Manejando y estableciendo la relacion entre incidentes padres e Incidentes hijos: {}", incident.getNumber());
             if (util.hasData(incidentRequest.getIncident_parent()) || util.hasData(incidentRequest.getParent_incident())) {
                 String incidentParent = util.hasData(incidentRequest.getIncident_parent()) ? incidentRequest.getIncident_parent() : incidentRequest.getParent_incident();
                 Incident master = incidentService.findByIntegrationId(incidentParent);
@@ -652,6 +678,7 @@ public class IncidentController {
             }
 
 
+            logger.info("Asignando varios atributos del objeto incident basados en los valores proporcionados en incidentRequest: {}", incident.getNumber());
             if (util.hasData(incidentRequest.getCaused_by())) {
                 incident.setCausedBy(sysUserService.findByIntegrationId(incidentRequest.getCaused_by()));
             } else {
@@ -738,17 +765,23 @@ public class IncidentController {
             }
 
 
+            logger.info("Guardando Incidente en la Base de Datos: {}", incident.getNumber());
             incidentService.save(incident);
 
             util.printData(tag, tagAction.concat(util.getFieldDisplay(incident)), util.getFieldDisplay(incident.getCompany()), util.getFieldDisplay(incident.getDomain()));
 
+            
+            logger.info("Incidente Actualizado correctamente: {}", incident.getNumber());
 
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar el incidente: {}", e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        
+        logger.info("El Incidente se Actualizado correctamente: {}", incident.getNumber());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("incident", incident);
 

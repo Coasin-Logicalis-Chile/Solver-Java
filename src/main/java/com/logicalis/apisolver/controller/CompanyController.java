@@ -16,16 +16,22 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class CompanyController {
+
+	private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
 
 	@Autowired
 	private ICompanyService companyService;
 	
 	@GetMapping("/companies")
 	public List<Company> index() {
+		logger.info("Solicitud GET recibida en /companies");
 		return companyService.findAll();
 	}
 	

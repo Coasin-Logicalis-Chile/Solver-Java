@@ -30,10 +30,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class JournalController {
+
+    private final Logger logger = LoggerFactory.getLogger(JournalController.class);
 
     @Autowired
     private IJournalService journalService;
@@ -57,13 +62,15 @@ public class JournalController {
     @Autowired
     private Environment environment;
     @Async
-    @PutMapping("/journalSN")
+    @PutMapping("/journalSN") 
     public ResponseEntity<?> update(@RequestBody JournalRequest journalRequest) {
         Journal currentJournal = new Journal();
         Journal journalUpdated = null;
         Map<String, Object> response = new HashMap<>();
+        logger.info("Solicitud PUT recibida para actualizar Journal: {}", journalRequest.getSys_id());
         Rest rest = new Rest();
         if (currentJournal == null) {
+            logger.warn("Journal no encontrada para sys_id: {}", journalRequest.getSys_id());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(journalRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -75,29 +82,38 @@ public class JournalController {
             System.out.println("journalRequest.getValue: ".concat(journalRequest.getValue()));
             System.out.println("journalRequest.getSys_created_on: ".concat(journalRequest.getSys_created_on()));*/
 
+            logger.debug("Actualizando Journal. sys_id Journal: {}", journalRequest.getSys_id());
+
             Journal journal = new Journal();
             String tagAction = app.CreateConsole();
             String tag = "[Journal] ";
+
+            logger.info("Estableciendo nuevos atributos al Objeto Journal. sys_id Journal: {}", journalRequest.getSys_id());
             journal.setOrigin(journalRequest.getElement());
             journal.setElement(journalRequest.getElement_id());
             journal.setCreatedOn(journalRequest.getSys_created_on());
             journal.setIntegrationId(journalRequest.getSys_id());
+
+            logger.info("Determinando relacion entre objeto Incident o ScRequestItem. sys_id Task SLA: {}", journalRequest.getSys_id());
             String element = "";
             if (journalRequest.getName().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(journal.getElement());
                 if (incident != null) {
+                    logger.info("Relacion establecida con Incident: {}", incident.getNumber());
                     journal.setIncident(incident);
                     element = util.getFieldDisplay(incident);
                 }
             } else if (journalRequest.getName().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journal.getElement());
                 if (scRequestItem != null) {
+                    logger.info("Relacion establecida con scRequestItem: {}", scRequestItem.getNumber());
                     journal.setScRequestItem(scRequestItem);
-
                     element = util.getFieldDisplay(scRequestItem);
                 }
             }
 
+        
+            logger.info("Procesando objeto journalRequest: {} para Verificar y actualizar informacion", journalRequest.getSys_id());
             if (util.hasData(journalRequest.getSys_created_by())) {
                 SysUser openedBy = sysUserService.findByUserName(journalRequest.getSys_created_by());
                 if (openedBy != null)
@@ -114,16 +130,21 @@ public class JournalController {
             System.out.println("IMG VALUE PROCESS");
             System.out.println(journal.getValue());*/
 
+            logger.info("Guardando Journal en la Base de Datos: {}", journalRequest.getSys_id());
             journalService.save(journal);
+
+            logger.info("Journal Actualizado correctamente: sys_id Journal: {}", journalRequest.getSys_id());
 
             //util.printData(tag, tagAction, util.getFieldDisplay(journal), element);
 
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar la Task SLA: {}. Error: {}", journalRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("Journal Actualizado correctamente: sys_id Journal: {}", journalRequest.getSys_id());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("journal", journalUpdated);
 
@@ -308,6 +329,8 @@ public class JournalController {
     @PostMapping("/journal")
     public ResponseEntity<?> create(@RequestBody String json) {
 
+        logger.info("Se recibio una solicitud POST para crear una entrada de Journal.");
+
         Map<String, Object> response = new HashMap<>();
         Journal addJournal = new Journal();
         try {
@@ -321,16 +344,21 @@ public class JournalController {
             if (journal.getName().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(journal.getElement());
                 if (incident != null)
+                    logger.info("Numero de Incidente de Journal: {}", incident.getNumber());
                     journal.setIncident(incident);
             } else if (journal.getName().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journal.getElement());
                 if (scRequestItem != null)
+                    logger.info("Numero de RequestItem de Journal: {}", scRequestItem.getNumber());
                     journal.setScRequestItem(scRequestItem);
             }
             journal.setCreateBy(sysUserService.findById(util.parseIdJson(json, "journal", "createBy")));
             addJournal = rest.addJournal(endPointSN.PostJournal(), journal);
+            logger.info("Guardando Journal en la Base de Datos: {}", addJournal.getIntegrationId());
             journalService.save(addJournal);
+            logger.info("Journal creado correctamente.", addJournal.getIntegrationId());
         } catch (DataAccessException e) {
+            logger.error("Error al crear Journal: {}", e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

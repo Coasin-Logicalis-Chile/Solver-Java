@@ -34,10 +34,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class ScRequestItemController {
+
+    private final Logger logger = LoggerFactory.getLogger(ScRequestItemController.class);
 
     @Autowired
     private IScRequestItemService scRequestItemService;
@@ -389,8 +394,6 @@ public class ScRequestItemController {
     public ResponseEntity<?> update(@RequestBody String json) {
         ScRequestItem scRequestItem = new ScRequestItem();
         Map<String, Object> response = new HashMap<>();
-
-
         try {
             String tagAction = app.CreateConsole();
             String tag = "[ScRequestItem] ";
@@ -399,10 +402,17 @@ public class ScRequestItemController {
             Gson gson = new Gson();
             ScRequestItemRequest scRequestItemSolver = gson.fromJson(json, ScRequestItemRequest.class);
             ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItemSolver.getSys_id());
+
             if (exists != null) {
+                logger.info("Request Item existe en la BD: {}",  exists.getNumber());
                 scRequestItem.setId(exists.getId());
                 tagAction = app.UpdateConsole();
+                logger.info("Estableciendo atributos al Objeto scRequestItem: {}", exists.getNumber());
+            }else{
+                logger.info("Request Item no existe en la BD: {}",  scRequestItemSolver.getNumber());
+                logger.info("Estableciendo atributos al Objeto scRequestItem: {}", scRequestItemSolver.getNumber());
             }
+
             scRequestItem.setApproval(scRequestItemSolver.getApproval());
             scRequestItem.setStage(scRequestItemSolver.getStage());
             scRequestItem.setContactType(scRequestItemSolver.getContact_type());
@@ -423,12 +433,17 @@ public class ScRequestItemController {
             scRequestItem.setScRequestIntegrationId(scRequestItemSolver.getRequest());
 
             ScRequest scRequest = scRequestService.findByIntegrationId(scRequestItemSolver.getRequest());
+            //logger.info("Vinculando objeto ScRequestItem: {} con su correspondiente ScRequest: {}",scRequestItemSolver.getRequest(), scRequest.getNumber());
             scRequestItem.setScRequest(scRequest);
 
+
             Company company = companyService.findByIntegrationId(scRequestItemSolver.getCompany());
+            //logger.info("Vinculando objeto ScRequestItem: {} con su correspondiente Company: {} y Domain: {}",scRequestItemSolver.getRequest(), company.getIntegrationId(), company.getDomain().getIntegrationId());
             scRequestItem.setCompany(company);
             scRequestItem.setDomain(company.getDomain());
 
+
+            logger.info("Asignando usuarios especificos a propiedades del objeto ScRequestItem: {}", scRequestItem.getNumber());
             if (util.hasData(scRequestItemSolver.getOpened_by())) {
                 SysUser openedBy = sysUserService.findByIntegrationId(scRequestItemSolver.getOpened_by());
                 scRequestItem.setOpenedBy(openedBy);
@@ -483,15 +498,21 @@ public class ScRequestItemController {
                 }
             }*/
 
+            
+            logger.info("Guardando ScRequestItem en la Base de Datos: {}", scRequestItem.getNumber());
             scRequestItemService.save(scRequestItem);
             util.printData(tag, tagAction.concat(util.getFieldDisplay(scRequestItem)), util.getFieldDisplay(company), util.getFieldDisplay(company.getDomain()));
 
+            logger.info("ScRequestItem Actualizado correctamente: {}", scRequestItem.getNumber());
+
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar ScRequestItem: {}. Error:", scRequestItem.getNumber(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("ScRequestItem Actualizado correctamente: {}", scRequestItem.getNumber());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("scRequestItem", scRequestItem);
 

@@ -27,10 +27,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class TaskSlaController {
+
+    private final Logger logger = LoggerFactory.getLogger(TaskSlaController.class);
 
     @Autowired
     private ITaskSlaService taskSlaService;
@@ -518,56 +523,31 @@ public class TaskSlaController {
         return taskSlaService.findByScTask(id);
     }
 
-    @PutMapping("/taskSlaSN")
+    @PutMapping("/taskSlaSN") 
     public ResponseEntity<?> update(@RequestBody TaskSlaRequest taskSlaRequest) {
         TaskSla currentTaskSla = new TaskSla();
         TaskSla taskSlaUpdated = null;
         Map<String, Object> response = new HashMap<>();
 
+        logger.info("Solicitud PUT recibida para actualizar Task SLA. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
+
         String tagAction = "Create";
         String tag = "[TaskSla] ";
 
         if (currentTaskSla == null) {
+            logger.warn("Task SLA no encontrada para sys_id: {}", taskSlaRequest.getSys_id()); 
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(taskSlaRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
         try {
-           /* System.out.println("taskSlaRequest.getActive()) : ".concat(util.isNull(String.valueOf(taskSlaRequest.getActive()))));
-            System.out.println("taskSlaRequest.getBusiness_duration()) : ".concat(util.isNull(taskSlaRequest.getBusiness_duration())));
-            System.out.println("taskSlaRequest.getBusiness_pause_duration()) : ".concat(util.isNull(taskSlaRequest.getBusiness_pause_duration())));
-            System.out.println("taskSlaRequest.getBusiness_percentage()) : ".concat(util.isNull(taskSlaRequest.getBusiness_percentage())));
-            System.out.println("taskSlaRequest.getBusiness_time_left()) : ".concat(util.isNull(taskSlaRequest.getBusiness_time_left())));
-            System.out.println("taskSlaRequest.getDuration()) : ".concat(util.isNull(taskSlaRequest.getDuration())));
-            System.out.println("taskSlaRequest.getEnd_time()) : ".concat(util.isNull(taskSlaRequest.getEnd_time())));
-            System.out.println("taskSlaRequest.getHas_breached()) : ".concat(util.isNull(taskSlaRequest.getHas_breached())));
-            System.out.println("taskSlaRequest.getOriginal_breach_time()) : ".concat(util.isNull(taskSlaRequest.getOriginal_breach_time())));
-            System.out.println("taskSlaRequest.getPause_duration()) : ".concat(util.isNull(taskSlaRequest.getPause_duration())));
-            System.out.println("taskSlaRequest.getPause_time()) : ".concat(util.isNull(taskSlaRequest.getPause_time())));
-            System.out.println("taskSlaRequest.getPercentage()) : ".concat(util.isNull(taskSlaRequest.getPercentage())));
-            System.out.println("taskSlaRequest.getPlanned_end_time()) : ".concat(util.isNull(taskSlaRequest.getPlanned_end_time())));
-            System.out.println("taskSlaRequest.getSchedule()) : ".concat(util.isNull(taskSlaRequest.getSchedule())));
-            System.out.println("taskSlaRequest.getSla()) : ".concat(util.isNull(taskSlaRequest.getSla())));
-            System.out.println("taskSlaRequest.getStage()) : ".concat(util.isNull(taskSlaRequest.getStage())));
-            System.out.println("taskSlaRequest.getStart_time()) : ".concat(util.isNull(taskSlaRequest.getStart_time())));
-            System.out.println("taskSlaRequest.getSys_created_by()) : ".concat(util.isNull(taskSlaRequest.getSys_created_by())));
-            System.out.println("taskSlaRequest.getSys_created_on()) : ".concat(util.isNull(taskSlaRequest.getSys_created_on())));
-            System.out.println("taskSlaRequest.getSys_domain()) : ".concat(util.isNull(taskSlaRequest.getSys_domain())));
-            System.out.println("taskSlaRequest.getSys_domain_path()) : ".concat(util.isNull(taskSlaRequest.getSys_domain_path())));
-            System.out.println("taskSlaRequest.getSys_id()) : ".concat(util.isNull(taskSlaRequest.getSys_id())));
-            System.out.println("taskSlaRequest.getSys_mod_count()) : ".concat(util.isNull(taskSlaRequest.getSys_mod_count())));
-            System.out.println("taskSlaRequest.getSys_tags()) : ".concat(util.isNull(taskSlaRequest.getSys_tags())));
-            System.out.println("taskSlaRequest.getSys_updated_by()) : ".concat(util.isNull(taskSlaRequest.getSys_updated_by())));
-            System.out.println("taskSlaRequest.getSys_updated_on()) : ".concat(util.isNull(taskSlaRequest.getSys_updated_on())));
-            System.out.println("taskSlaRequest.getTask()) : ".concat(util.isNull(taskSlaRequest.getTask())));
-            System.out.println("taskSlaRequest.getTime_left()) : ".concat(util.isNull(taskSlaRequest.getTime_left())));
-            System.out.println("taskSlaRequest.getTimezone()) : ".concat(util.isNull(taskSlaRequest.getTimezone())));
-            System.out.println("taskSlaRequest.getU_invalid_breach()) : ".concat(util.isNull(taskSlaRequest.getU_invalid_breach())));
-            System.out.println("taskSlaRequest.getU_invalid_code()) : ".concat(util.isNull(taskSlaRequest.getU_invalid_code())));
-            System.out.println("taskSlaRequest.getU_invalid_reason()) : ".concat(util.isNull(taskSlaRequest.getU_invalid_reason())));
-            System.out.println("taskSlaRequest.getU_measurable()) : ".concat(util.isNull(taskSlaRequest.getU_measurable())));
-            System.out.println("taskSlaRequest.getU_trigger_group()) : ".concat(util.isNull(taskSlaRequest.getU_trigger_group())));*/
+
+            logger.debug("Actualizando Task SLA. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
+
             TaskSla taskSla = new TaskSla();
+
+
+            logger.info("Estableciendo nuevos atributos al Objeto taskSla. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
             taskSla.setActive(taskSlaRequest.getActive());
             taskSla.setBusinessDuration(taskSlaRequest.getBusiness_duration());
             taskSla.setBusinessPauseDuration(taskSlaRequest.getBusiness_pause_duration());
@@ -600,34 +580,44 @@ public class TaskSlaController {
             //taskSla.setUInvalidReason(taskSlaRequest.getU_invalid_reason());
             //taskSla.setUMeasurable(taskSlaRequest.getU_measurable());
             //taskSla.setUTriggerGroup(taskSlaRequest.getU_trigger_group());
+
+            logger.info("Buscando y estableciendo relacion de Dominio. sys_id Task Dominio: {}", taskSlaRequest.getSys_domain());
             if (util.hasData(taskSlaRequest.getSys_domain())) {
                 Domain domain = domainService.findByIntegrationId(taskSlaRequest.getSys_domain());
                 if (domain != null)
                     taskSla.setDomain(domain);
             }
+
+            logger.info("Determinando relacion entre objeto Incident, ScRequestItem o ScTask. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
             String element = "";
             if (taskSlaRequest.getElement().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(taskSlaRequest.getTask());
                 if (incident != null) {
+                    logger.info("Relacion establecida con Incident: {}", incident.getNumber());
                     taskSla.setIncident(incident);
                     element = util.getFieldDisplay(incident);
                 }
             } else if (taskSlaRequest.getElement().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(taskSlaRequest.getTask());
                 if (scRequestItem != null) {
+                    logger.info("Relacion establecida con scRequest: {}", scRequestItem.getNumber());
                     taskSla.setScRequestItem(scRequestItem);
                     element = util.getFieldDisplay(scRequestItem);
                 }
             } else if (taskSlaRequest.getElement().equals(SnTable.ScTask.get())) {
                 ScTask scTask = scTaskService.findByIntegrationId(taskSlaRequest.getTask());
                 if (scTask != null) {
+                    logger.info("Relacion establecida con TASK: {}", scTask.getNumber());
                     taskSla.setScTask(scTask);
                     element = util.getFieldDisplay(scTask);
                 }
             }
+
+
             if (util.hasData(taskSlaRequest.getSla())) {
                 ContractSla sla = contractSlaService.findByIntegrationId(taskSlaRequest.getSla());
                 if (sla != null) {
+                    logger.info("Relacion establecida con contractSlaService: {}", taskSlaRequest.getSla());
                     taskSla.setSla(sla);
                 }
             }
@@ -635,6 +625,7 @@ public class TaskSlaController {
             if (util.hasData(taskSlaRequest.getSchedule())) {
                 CmnSchedule schedule = cmnScheduleService.findByIntegrationId(taskSlaRequest.getSchedule());
                 if (schedule != null) {
+                    logger.info("Relacion establecida con cmnScheduleService: {}", taskSlaRequest.getSchedule());
                     taskSla.setSchedule(schedule);
                 }
             }
@@ -645,13 +636,20 @@ public class TaskSlaController {
                 tagAction = "Update";
             }
             //util.printData(tag, tagAction, util.getFieldDisplay(taskSla), element);
+
+            logger.info("Guardando Task SLA en la Base de Datos: {}", taskSla.getId());
             taskSlaUpdated = taskSlaService.save(taskSla);
+
+            logger.info("Task SLA Actualizado correctamente: sys_id Task SLA: {}", taskSlaRequest.getSys_id());
+            
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar la Task SLA: {}. Error: {}", taskSlaRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("La Task SLA Actualizado correctamente: sys_id Task SLA: {}", taskSlaRequest.getSys_id());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("taskSla", taskSlaUpdated);
 

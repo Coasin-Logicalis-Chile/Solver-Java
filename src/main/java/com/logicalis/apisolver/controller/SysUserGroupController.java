@@ -27,10 +27,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class SysUserGroupController {
+
+    private final Logger logger = LoggerFactory.getLogger(SysUserGroupController.class);
 
     @Autowired
     private ISysUserGroupService sysUserGroupService;
@@ -87,46 +92,71 @@ public class SysUserGroupController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @PutMapping("/sysUserGroupSN")
+    @PutMapping("/sysUserGroupSN") 
     public ResponseEntity<?> update(@RequestBody SysUserGroupRequest sysUserGroupRequest) {
         SysUserGroup currentSysUserGroup = new SysUserGroup();
         SysUserGroup sysUserGroupUpdated = null;
-        Map<String, Object> response = new HashMap<>();
+        Map<String, Object> response = new HashMap<>(); 
+
+        logger.info("Solicitud PUT recibida para actualizar sysUserGroup. Group: {}, User: {}", sysUserGroupRequest.getGroup(), sysUserGroupRequest.getUser());
+
         Rest rest = new Rest();
         if (currentSysUserGroup == null) {
+            logger.warn("sysUserGroup es NULL.");
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
         try {
+
+            logger.debug("Actualizando sysUserGroup. sys_id sysUserGroup: {}", sysUserGroupRequest.getSys_id());
+
             SysUserGroup sysUserGroup = new SysUserGroup();
             String tagAction = app.CreateConsole();
             String tag = "[SysUserGroup] ";
             sysUserGroup.setActive(sysUserGroupRequest.getActive());
             sysUserGroup.setIntegrationId(sysUserGroupRequest.getSys_id());
+
             if (util.hasData(sysUserGroupRequest.getGroup())) {
                 SysGroup sysGroup = sysGroupService.findByIntegrationId(sysUserGroupRequest.getGroup());
                 if (sysGroup != null)
+                    logger.info("Determinando relacion entre sysUserGroup y Group. sysUserGroup: {}, Group: {}", sysUserGroupRequest.getSys_id(), sysGroup.getIntegrationId());
                     sysUserGroup.setSysGroup(sysGroup);
             }
             if (util.hasData(sysUserGroupRequest.getUser())) {
                 SysUser sysUser = sysUserService.findByIntegrationId(sysUserGroupRequest.getUser());
                 if (sysUser != null)
-                    sysUserGroup.setSysUser(sysUser);
+                    logger.info("Determinando relacion entre sysUserGroup y User. sysUserGroup: {}, User: {}", sysUserGroupRequest.getSys_id(), sysUser.getIntegrationId());
+                    sysUserGroup.setSysUser(sysUser); 
             }
-            SysUserGroup exists = sysUserGroupService.findByIntegrationId(sysUserGroup.getIntegrationId());
+
+            
+            SysUserGroup exists = sysUserGroupService.findByIntegrationId(sysUserGroup.getIntegrationId()); 
+            
             if (exists != null) {
+                logger.info("sysUserGroup existe en la BD: {}", exists.getIntegrationId());
                 sysUserGroup.setId(exists.getId());
                 tagAction = app.UpdateConsole();
+            }else{
+                logger.info("sysUserGroup no existe en la BD: {}",  sysUserGroupRequest.getSys_id());
             }
+
+            // 
+
+            logger.info("Guardando sysUserGroup en la Base de Datos: {}", sysUserGroup.getIntegrationId());
             sysUserGroupUpdated = sysUserGroupService.save(sysUserGroup);
             //util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUserGroup)));
+
+            logger.info("sysUserGroup Actualizado correctamente: sys_id sysUserGroup: {}", sysUserGroup.getIntegrationId());
+
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar sysUserGroup: {}. Error: {}", sysUserGroupRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("sysUserGroup Actualizado correctamente: sys_id sysUserGroup: {}", sysUserGroupRequest.getSys_id());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUserGroup", sysUserGroupUpdated);
 

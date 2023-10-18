@@ -28,10 +28,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class SysGroupController {
+
+    private final Logger logger = LoggerFactory.getLogger(SysGroupController.class);
 
     @Autowired
     private ISysGroupService sysGroupService;
@@ -206,13 +211,19 @@ public class SysGroupController {
         SysGroup currentSysGroup = new SysGroup();
         SysGroup sysGroupUpdated = null;
         Map<String, Object> response = new HashMap<>();
+
+        logger.info("Solicitud PUT recibida para sysGroup: {}", sysGroupRequest.getSys_id());
+
         Rest rest = new Rest();
         if (currentSysGroup == null) {
+            logger.warn("sysUserGroup es NULL.");
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
 
         try {
+
+            logger.debug("Actualizando sysGroup. sys_id Group: {}", sysGroupRequest.getSys_id());
             SysGroup sysGroup = new SysGroup();
             String tagAction = app.CreateConsole();
             String tag = "[SysGroup] ";
@@ -220,6 +231,7 @@ public class SysGroupController {
             sysGroup.setName(sysGroupRequest.getName());
             sysGroup.setIntegrationId(sysGroupRequest.getSys_id());
             sysGroup.setSolver(sysGroupRequest.getU_solver());
+            logger.info("Estableciendo company. Sys_id company {}", sysGroupRequest.getCompany());
             Company company = companyService.findByIntegrationId(sysGroupRequest.getCompany());
             sysGroup.setCompany(company);
             sysGroup.setDomain(company.getDomain());
@@ -234,20 +246,32 @@ public class SysGroupController {
                 if (company != null)
                     sysGroup.setCompany(company);
             }*/
+
+
             SysGroup exists = sysGroupService.findByIntegrationId(sysGroup.getIntegrationId());
+            
             if (exists != null) {
+                logger.info("sysGroup existe en la BD: {}", exists.getIntegrationId());
                 sysGroup.setId(exists.getId());
                 tagAction = app.UpdateConsole();
+            }else{
+                logger.info("sysGroup no existe en la BD: {}",  sysGroupRequest.getSys_id());
             }
 
+            logger.info("Guardando Group en la Base de Datos: {}", sysGroup.getIntegrationId());
             sysGroupUpdated = sysGroupService.save(sysGroup);
             //util.printData(tag, tagAction.concat(util.getFieldDisplay(sysGroup)), util.getFieldDisplay(sysGroup.getCompany()), util.getFieldDisplay(sysGroup.getDomain()));
+
+            logger.info("Group Actualizado correctamente: sys_id Group: {}", sysGroup.getIntegrationId());
+
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar Group: {}. Error: {}", sysGroupRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("Group Actualizado correctamente: sys_id Group: {}", sysGroupRequest.getSys_id());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysGroup", sysGroupUpdated);
 

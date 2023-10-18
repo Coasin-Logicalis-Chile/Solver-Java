@@ -35,10 +35,15 @@ import java.nio.file.Files;
 import java.util.*;
 import java.util.zip.Deflater;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class AttachmentController {
+
+    private final Logger logger = LoggerFactory.getLogger(AttachmentController.class);
 
     @Autowired
     private IAttachmentService attachmentService;
@@ -921,6 +926,7 @@ public class AttachmentController {
                 current.setOrigin(type);
 
                 attachmentService.save(current);
+                logger.info("Archivo guardado en la base de datos: {}", current.getFileName());
                 util.printData(tag, tagAction.concat("BD"), util.getFieldDisplay(current), current.getElement());
 
                 attachment = rest.sendFileToServiceNow(element, file, type, file.getOriginalFilename());

@@ -35,10 +35,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class ScRequestController {
+
+    private final Logger logger = LoggerFactory.getLogger(ScRequestItemController.class);
 
     @Autowired
     private IScRequestService scRequestService;
@@ -318,17 +323,24 @@ public class ScRequestController {
 
         try {
             String tagAction = app.CreateConsole();
-            String tag = "[ScRequest] ";
+            String tag = "[ScRequest] "; 
 
             Gson gson = new Gson();
             ScRequestRequest scRequestRequest = gson.fromJson(json, ScRequestRequest.class);
 
 
             ScRequest exists = scRequestService.findByIntegrationId(scRequestRequest.getSys_id());
+
             if (exists != null) {
+                logger.info("Request existe en la BD: {}",  exists.getNumber());
                 scRequest.setId(exists.getId());
                 tagAction = app.UpdateConsole();
+                logger.info("Estableciendo atributos al Objeto scRequest: {}", exists.getNumber());
+            }else{
+                logger.info("Request no existe en la BD: {}",  scRequestRequest.getNumber());
+                logger.info("Estableciendo atributos al Objeto scRequest: {}", scRequestRequest.getNumber());
             }
+
             scRequest.setSysUpdatedOn(scRequestRequest.getSys_updated_on());
             scRequest.setNumber(scRequestRequest.getNumber());
             scRequest.setState(scRequestRequest.getState());
@@ -372,15 +384,20 @@ public class ScRequestController {
             SysGroup sysGroup = sysGroupService.findByIntegrationId(scRequestRequest.getAssignment_group());
             scRequest.setAssignmentGroup(sysGroup);
 
+            logger.info("Guardando ScRequest en la Base de Datos: {}", scRequest.getNumber());
             scRequestService.save(scRequest);
             util.printData(tag, tagAction.concat(util.getFieldDisplay(scRequest)), util.getFieldDisplay(scRequest.getCompany()), util.getFieldDisplay(scRequest.getDomain()));
 
+            logger.info("ScRequest Actualizado correctamente: {}", scRequest.getNumber());
+
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            logger.error("Error al actualizar ScRequest: {}. Error:", scRequest.getNumber(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+
+        logger.info("ScRequest Actualizado correctamente: {}", scRequest.getNumber());
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("scRequest", scRequest);
 

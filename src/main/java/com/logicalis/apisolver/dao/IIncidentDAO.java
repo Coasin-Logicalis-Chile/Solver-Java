@@ -77,6 +77,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "AND ((COALESCE(?16) IS null) OR UPPER(e.label) IN (?16))\n" +
             "AND ((?17 = '' AND ?18 = '' ) OR (?17 != '' AND ?18 = '' AND (a.created_on BETWEEN TO_TIMESTAMP(?17,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP((CURRENT_DATE || ' 23:59:59'),'YYYY-MM-DD HH24:MI:SS'))) OR (?17 = '' AND ?18 != ''  AND (a.created_on BETWEEN TO_TIMESTAMP(('1900-01-01 00:00:00'),'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?18,'YYYY-MM-DD HH24:MI:SS'))) OR (?17 != '' AND ?18 != ''  AND (a.created_on BETWEEN TO_TIMESTAMP(?17,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?18,'YYYY-MM-DD HH24:MI:SS'))))\n" +
             "AND a.delete IS FALSE\n" +
+            "AND c.active IS TRUE\n" +
             "AND b.active IS TRUE", nativeQuery = true)
     public Page<IncidentFields> findPaginatedIncidentsByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String incidentParent, String scRequestParent, String scRequestItemParent, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
@@ -223,6 +224,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "AND (?7 = 0 OR c.sys_user = ?7)\n" +
             "AND (?8 = false OR (UPPER(d.label) NOT LIKE '%CERRADO%' AND UPPER(d.label) NOT LIKE '%CANCELADO%' AND UPPER(d.label) NOT LIKE '%RESUELTO%' AND UPPER(g.label) NOT LIKE '%RESUELTO%'))\n" +
             "AND a.delete IS FALSE\n" +
+            "AND c.active IS TRUE\n" +
             "AND b.active IS TRUE", nativeQuery = true)
     public Long countIncidentsByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean closed, Long assignedToGroup, boolean open);
 
@@ -250,6 +252,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "AND c.sys_user = ?2\n" +
             "AND upper(d.label) NOT LIKE '%CERRADO%'\n" +
             "AND upper(d.label) NOT LIKE '%CANCELADO%'\n" +
+            "AND c.active IS TRUE\n" +
             "AND b.active IS TRUE", nativeQuery = true)
     public Long countIncidentsSLAByFilters(Long company, Long assignedTo);
 
