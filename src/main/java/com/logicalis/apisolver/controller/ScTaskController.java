@@ -11,6 +11,7 @@ import com.logicalis.apisolver.services.*;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.ScTaskRequest;
+import com.logicalis.apisolver.view.ScTaskSolver;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -110,14 +111,17 @@ public class ScTaskController {
 
     @PutMapping("/scTask/{id}")
     public ResponseEntity<?> update(@RequestBody String json, @PathVariable Long id) {
+        log.info("Solicitud PUT recibida para actualizar scTask con ID: {}", id);
         ScTask currentScTask = scTaskService.findById(id);
         ScTask scTaskUpdated = null;
         Map<String, Object> response = new HashMap<>();
         if (currentScTask == null) {
+            log.info("scTask con ID {} no encontrado. No se puede actualizar.", id);
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         try {
+            log.info("Actualizando y estableciendo nuevos atributos, scTask: {}", currentScTask.getNumber());
             String levelOne = "scTask";
             SysUser assignedTo = getSysUserByIntegrationId(Util.parseJson(json, levelOne, "assigned_to"));
             currentScTask.setAssignedTo(assignedTo);
@@ -138,10 +142,12 @@ public class ScTaskController {
             currentScTask.setReasonPending(Util.parseJson(json, levelOne, Field.ReasonPending.get()));
             currentScTask.setClosedBy(closedBy);
             ScTask addScTask = rest.putScTask(EndPointSN.PutScTask(), currentScTask);
+            log.info("Guardando scTask en la Base de Datos: {}", currentScTask.getNumber());
             scTaskUpdated = scTaskService.save(currentScTask);
             String tag = "[ScTask]";
             String tagAction = "Update in ServiceNow";
             Util.printData(tag, tagAction, Util.getFieldDisplay(currentScTask), Util.getFieldDisplay(currentScTask.getAssignedTo()));
+            log.info("scTask actualizado exitosamente: ", currentScTask.getNumber());
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -388,7 +394,7 @@ public class ScTaskController {
         JSONParser parser = new JSONParser();
         JSONObject resultJson = new JSONObject();
         JSONArray ListScTaskJson = new JSONArray();
-        final ScTaskRequest[] scTaskSolver = {new ScTaskRequest()};
+        final ScTaskSolver[] scTaskSolver = {new ScTaskSolver()};
         Gson gson = new Gson();
         final ScTask[] scTask = {new ScTask()};
         final Domain[] domain = new Domain[1];
@@ -419,7 +425,7 @@ public class ScTaskController {
                     ListScTaskJson = (JSONArray) parser.parse(resultJson.get("result").toString());
                 ListScTaskJson.stream().forEach(scTaskJson -> {
                     try {
-                        scTaskSolver[0] = gson.fromJson(scTaskJson.toString(), ScTaskRequest.class);
+                        scTaskSolver[0] = gson.fromJson(scTaskJson.toString(), ScTaskSolver.class);
                         scTask[0] =  new ScTask();
                         scTask[0].setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
                         scTask[0].setActive(scTaskSolver[0].getActive());
@@ -865,8 +871,13 @@ public class ScTaskController {
             ScTask exists = scTaskService.findByIntegrationId(scTaskSolver.getSys_id());
             String tagAction = App.CreateConsole();
             if (exists != null) {
+                log.info("La Task existe en la BD: {}",  exists.getNumber());
                 scTask.setId(exists.getId());
                 tagAction = App.UpdateConsole();
+                log.info("Estableciendo atributos al Objeto scTask: {}", exists.getNumber());
+            }else{
+                log.info("La Task no existe en la BD: {}",  scTaskSolver.getNumber());
+                log.info("Estableciendo atributos al Objeto scRequestItem: {}", scTaskSolver.getNumber());
             }
             scTask.setActionStatus(Util.isNull(scTaskSolver.getAction_status()));
             scTask.setActive(scTaskSolver.getActive());
@@ -916,8 +927,7 @@ public class ScTaskController {
             scTask.setSysModCount(Util.isNull(scTaskSolver.getSys_mod_count()));
             scTask.setSysUpdatedBy(Util.isNull(scTaskSolver.getSys_updated_by()));
             scTask.setSysUpdatedOn(Util.isNull(scTaskSolver.getSys_updated_on()));
-            if (!Util.isNull(scTaskSolver.getClosed_at()).equals(""))
-                scTask.setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver.getClosed_at())));
+            scTask.setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver.getSys_updated_on())));
             scTask.setTaskEffectiveNumber(Util.isNull(scTaskSolver.getTask_effective_number()));
             scTask.setTimeWorked(Util.isNull(scTaskSolver.getTime_worked()));
             scTask.setUniversalRequest(Util.isNull(scTaskSolver.getUniversal_request()));
@@ -931,8 +941,10 @@ public class ScTaskController {
             scTask.setScRequestIntegrationId(scTaskSolver.getRequest());
             scTask.setScRequestItemIntegrationId(scTaskSolver.getRequest_item());
             Company company = companyService.findByIntegrationId(scTaskSolver.getCompany());
+            log.info("Vinculando objeto ScRequestItem: {} con su correspondiente Company: {} y Domain: {}",scTaskSolver.getRequest(), company.getIntegrationId(), company.getDomain().getIntegrationId());
             scTask.setCompany(company);
             scTask.setDomain(company.getDomain());
+            log.info("Asignando valores a diferentes propiedades del objeto scTask: {}", scTask.getNumber());
             SysUser closedBy = sysUserService.findByIntegrationId(scTaskSolver.getClosed_by());
             scTask.setClosedBy(closedBy);
             SysUser scalingAssignedTo = sysUserService.findByIntegrationId(scTaskSolver.getScaling_assigned_to());
@@ -966,9 +978,12 @@ public class ScTaskController {
                     scTask.setTaskFor(scRequestItem.getTaskFor());
             }
             String tag = "[Sc Task]";
+            log.info("Guardando scTask en la Base de Datos: {}", scTask.getNumber());
             scTaskService.save(scTask);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(scTask)), Util.getFieldDisplay(company), Util.getFieldDisplay(company.getDomain()));
+            log.info("scTask Actualizado correctamente: {}", scTask.getNumber());
         } catch (DataAccessException e) {
+            log.error("Error al actualizar scTask: {}. Error:", scTask.getNumber(),e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

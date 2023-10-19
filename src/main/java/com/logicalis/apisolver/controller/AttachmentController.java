@@ -755,6 +755,7 @@ public class AttachmentController {
                 current.setElement(element);
                 current.setOrigin(type);
                 attachmentService.save(current);
+                log.info("Archivo guardado en la base de datos: {}",  current.getFileName());
                 Util.printData(tag, tagAction.concat("BD"), Util.getFieldDisplay(current), current.getElement());
                 attachment = rest.sendFileToServiceNow(element, file, type, file.getOriginalFilename());
                 if (!Objects.isNull(attachment))

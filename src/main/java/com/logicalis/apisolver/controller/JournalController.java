@@ -57,28 +57,36 @@ public class JournalController {
         Journal currentJournal = new Journal();
         Journal journalUpdated = null;
         Map<String, Object> response = new HashMap<>();
+        log.info("Solicitud PUT recibida para actualizar Journal: {}", journalRequest.getSys_id());
         if (Objects.isNull(currentJournal)) {
+            log.warn("Journal no encontrada para sys_id: {}", journalRequest.getSys_id());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(journalRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         try {
+            log.debug("Actualizando Journal. sys_id Journal: {}", journalRequest.getSys_id());
             Journal journal = new Journal();
+            log.info("Estableciendo nuevos atributos al Objeto Journal. sys_id Journal: {}", journalRequest.getSys_id());
             journal.setOrigin(journalRequest.getElement());
             journal.setElement(journalRequest.getElement_id());
             journal.setCreatedOn(journalRequest.getSys_created_on());
             journal.setIntegrationId(journalRequest.getSys_id());
+            log.info("Determinando relacion entre objeto Incident o ScRequestItem. sys_id Task SLA: {}", journalRequest.getSys_id());
             if (journalRequest.getName().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(journal.getElement());
                 if (incident != null) {
+                    log.info("Relacion establecida con Incident: {}", incident.getNumber());
                     journal.setIncident(incident);
                 }
             } else if (journalRequest.getName().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journal.getElement());
                 if (scRequestItem != null) {
+                    log.info("Relacion establecida con scRequestItem: {}", scRequestItem.getNumber());
                     journal.setScRequestItem(scRequestItem);
                 }
             }
 
+            log.info("Procesando objeto journalRequest: {} para Verificar y actualizar informacion", journalRequest.getSys_id());
             if (Util.hasData(journalRequest.getSys_created_by())) {
                 SysUser openedBy = sysUserService.findByUserName(journalRequest.getSys_created_by());
                 if (openedBy != null)
@@ -89,9 +97,11 @@ public class JournalController {
                 journal.setId(exists.getId());
             }
             journal.setValue(Util.reeplaceImg(journalRequest.getValue()));
+            log.info("Guardando Journal en la Base de Datos: {}", journalRequest.getSys_id());
             journalService.save(journal);
+            log.info("Journal Actualizado correctamente: sys_id Journal: {}", journalRequest.getSys_id());
         } catch (DataAccessException e) {
-            log.error("error " + e.getMessage());
+            log.error("Error al actualizar la Task SLA: {}. Error: {}", journalRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
@@ -292,17 +302,24 @@ public class JournalController {
             journal.setElement(Util.parseJson(json, "journal", "element"));
             if (journal.getName().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(journal.getElement());
-                if (incident != null)
+                if (incident != null) {
+                    log.info("Numero de Incidente de Journal: {}", incident.getNumber());
                     journal.setIncident(incident);
+                }
             } else if (journal.getName().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(journal.getElement());
-                if (scRequestItem != null)
+                if (scRequestItem != null) {
+                    log.info("Numero de RequestItem de Journal: {}", scRequestItem.getNumber());
                     journal.setScRequestItem(scRequestItem);
+                }
             }
             journal.setCreateBy(sysUserService.findById(Util.parseIdJson(json, "journal", "createBy")));
             addJournal = rest.addJournal(EndPointSN.PostJournal(), journal);
+            log.info("Guardando Journal en la Base de Datos: {}", addJournal.getIntegrationId());
             journalService.save(addJournal);
+            log.info("Journal creado correctamente.", addJournal.getIntegrationId());
         } catch (DataAccessException e) {
+            log.error("Error al crear Journal: {}", e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             log.error("Error creating Journal, message {}",response);

@@ -72,6 +72,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "                                      INNER JOIN sys_user_group c ON c.sys_group = b.id \n" +
             "                                      where  b.id = a.assignment_group\n" +
             "                                      and    b.active is TRUE\n" +
+            "                                      and    c.active is TRUE\n" +
             "                                      and    c.sys_user = ?10 ) ) \n" +
             "         AND (?11 = false OR UPPER(d.label) like '%CERRADO%')        \n" +
             "         AND (?12  = false OR (   UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%'] )\n" +
@@ -250,6 +251,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "                                          INNER JOIN sys_user_group c ON c.sys_group = b.id \n" +
             "                                          where  b.id = a.assignment_group\n" +
             "                                           and    b.active is TRUE\n" +
+            "                                           and    c.active is TRUE\n" +
             "                                           and    c.sys_user = ?7 ) )",nativeQuery = true)
     public Long countIncidentsByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean closed, Long assignedToGroup, boolean open);
 

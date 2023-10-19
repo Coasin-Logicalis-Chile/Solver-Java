@@ -8,21 +8,15 @@ public class ScTaskSolver {
     private String approval;
     private String approval_history;
     private String approval_set;
-    private String assigned_to;
     private String scaling_assigned_to;
-    private String assignment_group;
     private String scaling_assignment_group;
     private String business_duration;
-    private String business_service;
     private String calendar_duration;
     private String calendar_stc;
     private String close_notes;
     private String closed_at;
-    private String closed_by;
-    private String cmdb_ci;
     private String comments;
     private String comments_and_work_notes;
-    private String company;
     private String contact_type;
     private String contract;
     private String correlation_display;
@@ -37,17 +31,13 @@ public class ScTaskSolver {
     private String group_list;
     private String impact;
     private String knowledge;
-    private String location;
     private String made_sla;
     private String needs_attention;
     private String number;
     private String opened_at;
-    private String opened_by;
     private String order;
     private String priority;
     private String reassignment_count;
-    private String request;
-    private String request_item;
     private String request_number;
     private String request_item_number;
     private String route_reason;
@@ -60,7 +50,6 @@ public class ScTaskSolver {
     private String sys_class_name;
     private String sys_created_by;
     private String sys_created_on;
-    private String sys_domain;
     private String sys_id;
     private String sys_mod_count;
     private String sys_tags;
@@ -71,7 +60,6 @@ public class ScTaskSolver {
     private String time_worked;
     private String u_cat_item;
     private String u_reopen_count;
-    private String u_request_item;
     private String universal_request;
     private String upon_approval;
     private String upon_reject;
@@ -82,14 +70,31 @@ public class ScTaskSolver {
     private String work_notes;
     private String work_notes_list;
     private String work_start;
-    private String parent;
-
-    private String u_solver_assigned_to;
-    private String u_solver_closed_by;
     private boolean u_solver_flag_assigned_to;
     private boolean u_solver_flag_closed_by;
     private boolean scaling;
     private String requested_for;
+    private String action_status;
+    private boolean u_pending_other_group;
+    private String u_request_item;
+
+
+    public boolean getU_pending_other_group() {
+        return u_pending_other_group;
+    }
+
+    public void setU_pending_other_group(boolean u_pending_other_group) {
+        this.u_pending_other_group = u_pending_other_group;
+    }
+
+    public String getAction_status() {
+        return action_status;
+    }
+
+    public void setAction_status(String action_status) {
+        this.action_status = action_status;
+    }
+
     public boolean getActive() {
         return active;
     }
@@ -146,22 +151,6 @@ public class ScTaskSolver {
         this.approval_set = approval_set;
     }
 
-    public String getAssigned_to() {
-        return assigned_to;
-    }
-
-    public void setAssigned_to(String assigned_to) {
-        this.assigned_to = assigned_to;
-    }
-
-    public String getAssignment_group() {
-        return assignment_group;
-    }
-
-    public void setAssignment_group(String assignment_group) {
-        this.assignment_group = assignment_group;
-    }
-
     public String getBusiness_duration() {
         return business_duration;
     }
@@ -170,13 +159,6 @@ public class ScTaskSolver {
         this.business_duration = business_duration;
     }
 
-    public String getBusiness_service() {
-        return business_service;
-    }
-
-    public void setBusiness_service(String business_service) {
-        this.business_service = business_service;
-    }
 
     public String getCalendar_duration() {
         return calendar_duration;
@@ -210,22 +192,6 @@ public class ScTaskSolver {
         this.closed_at = closed_at;
     }
 
-    public String getClosed_by() {
-        return closed_by;
-    }
-
-    public void setClosed_by(String closed_by) {
-        this.closed_by = closed_by;
-    }
-
-    public String getCmdb_ci() {
-        return cmdb_ci;
-    }
-
-    public void setCmdb_ci(String cmdb_ci) {
-        this.cmdb_ci = cmdb_ci;
-    }
-
     public String getComments() {
         return comments;
     }
@@ -240,14 +206,6 @@ public class ScTaskSolver {
 
     public void setComments_and_work_notes(String comments_and_work_notes) {
         this.comments_and_work_notes = comments_and_work_notes;
-    }
-
-    public String getCompany() {
-        return company;
-    }
-
-    public void setCompany(String company) {
-        this.company = company;
     }
 
     public String getContact_type() {
@@ -362,14 +320,6 @@ public class ScTaskSolver {
         this.knowledge = knowledge;
     }
 
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
     public String getMade_sla() {
         return made_sla;
     }
@@ -402,14 +352,6 @@ public class ScTaskSolver {
         this.opened_at = opened_at;
     }
 
-    public String getOpened_by() {
-        return opened_by;
-    }
-
-    public void setOpened_by(String opened_by) {
-        this.opened_by = opened_by;
-    }
-
     public String getOrder() {
         return order;
     }
@@ -432,22 +374,6 @@ public class ScTaskSolver {
 
     public void setReassignment_count(String reassignment_count) {
         this.reassignment_count = reassignment_count;
-    }
-
-    public String getRequest() {
-        return request;
-    }
-
-    public void setRequest(String request) {
-        this.request = request;
-    }
-
-    public String getRequest_item() {
-        return request_item;
-    }
-
-    public void setRequest_item(String request_item) {
-        this.request_item = request_item;
     }
 
     public String getRoute_reason() {
@@ -528,14 +454,6 @@ public class ScTaskSolver {
 
     public void setSys_created_on(String sys_created_on) {
         this.sys_created_on = sys_created_on;
-    }
-
-    public String getSys_domain() {
-        return sys_domain;
-    }
-
-    public void setSys_domain(String sys_domain) {
-        this.sys_domain = sys_domain;
     }
 
 
@@ -707,14 +625,6 @@ public class ScTaskSolver {
         this.work_start = work_start;
     }
 
-    public String getParent() {
-        return parent;
-    }
-
-    public void setParent(String parent) {
-        this.parent = parent;
-    }
-
     public String getScaling_assigned_to() {
         return scaling_assigned_to;
     }
@@ -729,22 +639,6 @@ public class ScTaskSolver {
 
     public void setScaling_assignment_group(String scaling_assignment_group) {
         this.scaling_assignment_group = scaling_assignment_group;
-    }
-
-    public String getU_solver_assigned_to() {
-        return u_solver_assigned_to;
-    }
-
-    public void setU_solver_assigned_to(String u_solver_assigned_to) {
-        this.u_solver_assigned_to = u_solver_assigned_to;
-    }
-
-    public String getU_solver_closed_by() {
-        return u_solver_closed_by;
-    }
-
-    public void setU_solver_closed_by(String u_solver_closed_by) {
-        this.u_solver_closed_by = u_solver_closed_by;
     }
 
     public boolean getU_solver_flag_assigned_to() {

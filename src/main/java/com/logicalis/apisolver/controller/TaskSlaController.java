@@ -436,14 +436,16 @@ public class TaskSlaController {
         TaskSla currentTaskSla = new TaskSla();
         TaskSla taskSlaUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        String tagAction = "Create";
-        String tag = "[TaskSla] ";
+        log.info("Solicitud PUT recibida para actualizar Task SLA. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
         if (currentTaskSla == null) {
+            log.warn("Task SLA no encontrada para sys_id: {}", taskSlaRequest.getSys_id());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(taskSlaRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         try {
+            log.debug("Actualizando Task SLA. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
             TaskSla taskSla = new TaskSla();
+            log.info("Estableciendo nuevos atributos al Objeto taskSla. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
             taskSla.setActive(taskSlaRequest.getActive());
             taskSla.setBusinessDuration(taskSlaRequest.getBusiness_duration());
             taskSla.setBusinessPauseDuration(taskSlaRequest.getBusiness_pause_duration());
@@ -466,36 +468,43 @@ public class TaskSlaController {
             taskSla.setSysUpdatedOn(taskSlaRequest.getSys_updated_on());
             taskSla.setTimeLeft(taskSlaRequest.getTime_left());
             taskSla.setTimezone(taskSlaRequest.getTimezone());
+            log.info("Buscando y estableciendo relacion de Dominio. sys_id Task Dominio: {}", taskSlaRequest.getSys_domain());
             if (Util.hasData(taskSlaRequest.getSys_domain())) {
                 Domain domain = domainService.findByIntegrationId(taskSlaRequest.getSys_domain());
                 if (domain != null)
                     taskSla.setDomain(domain);
             }
+            log.info("Determinando relacion entre objeto Incident, ScRequestItem o ScTask. sys_id Task SLA: {}", taskSlaRequest.getSys_id());
             if (taskSlaRequest.getElement().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(taskSlaRequest.getTask());
                 if (incident != null) {
+                    log.info("Relacion establecida con Incident: {}", incident.getNumber());
                     taskSla.setIncident(incident);
                 }
             } else if (taskSlaRequest.getElement().equals(SnTable.ScRequestItem.get())) {
                 ScRequestItem scRequestItem = scRequestItemService.findByIntegrationId(taskSlaRequest.getTask());
                 if (scRequestItem != null) {
+                    log.info("Relacion establecida con scRequest: {}", scRequestItem.getNumber());
                     taskSla.setScRequestItem(scRequestItem);
                 }
             } else if (taskSlaRequest.getElement().equals(SnTable.ScTask.get())) {
                 ScTask scTask = scTaskService.findByIntegrationId(taskSlaRequest.getTask());
                 if (scTask != null) {
+                    log.info("Relacion establecida con TASK: {}", scTask.getNumber());
                     taskSla.setScTask(scTask);
                 }
             }
             if (Util.hasData(taskSlaRequest.getSla())) {
                 ContractSla sla = contractSlaService.findByIntegrationId(taskSlaRequest.getSla());
                 if (sla != null) {
+                    log.info("Relacion establecida con contractSlaService: {}", taskSlaRequest.getSla());
                     taskSla.setSla(sla);
                 }
             }
             if (Util.hasData(taskSlaRequest.getSchedule())) {
                 CmnSchedule schedule = cmnScheduleService.findByIntegrationId(taskSlaRequest.getSchedule());
                 if (schedule != null) {
+                    log.info("Relacion establecida con cmnScheduleService: {}", taskSlaRequest.getSchedule());
                     taskSla.setSchedule(schedule);
                 }
             }
@@ -503,9 +512,11 @@ public class TaskSlaController {
             if (exists != null) {
                 taskSla.setId(exists.getId());
             }
+            log.info("Guardando Task SLA en la Base de Datos: {}", taskSla.getId());
             taskSlaUpdated = taskSlaService.save(taskSla);
+            log.info("Task SLA Actualizado correctamente: sys_id Task SLA: {}", taskSlaRequest.getSys_id());
         } catch (DataAccessException e) {
-            log.error("error " + e.getMessage());
+            log.error("Error al actualizar la Task SLA: {}. Error: {}", taskSlaRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

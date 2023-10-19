@@ -116,6 +116,7 @@ public class SysGroupController {
         SysGroup sysGroupUpdated = null;
         Map<String, Object> response = new HashMap<>();
         if (currentSysGroup == null) {
+            log.warn("sysUserGroup es NULL.");
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
@@ -169,10 +170,12 @@ public class SysGroupController {
         SysGroup sysGroupUpdated = null;
         Map<String, Object> response = new HashMap<>();
         if (Objects.isNull(currentSysGroup)) {
+            log.warn("sysUserGroup es NULL.");
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         try {
+            log.debug("Actualizando sysGroup. sys_id Group: {}", sysGroupRequest.getSys_id());
             SysGroup sysGroup = new SysGroup();
             String tagAction = App.CreateConsole();
             String tag = "[SysGroup] ";
@@ -180,16 +183,22 @@ public class SysGroupController {
             sysGroup.setName(sysGroupRequest.getName());
             sysGroup.setIntegrationId(sysGroupRequest.getSys_id());
             sysGroup.setSolver(sysGroupRequest.getU_solver());
+            log.info("Estableciendo company. Sys_id company {}", sysGroupRequest.getCompany());
             Company company = companyService.findByIntegrationId(sysGroupRequest.getCompany());
             sysGroup.setCompany(company);
             sysGroup.setDomain(company.getDomain());
             SysGroup exists = sysGroupService.findByIntegrationId(sysGroup.getIntegrationId());
             if (exists != null) {
+                log.info("sysGroup existe en la BD: {}", exists.getIntegrationId());
                 sysGroup.setId(exists.getId());
+            }else{
+                log.info("sysGroup no existe en la BD: {}",  sysGroupRequest.getSys_id());
             }
+            log.info("Guardando Group en la Base de Datos: {}", sysGroup.getIntegrationId());
             sysGroupUpdated = sysGroupService.save(sysGroup);
+            log.info("Group Actualizado correctamente: sys_id Group: {}", sysGroup.getIntegrationId());
         } catch (DataAccessException e) {
-            log.error("error " + e.getMessage());
+            log.error("Error al actualizar Group: {}. Error: {}", sysGroupRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -156,6 +156,7 @@ public class SysUserController {
             SysUser sysUser = new SysUser();
             String tagAction = App.CreateConsole();
             String tag = "[SysUser] ";
+            log.info("Estableciendo nuevos atributos al Objeto sysUser: {}", sysUserRequest.getSys_id());
             sysUser.setActive(sysUserRequest.getActive());
             sysUser.setEmail(sysUserRequest.getEmail().toLowerCase(Locale.ROOT));
             sysUser.setEmployeeNumber(sysUserRequest.getEmployee_number());
@@ -196,10 +197,12 @@ public class SysUserController {
                 sysUser.setId(exists.getId());
                 tagAction = App.UpdateConsole();
             }
+            log.info("Guardando Usuario en la Base de Datos: {}", sysUser.getIntegrationId());
             sysUserUpdated = sysUserService.save(sysUser);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(sysUser)), Util.getFieldDisplay(sysUser.getCompany()), Util.getFieldDisplay(sysUser.getDomain()));
+            log.info("Usuario Actualizado correctamente: {}", sysUser.getIntegrationId());
         } catch (DataAccessException e) {
-            log.error("error " + e.getMessage());
+            log.error("Error al actualizar Usuario: {}", e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

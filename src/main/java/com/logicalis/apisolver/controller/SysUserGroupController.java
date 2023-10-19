@@ -83,11 +83,14 @@ public class SysUserGroupController {
         SysUserGroup currentSysUserGroup = new SysUserGroup();
         SysUserGroup sysUserGroupUpdated = null;
         Map<String, Object> response = new HashMap<>();
+        log.info("Solicitud PUT recibida para actualizar sysUserGroup. Group: {}, User: {}", sysUserGroupRequest.getGroup(), sysUserGroupRequest.getUser());
         if (Objects.isNull(currentSysUserGroup)) {
+            log.warn("sysUserGroup es NULL.");
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserGroupRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         try {
+            log.debug("Actualizando sysUserGroup. sys_id sysUserGroup: {}", sysUserGroupRequest.getSys_id());
             SysUserGroup sysUserGroup = new SysUserGroup();
             String tagAction = App.CreateConsole();
             String tag = "[SysUserGroup] ";
@@ -95,21 +98,30 @@ public class SysUserGroupController {
             sysUserGroup.setIntegrationId(sysUserGroupRequest.getSys_id());
             if (Util.hasData(sysUserGroupRequest.getGroup())) {
                 SysGroup sysGroup = sysGroupService.findByIntegrationId(sysUserGroupRequest.getGroup());
-                if (sysGroup != null)
+                if (sysGroup != null) {
+                    log.info("Determinando relacion entre sysUserGroup y Group. sysUserGroup: {}, Group: {}", sysUserGroupRequest.getSys_id(), sysGroup.getIntegrationId());
                     sysUserGroup.setSysGroup(sysGroup);
+                }
             }
             if (Util.hasData(sysUserGroupRequest.getUser())) {
                 SysUser sysUser = sysUserService.findByIntegrationId(sysUserGroupRequest.getUser());
-                if (sysUser != null)
+                if (sysUser != null) {
+                    log.info("Determinando relacion entre sysUserGroup y User. sysUserGroup: {}, User: {}", sysUserGroupRequest.getSys_id(), sysUser.getIntegrationId());
                     sysUserGroup.setSysUser(sysUser);
+                }
             }
             SysUserGroup exists = sysUserGroupService.findByIntegrationId(sysUserGroup.getIntegrationId());
             if (exists != null) {
+                log.info("sysUserGroup existe en la BD: {}", exists.getIntegrationId());
                 sysUserGroup.setId(exists.getId());
+            }else{
+                log.info("sysUserGroup no existe en la BD: {}",  sysUserGroupRequest.getSys_id());
             }
+            log.info("Guardando sysUserGroup en la Base de Datos: {}", sysUserGroup.getIntegrationId());
             sysUserGroupUpdated = sysUserGroupService.save(sysUserGroup);
+            log.info("sysUserGroup Actualizado correctamente: sys_id sysUserGroup: {}", sysUserGroup.getIntegrationId());
         } catch (DataAccessException e) {
-            log.error("error " + e.getMessage());
+            log.error("Error al actualizar sysUserGroup: {}. Error: {}", sysUserGroupRequest.getSys_id(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

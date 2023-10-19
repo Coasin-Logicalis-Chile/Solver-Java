@@ -187,8 +187,13 @@ public class ScRequestController {
             ScRequestRequest scRequestRequest = gson.fromJson(json, ScRequestRequest.class);
             ScRequest exists = scRequestService.findByIntegrationId(scRequestRequest.getSys_id());
             if (exists != null) {
+                log.info("Request existe en la BD: {}",  exists.getNumber());
                 scRequest.setId(exists.getId());
                 tagAction = App.UpdateConsole();
+                log.info("Estableciendo atributos al Objeto scRequest: {}", exists.getNumber());
+            }else{
+                log.info("Request no existe en la BD: {}",  scRequestRequest.getNumber());
+                log.info("Estableciendo atributos al Objeto scRequest: {}", scRequestRequest.getNumber());
             }
             scRequest.setSysUpdatedOn(scRequestRequest.getSys_updated_on());
             scRequest.setNumber(scRequestRequest.getNumber());
@@ -232,10 +237,12 @@ public class ScRequestController {
             SysGroup sysGroup = sysGroupService.findByIntegrationId(scRequestRequest.getAssignment_group());
             scRequest.setAssignmentGroup(sysGroup);
 
+            log.info("Guardando ScRequest en la Base de Datos: {}", scRequest.getNumber());
             scRequestService.save(scRequest);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(scRequest)), Util.getFieldDisplay(scRequest.getCompany()), Util.getFieldDisplay(scRequest.getDomain()));
+            log.info("ScRequest Actualizado correctamente: {}", scRequest.getNumber());
         } catch (DataAccessException e) {
-            log.error("error " + e.getMessage());
+            log.error("Error al actualizar ScRequest: {}. Error:", scRequest.getNumber(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -211,8 +211,13 @@ public class ScRequestItemController {
             ScRequestItemRequest scRequestItemSolver = gson.fromJson(json, ScRequestItemRequest.class);
             ScRequestItem exists = scRequestItemService.findByIntegrationId(scRequestItemSolver.getSys_id());
             if (exists != null) {
+                log.info("Request Item existe en la BD: {}",  exists.getNumber());
                 scRequestItem.setId(exists.getId());
                 tagAction = App.UpdateConsole();
+                log.info("Estableciendo atributos al Objeto scRequestItem: {}", exists.getNumber());
+            }else{
+                log.info("Request Item no existe en la BD: {}",  scRequestItemSolver.getNumber());
+                log.info("Estableciendo atributos al Objeto scRequestItem: {}", scRequestItemSolver.getNumber());
             }
             scRequestItem.setApproval(scRequestItemSolver.getApproval());
             scRequestItem.setStage(scRequestItemSolver.getStage());
@@ -237,6 +242,7 @@ public class ScRequestItemController {
             Company company = companyService.findByIntegrationId(scRequestItemSolver.getCompany());
             scRequestItem.setCompany(company);
             scRequestItem.setDomain(company.getDomain());
+            log.info("Asignando usuarios especificos a propiedades del objeto ScRequestItem: {}", scRequestItem.getNumber());
             if (Util.hasData(scRequestItemSolver.getOpened_by())) {
                 SysUser openedBy = sysUserService.findByIntegrationId(scRequestItemSolver.getOpened_by());
                 scRequestItem.setOpenedBy(openedBy);
@@ -249,11 +255,12 @@ public class ScRequestItemController {
                 SysUser requestedFor = sysUserService.findByIntegrationId(scRequestItemSolver.getRequested_for());
                 scRequestItem.setRequestedFor(requestedFor);
             }
-
+            log.info("Guardando ScRequestItem en la Base de Datos: {}", scRequestItem.getNumber());
             scRequestItemService.save(scRequestItem);
             Util.printData(tag, tagAction.concat(Util.getFieldDisplay(scRequestItem)), Util.getFieldDisplay(company), Util.getFieldDisplay(company.getDomain()));
+            log.info("ScRequestItem Actualizado correctamente: {}", scRequestItem.getNumber());
         } catch (DataAccessException e) {
-            log.error("error " + e.getMessage());
+            log.error("Error al actualizar ScRequestItem: {}. Error:", scRequestItem.getNumber(), e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
