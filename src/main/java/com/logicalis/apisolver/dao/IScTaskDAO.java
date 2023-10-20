@@ -182,6 +182,7 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "                            where u.sys_group = a.scaling_assignment_group and u.sys_user = ?7)))", nativeQuery = true)
     public Long countScTasksByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open);
 
+    /*
     @Query(value = "SELECT count(*)\n" +
             "FROM sc_task a \n" +
             "     JOIN sc_request b      ON a.sc_request = b.id\n" +
@@ -207,6 +208,30 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "       and    b.active is TRUE \n" +
             "       and    c.active is true\n" +
             "       and    c.sys_user = ?2)",nativeQuery = true)
+     */
+    @Query(value = "SELECT count(*)\n" +
+            "FROM sc_task a \n" +
+            "     JOIN sc_request b      ON a.sc_request = b.id\n" +
+            "     JOIN sc_request_item c ON a.sc_request_item = c.id\n" +
+            "     JOIN choice f          ON a.state = f.value  AND f.name= 'task'\n" +
+            "                                                  AND f.element = 'state' \n" +
+            "     LEFT JOIN choice g   ON a.priority = g.value AND g.name = 'task' AND g.element = 'priority'\n" +
+            "     LEFT JOIN sys_user h ON a.task_for = h.id\n" +
+            "     JOIN ( SELECT DISTINCT z.id AS sc_task, w.stage \n" +
+            "            FROM sc_task z\n" +
+            "                 JOIN task_sla w ON z.id = w.sc_task\n" +
+            "            WHERE  w.stage = 'in_progress' \n" +
+            "            AND    w.percentage <> '' \n" +
+            "            AND    w.percentage IS NOT NULL \n" +
+            "            AND Cast(Split_part(COALESCE(w.percentage, '0'), '.', 1) AS INTEGER) > 90) i \n" +
+            "                ON i.sc_task = a.id\n" +
+            "WHERE a.company = ?1\n" +
+            "AND   (upper(f.label) not like all (ARRAY['%CERRADO%', '%CANCELADO%']) )\n" +
+            "and   exists (select 'x' \n" +
+            "                         from   vw_user b \n" +
+            "                          where  b.id  = a.assignment_group\n" +
+            "                           and    b.sys_user = ?2\n" +
+            "                           and    b.company = a.company)",nativeQuery = true)
     public Long countTaskSLAByFilters(Long company, Long assignedTo);
 
     List<ScTask> findByScRequestItem(ScRequestItem scRequestItem);
