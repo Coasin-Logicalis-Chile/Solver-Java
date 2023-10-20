@@ -68,12 +68,12 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "         AND (?7 = '' OR a.incident_parent = ?7)  \n" +
             "         AND (?8 = '' OR a.sc_request_parent = ?8)  \n" +
             "         AND (?9 = '' OR a.sc_request_item_parent = ?9) \n" +
-            "         AND ((?10 = 0) or exists ( select 'x'  from sys_group      b\n" +
-            "                                      INNER JOIN sys_user_group c ON c.sys_group = b.id \n" +
-            "                                      where  b.id = a.assignment_group\n" +
-            "                                      and    b.active is TRUE\n" +
-            "                                      and    c.active is TRUE\n" +
-            "                                      and    c.sys_user = ?10 ) ) \n" +
+            "         AND ((?10 = 0 and exists ( select  'x' from sys_user_group c where  c.sys_group = a.assignment_group\n" +
+            "            and c.active is true)) or exists ( select 'x' \n" +
+            "               from   vw_user b \n" +
+            "             where  b.id  = a.assignment_group\n" +
+            "             AND    b.sys_user = ?10\n" +
+            "             and    b.company = a.company) ) \n" +
             "         AND (?11 = false OR UPPER(d.label) like '%CERRADO%')        \n" +
             "         AND (?12  = false OR (   UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%'] )\n" +
             "                        AND UPPER(g.label) NOT LIKE '%RESUELTO%')) \n" +
@@ -247,12 +247,12 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "AND (?8 = false OR (UPPER(d.label) NOT LIKE ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%'] ) \n" +
             "            AND UPPER(g.label) NOT LIKE '%RESUELTO%'))\n" +
             "AND a.delete IS FALSE \n" +
-            "AND ((?7 = 0) or exists ( select 'x'  from sys_group      b\n" +
-            "                                          INNER JOIN sys_user_group c ON c.sys_group = b.id \n" +
-            "                                          where  b.id = a.assignment_group\n" +
-            "                                           and    b.active is TRUE\n" +
-            "                                           and    c.active is TRUE\n" +
-            "                                           and    c.sys_user = ?7 ) )",nativeQuery = true)
+            "AND ((?7 = 0 and exists ( select  'x' from sys_user_group c where  c.sys_group = a.assignment_group\n" +
+            "            and c.active is true)) or exists ( select 'x' \n" +
+            "               from   vw_user b \n" +
+            "             where  b.id  = a.assignment_group\n" +
+            "             AND    b.sys_user = ?7 \n" +
+            "             and    b.company = a.company ) )",nativeQuery = true)
     public Long countIncidentsByFilters(Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean closed, Long assignedToGroup, boolean open);
 
     @Query(value = "SELECT count(*) \n" +
@@ -275,7 +275,6 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "and   exists ( select 'x' \n" +
             "               from   vw_user b \n" +
             "               where  b.id  = a.assignment_group\n" +
-            "               and    b.active is true\n" +
             "               and    b.sys_user = ?2\n" +
             "               and    b.company = a.company) ",nativeQuery = true)
     public Long countIncidentsSLAByFilters(Long company, Long assignedTo);

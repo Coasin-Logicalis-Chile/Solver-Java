@@ -71,10 +71,7 @@ public interface ISysUserDAO extends PagingAndSortingRepository<SysUser, Long> {
             "INNER JOIN sys_user_group c ON a.id = c.sys_user\n" +
             "WHERE a.company = ?1\n" +
             "AND (a.user_type != 'comodin' OR a.user_type is NULL)\n" +
-            "AND EXISTS (SELECT  'x'\n" +
-            "            FROM sys_user_group a\n" +
-            "            WHERE  a.sys_group = c.sys_group\n" +
-            "                   AND a.active is TRUE AND a.sys_user = ?2)\n" +
+            "and exists ( SELECT 'x'  FROM sys_user_group a WHERE  a.sys_group = c.sys_group and sys_user = ?2)\n" +
             "ORDER  BY a.name ASC", nativeQuery = true)
     public List<SysUserFields> findSysUsersByMySysGroups(Long company, Long sysUser);
 }
