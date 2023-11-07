@@ -24,6 +24,9 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -292,8 +295,9 @@ public class JournalController {
     @PostMapping("/journal")
     public ResponseEntity<?> create(@RequestBody String json) {
         log.info("Init creating Jornal");
+        long start1 = System.currentTimeMillis();
         Map<String, Object> response = new HashMap<>();
-        Journal addJournal = new Journal();
+        final Journal[] addJournal = {new Journal()};
         try {
             Journal journal = new Journal();
             journal.setValue(Util.parseJson(json, "journal", "value"));
@@ -314,10 +318,41 @@ public class JournalController {
                 }
             }
             journal.setCreateBy(sysUserService.findById(Util.parseIdJson(json, "journal", "createBy")));
-            addJournal = rest.addJournal(EndPointSN.PostJournal(), journal);
-            log.info("Guardando Journal en la Base de Datos: {}", addJournal.getIntegrationId());
-            journalService.save(addJournal);
-            log.info("Journal creado correctamente.", addJournal.getIntegrationId());
+            log.info("Inicio de la creación del Journal en la Base de Datos.");
+
+            ZoneId gmtMinus4 = ZoneId.of("GMT-4");
+            LocalDateTime currentDateTime = LocalDateTime.now(gmtMinus4);
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+            String formattedDateTime = currentDateTime.format(formatter);
+
+            journal.setCreatedOn(formattedDateTime);
+            Journal finalJournal = journalService.save(journal);
+            long journalId = finalJournal.getId();
+            log.info("Journal insertado correctamente en la Base de Datos. ID: {}", journalId);
+
+            Runnable obj1 = () -> {
+                long start = System.currentTimeMillis(), journalId2;
+                //log.info("Enviando para ServiceNow el Journal {}", journal);
+                //addJournal[0] = rest.addJournal(EndPointSN.PostJournal(), journal);
+                log.info("Enviando para ServiceNow el Journal con ID: {}", journalId);
+                addJournal[0] = rest.addJournal(EndPointSN.PostJournal(), finalJournal);
+                journalId2 = addJournal[0].getId();
+                long end = System.currentTimeMillis();
+                String integrationId = addJournal[0].getIntegrationId();
+                log.info("Fin del proceso de transferencia para ServiceNow del Journal ID:"+ journalId2 +". Tiempo  total:" + (end-start) + "ms");
+                log.info("Actualizando el ID de intregración del Journal retornado de ServiceNow en la Base de Datos: {}", integrationId);
+                journalService.save(addJournal[0]);
+                log.info("Journal actualizando correctamente, ID de integración:" + integrationId);
+            };
+            Thread t1 = new Thread(obj1);
+            t1.start();
+            response.put("mensaje", Messages.createOK.get());
+            //response.put("journal", journal);
+            response.put("journal", finalJournal);
+            long end1 = System.currentTimeMillis();
+            //log.info("Journal creado correctamente en Solver. Tiempo total:" + (end1-start1) + "ms");
+            log.info("Journal creado correctamente en Solver. ID:" + journalId + ". Tiempo total:" + (end1-start1) + "ms");
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
         } catch (DataAccessException e) {
             log.error("Error al crear Journal: {}", e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
@@ -325,10 +360,6 @@ public class JournalController {
             log.error("Error creating Journal, message {}",response);
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        response.put("mensaje", Messages.createOK.get());
-        response.put("journal", addJournal);
-        log.info("Journal created ok");
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
