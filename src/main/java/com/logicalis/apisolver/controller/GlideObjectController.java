@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.GlideObject;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class GlideObjectController {
-
 	@Autowired
 	private IGlideObjectService glideObjectService;
 	
@@ -31,10 +29,8 @@ public class GlideObjectController {
 	
 	@GetMapping("/glideObject/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		GlideObject glideObject = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			glideObject = glideObjectService.findById(id);
 		} catch(DataAccessException e){
@@ -42,12 +38,10 @@ public class GlideObjectController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(glideObject == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<GlideObject>(glideObject, HttpStatus.OK);
 	}
 
@@ -55,7 +49,6 @@ public class GlideObjectController {
 	@PostMapping("/glideObject")
 	public ResponseEntity<?> create(@RequestBody GlideObject glideObject) {
 		GlideObject newGlideObject = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newGlideObject = glideObjectService.save(glideObject);
@@ -66,28 +59,22 @@ public class GlideObjectController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("glideObject", newGlideObject);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/glideObject/{id}")
 	public ResponseEntity<?> update(@RequestBody GlideObject glideObject, @PathVariable Long id) {
-
 		GlideObject currentGlideObject = glideObjectService.findById(id);
 		GlideObject glideObjectUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentGlideObject == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentGlideObject.setName(glideObject.getName());
 			glideObjectUpdated = glideObjectService.save(currentGlideObject);
-
 		} catch (DataAccessException e) {
 			response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -95,14 +82,12 @@ public class GlideObjectController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("glideObject", glideObjectUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/glideObject/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			glideObjectService.delete(id);

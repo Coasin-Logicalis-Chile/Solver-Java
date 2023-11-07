@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.Choice;
@@ -13,16 +12,12 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class ChoiceController {
-
     @Autowired
     private IChoiceService choiceService;
 
@@ -33,10 +28,8 @@ public class ChoiceController {
 
     @GetMapping("/choice/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         Choice choice = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             choice = choiceService.findById(id);
         } catch (DataAccessException e) {
@@ -45,17 +38,15 @@ public class ChoiceController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (choice == null) {
+        if (Objects.isNull(choice)) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<Choice>(choice, HttpStatus.OK);
     }
 
     @GetMapping("/choice/{integrationId}")
     public ResponseEntity<?> show(@PathVariable String integrationId) {
-
         Choice choice = null;
         Map<String, Object> response = new HashMap<>();
 
@@ -67,11 +58,10 @@ public class ChoiceController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        if (choice == null) {
+        if (Objects.isNull(choice)) {
             response.put("mensaje", Messages.notExist.get(integrationId.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<Choice>(choice, HttpStatus.OK);
     }
 
@@ -90,24 +80,19 @@ public class ChoiceController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("choice", newChoice);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/choice/{id}")
     public ResponseEntity<?> update(@RequestBody Choice choice, @PathVariable Long id) {
-
         Choice currentChoice = choiceService.findById(id);
         Choice choiceUpdated = null;
-
         Map<String, Object> response = new HashMap<>();
-
-        if (currentChoice == null) {
+        if (Objects.isNull(currentChoice)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             currentChoice.setName(choice.getName());
             choiceUpdated = choiceService.save(currentChoice);
@@ -119,14 +104,12 @@ public class ChoiceController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("choice", choiceUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/choice/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             choiceService.delete(id);
@@ -144,7 +127,6 @@ public class ChoiceController {
         List<ChoiceFields> list = new ArrayList<>();
         list = choiceService.choicesByIncident();
         ResponseEntity<List<ChoiceFields>> pageResponseEntity = new ResponseEntity<>(list, HttpStatus.OK);
-
         return pageResponseEntity;
     }
 
@@ -153,7 +135,6 @@ public class ChoiceController {
         List<ChoiceFields> list = new ArrayList<>();
         list = choiceService.choicesByScRequestItem();
         ResponseEntity<List<ChoiceFields>> pageResponseEntity = new ResponseEntity<>(list, HttpStatus.OK);
-
         return pageResponseEntity;
     }
 
@@ -161,14 +142,7 @@ public class ChoiceController {
     public ResponseEntity<List<ChoiceFields>> choicesByScTask() {
         List<ChoiceFields> list = new ArrayList<>();
         list = choiceService.choicesByScTask();
-        //ChoiceFields choice = choiceService.findByFilters("task","state","-9");
-
-        /*if (list.stream()
-                .filter(choiceField -> choiceField.getLabel() == choice.getLabel()).count() >= 0) {
-            list.add(choice);
-        }*/
         ResponseEntity<List<ChoiceFields>> pageResponseEntity = new ResponseEntity<>(list, HttpStatus.OK);
-
         return pageResponseEntity;
     }
 }

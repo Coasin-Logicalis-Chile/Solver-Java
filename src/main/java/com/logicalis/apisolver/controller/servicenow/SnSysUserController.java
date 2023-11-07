@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -10,9 +9,9 @@ import com.logicalis.apisolver.model.enums.EndPointSN;
 import com.logicalis.apisolver.model.enums.SnTable;
 import com.logicalis.apisolver.model.servicenow.SnSysUser;
 import com.logicalis.apisolver.services.*;
-import com.logicalis.apisolver.services.servicenow.ISnSysUserService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,10 +28,8 @@ import java.util.Locale;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnSysUserController {
-
-    @Autowired
-    private ISnSysUserService snSysUserService;
     @Autowired
     private ISysUserService sysUserService;
     @Autowired
@@ -45,360 +42,337 @@ public class SnSysUserController {
     private ICompanyService companyService;
     @Autowired
     private IDepartmentService departmentService;
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+    @Autowired
+    private Rest rest;
+
     @GetMapping("/sn_sys_users")
     public List<SnSysUser> show() {
-
-
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
-        Util util = new Util();
+        String[] sparmOffSets = Util.offSets500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysUser] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+            String result;
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JSONParser parser = new JSONParser();
+            JSONObject resultJson = new JSONObject();
+            JSONArray ListSnSysUserJson = new JSONArray();
+            final SysUser[] sysUser = {new SysUser()};
+            final Domain[] domain = new Domain[1];
+            final SnSysUser[] snSysUser = {new SnSysUser()};
+            final Company[] company = new Company[1];
+            final Location[] location = new Location[1];
+            final Department[] department = new Department[1];
+            final String[] tagAction = new String[1];
+            final SysUser[] exists = new SysUser[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.SysUser().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.SysUser().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListSnSysUserJson = new JSONArray();
-
+                result = rest.responseByEndPoint(EndPointSN.SysUser().concat(sparmOffSet));
+                log.info(tag.concat("(".concat(EndPointSN.SysUser().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnSysUserJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnSysUserJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnSysUserJson.stream().forEach(snSysUserJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SnSysUser snSysUser = new SnSysUser();
                     try {
-                        snSysUser = objectMapper.readValue(snSysUserJson.toString(), SnSysUser.class);
-                        snSysUsers.add(snSysUser);
-                        SysUser sysUser = new SysUser();
-                        sysUser.setActive(snSysUser.getActive());
-                        sysUser.setName(snSysUser.getName());
-                        sysUser.setIntegrationId(snSysUser.getSys_id());
-                        sysUser.setVip(snSysUser.getVip());
-                        sysUser.setEmail(snSysUser.getEmail().toLowerCase(Locale.ROOT));
-                        sysUser.setEmployeeNumber(snSysUser.getEmployee_number());
-                        sysUser.setFirstName(snSysUser.getFirst_name());
-                        sysUser.setUserName(snSysUser.getUser_name());
-                        sysUser.setLastName(snSysUser.getLast_name());
-                        sysUser.setVip(snSysUser.getVip());
-                        sysUser.setSolver(snSysUser.getU_solver());
-                        sysUser.setMobilePhone(snSysUser.getMobile_phone());
-                        sysUser.setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", app.Value()));
-                        Domain domain = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), app.Value());
-                        if (domain != null)
-                            sysUser.setDomain(domain);
-
-                        Company company = getCompanyByIntegrationId((JSONObject) snSysUserJson, SnTable.Company.get(), app.Value());
-                        if (company != null)
-                            sysUser.setCompany(company);
-
-                        Location location = getLocationByIntegrationId((JSONObject) snSysUserJson, "location", app.Value());
-                        if (location != null)
-                            sysUser.setLocation(location);
-
-                        Department department = getDepartmentByIntegrationId((JSONObject) snSysUserJson, "department", app.Value());
-                        if (department != null)
-                            sysUser.setDepartment(department);
-
-                        //if (sysUser.getSolver())
-                        //sysUser.setPassword("$2a$10$zGJsiIy5q/kQhFLWsHDIO.rde0UzUS5oH.I.Z.U7d/gXjieMmPaZm");
-
-                        String tagAction = app.CreateConsole();
-                        SysUser exists = sysUserService.findByIntegrationId(sysUser.getIntegrationId());
-                        if (exists != null) {
-                            sysUser.setId(exists.getId());
-                            sysUser.setPassword(exists.getPassword());
-                            tagAction = app.UpdateConsole();
+                        snSysUser[0] = mapper.readValue(snSysUserJson.toString(), SnSysUser.class);
+                        snSysUsers.add(snSysUser[0]);
+                        sysUser[0] = new SysUser();
+                        sysUser[0].setActive(snSysUser[0].getActive());
+                        sysUser[0].setName(snSysUser[0].getName());
+                        sysUser[0].setIntegrationId(snSysUser[0].getSys_id());
+                        sysUser[0].setVip(snSysUser[0].getVip());
+                        sysUser[0].setEmail(snSysUser[0].getEmail().toLowerCase(Locale.ROOT));
+                        sysUser[0].setEmployeeNumber(snSysUser[0].getEmployee_number());
+                        sysUser[0].setFirstName(snSysUser[0].getFirst_name());
+                        sysUser[0].setUserName(snSysUser[0].getUser_name());
+                        sysUser[0].setLastName(snSysUser[0].getLast_name());
+                        sysUser[0].setVip(snSysUser[0].getVip());
+                        sysUser[0].setSolver(snSysUser[0].getU_solver());
+                        sysUser[0].setMobilePhone(snSysUser[0].getMobile_phone());
+                        sysUser[0].setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", App.Value()));
+                        domain[0] = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), App.Value());
+                        if (domain[0] != null)
+                            sysUser[0].setDomain(domain[0]);
+                        company[0] = getCompanyByIntegrationId((JSONObject) snSysUserJson, SnTable.Company.get(), App.Value());
+                        if (company[0] != null)
+                            sysUser[0].setCompany(company[0]);
+                        location[0] = getLocationByIntegrationId((JSONObject) snSysUserJson, "location", App.Value());
+                        if (location[0] != null)
+                            sysUser[0].setLocation(location[0]);
+                        department[0] = getDepartmentByIntegrationId((JSONObject) snSysUserJson, "department", App.Value());
+                        if (department[0] != null)
+                            sysUser[0].setDepartment(department[0]);
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = sysUserService.findByIntegrationId(sysUser[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            sysUser[0].setId(exists[0].getId());
+                            sysUser[0].setPassword(exists[0].getPassword());
+                            tagAction[0] = App.UpdateConsole();
                         }
-                        sysUserService.save(sysUser);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(company), util.getFieldDisplay(location), util.getFieldDisplay(department));
-
-
+                        sysUserService.save(sysUser[0]);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysUser[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(location[0]), Util.getFieldDisplay(department[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snSysUsers;
     }
 
-
     @GetMapping("/sn_sys_users_solver")
     public List<SnSysUser> show(boolean query) {
-
-
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
-        Util util = new Util();
+        String[] sparmOffSets = Util.offSets500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysUser] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+            String result;
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JSONParser parser = new JSONParser();
+            JSONObject resultJson = new JSONObject();
+            JSONArray ListSnSysUserJson = new JSONArray();
+            final SysUser[] sysUser = {new SysUser()};
+            final Domain[] domain = new Domain[1];
+            final Company[] company = new Company[1];
+            final SnSysUser[] snSysUser = {new SnSysUser()};
+            final Location[] location = new Location[1];
+            final Department[] department = new Department[1];
+            final String[] tagAction = new String[1];
+            final SysUser[] exists = new SysUser[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.SysUser().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.SysUser().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListSnSysUserJson = new JSONArray();
-
+                result = rest.responseByEndPoint(EndPointSN.SysUser().concat(sparmOffSet));
+                log.info(tag.concat("(".concat(EndPointSN.SysUser().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnSysUserJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnSysUserJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnSysUserJson.stream().forEach(snSysUserJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SnSysUser snSysUser = new SnSysUser();
                     try {
-                        snSysUser = objectMapper.readValue(snSysUserJson.toString(), SnSysUser.class);
-                        snSysUsers.add(snSysUser);
-                        SysUser sysUser = new SysUser();
-                        sysUser.setActive(snSysUser.getActive());
-                        sysUser.setName(snSysUser.getName());
-                        sysUser.setIntegrationId(snSysUser.getSys_id());
-                        sysUser.setVip(snSysUser.getVip());
-                        sysUser.setEmail(snSysUser.getEmail().toLowerCase(Locale.ROOT));
-                        sysUser.setEmployeeNumber(snSysUser.getEmployee_number());
-                        sysUser.setFirstName(snSysUser.getFirst_name());
-                        sysUser.setUserName(snSysUser.getUser_name());
-                        sysUser.setLastName(snSysUser.getLast_name());
-                        sysUser.setVip(snSysUser.getVip());
-                        sysUser.setSolver(snSysUser.getU_solver());
-                        sysUser.setMobilePhone(snSysUser.getMobile_phone());
-                        sysUser.setUserType(snSysUser.getU_user_type());
-                        sysUser.setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", app.Value()));
-                        Domain domain = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), app.Value());
-                        if (domain != null)
-                            sysUser.setDomain(domain);
+                        snSysUser[0] = mapper.readValue(snSysUserJson.toString(), SnSysUser.class);
+                        snSysUsers.add(snSysUser[0]);
+                        sysUser[0] = new SysUser();
+                        sysUser[0].setActive(snSysUser[0].getActive());
+                        sysUser[0].setName(snSysUser[0].getName());
+                        sysUser[0].setIntegrationId(snSysUser[0].getSys_id());
+                        sysUser[0].setVip(snSysUser[0].getVip());
+                        sysUser[0].setEmail(snSysUser[0].getEmail().toLowerCase(Locale.ROOT));
+                        sysUser[0].setEmployeeNumber(snSysUser[0].getEmployee_number());
+                        sysUser[0].setFirstName(snSysUser[0].getFirst_name());
+                        sysUser[0].setUserName(snSysUser[0].getUser_name());
+                        sysUser[0].setLastName(snSysUser[0].getLast_name());
+                        sysUser[0].setVip(snSysUser[0].getVip());
+                        sysUser[0].setSolver(snSysUser[0].getU_solver());
+                        sysUser[0].setMobilePhone(snSysUser[0].getMobile_phone());
+                        sysUser[0].setUserType(snSysUser[0].getU_user_type());
+                        sysUser[0].setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", App.Value()));
+                        domain[0] = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), App.Value());
+                        if (domain[0] != null)
+                            sysUser[0].setDomain(domain[0]);
 
-                        Company company = getCompanyByIntegrationId((JSONObject) snSysUserJson, SnTable.Company.get(), app.Value());
-                        if (company != null)
-                            sysUser.setCompany(company);
+                        company[0] = getCompanyByIntegrationId((JSONObject) snSysUserJson, SnTable.Company.get(), App.Value());
+                        if (company[0] != null)
+                            sysUser[0].setCompany(company[0]);
 
-                        Location location = getLocationByIntegrationId((JSONObject) snSysUserJson, "location", app.Value());
-                        if (location != null)
-                            sysUser.setLocation(location);
+                        location[0] = getLocationByIntegrationId((JSONObject) snSysUserJson, "location", App.Value());
+                        if (location[0] != null)
+                            sysUser[0].setLocation(location[0]);
 
-                        Department department = getDepartmentByIntegrationId((JSONObject) snSysUserJson, "department", app.Value());
-                        if (department != null)
-                            sysUser.setDepartment(department);
+                        department[0] = getDepartmentByIntegrationId((JSONObject) snSysUserJson, "department", App.Value());
+                        if (department[0] != null)
+                            sysUser[0].setDepartment(department[0]);
 
-                        //if (sysUser.getSolver())
-                        //sysUser.setPassword("$2a$10$zGJsiIy5q/kQhFLWsHDIO.rde0UzUS5oH.I.Z.U7d/gXjieMmPaZm");
-
-                        String tagAction = app.CreateConsole();
-                        SysUser exists = sysUserService.findByIntegrationId(sysUser.getIntegrationId());
-                        if (exists != null) {
-                            sysUser.setId(exists.getId());
-                            sysUser.setPassword(exists.getPassword());
-                            tagAction = app.UpdateConsole();
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = sysUserService.findByIntegrationId(sysUser[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            sysUser[0].setId(exists[0].getId());
+                            sysUser[0].setPassword(exists[0].getPassword());
+                            tagAction[0] = App.UpdateConsole();
                         }
-                        sysUserService.save(sysUser);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(company), util.getFieldDisplay(location), util.getFieldDisplay(department));
-
-
+                        sysUserService.save(sysUser[0]);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysUser[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(location[0]), Util.getFieldDisplay(department[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snSysUsers;
     }
     @GetMapping("/snSyUsersSolverByQuery")
     public List<SnSysUser> show(String query) {
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
-        Util util = new Util();
+        String[] sparmOffSets = Util.offSets500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysUser] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+            String  result;
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JSONParser parser = new JSONParser();
+            JSONObject resultJson = new JSONObject();
+            JSONArray ListSnSysUserJson = new JSONArray();
+            final Domain[] domain = new Domain[1];
+            Gson gson = new Gson();
+            final SysUser[] sysUser = {new SysUser()};
+            final SnSysUser[] snSysUser = {new SnSysUser()};
+            final Company[] company = new Company[1];
+            final Location[] location = new Location[1];
+            final Department[] department = new Department[1];
+            final String[] tagAction = new String[1];
+            final SysUser[] exists = new SysUser[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
-                String  result = rest.responseByEndPoint(endPointSN.SysUserByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.SysUserByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListSnSysUserJson = new JSONArray();
-
+                result = rest.responseByEndPoint(EndPointSN.SysUserByQuery().replace("QUERY", query).concat(sparmOffSet));
+                log.info(tag.concat("(".concat(EndPointSN.SysUserByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnSysUserJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnSysUserJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnSysUserJson.stream().forEach(snSysUserJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SnSysUser snSysUser = new SnSysUser();
+                    snSysUser[0] = new SnSysUser();
                     try {
-                      //  snSysUser = objectMapper.readValue(snSysUserJson.toString(), SnSysUser.class);
-                        Gson gson = new Gson();
-                        snSysUser = gson.fromJson(snSysUserJson.toString(), SnSysUser.class);
-
-                        snSysUsers.add(snSysUser);
-                        SysUser sysUser = new SysUser();
-                        sysUser.setActive(snSysUser.getActive());
-                        sysUser.setName(snSysUser.getName());
-                        sysUser.setIntegrationId(snSysUser.getSys_id());
-                        sysUser.setVip(snSysUser.getVip());
-                        sysUser.setEmail(snSysUser.getEmail().toLowerCase(Locale.ROOT));
-                        sysUser.setEmployeeNumber(snSysUser.getEmployee_number());
-                        sysUser.setFirstName(snSysUser.getFirst_name());
-                        sysUser.setUserName(snSysUser.getUser_name());
-                        sysUser.setLastName(snSysUser.getLast_name());
-                        sysUser.setVip(snSysUser.getVip());
-                        sysUser.setSolver(snSysUser.getU_solver());
-                        sysUser.setMobilePhone(snSysUser.getMobile_phone());
-                        sysUser.setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", app.Value()));
-                        Domain domain = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), app.Value());
-                        if (domain != null)
-                            sysUser.setDomain(domain);
-
-                        Company company = getCompanyByIntegrationId((JSONObject) snSysUserJson, SnTable.Company.get(), app.Value());
-                        if (company != null)
-                            sysUser.setCompany(company);
-
-                        Location location = getLocationByIntegrationId((JSONObject) snSysUserJson, "location", app.Value());
-                        if (location != null)
-                            sysUser.setLocation(location);
-
-                        Department department = getDepartmentByIntegrationId((JSONObject) snSysUserJson, "department", app.Value());
-                        if (department != null)
-                            sysUser.setDepartment(department);
-
-                        //if (sysUser.getSolver())
-                        //sysUser.setPassword("$2a$10$zGJsiIy5q/kQhFLWsHDIO.rde0UzUS5oH.I.Z.U7d/gXjieMmPaZm");
-
-                        String tagAction = app.CreateConsole();
-                        SysUser exists = sysUserService.findByIntegrationId(sysUser.getIntegrationId());
-                        if (exists != null) {
-                            sysUser.setId(exists.getId());
-                            sysUser.setPassword(exists.getPassword());
-                            tagAction = app.UpdateConsole();
+                        snSysUser[0] = gson.fromJson(snSysUserJson.toString(), SnSysUser.class);
+                        snSysUsers.add(snSysUser[0]);
+                        sysUser[0] = new SysUser();
+                        sysUser[0].setActive(snSysUser[0].getActive());
+                        sysUser[0].setName(snSysUser[0].getName());
+                        sysUser[0].setIntegrationId(snSysUser[0].getSys_id());
+                        sysUser[0].setVip(snSysUser[0].getVip());
+                        sysUser[0].setEmail(snSysUser[0].getEmail().toLowerCase(Locale.ROOT));
+                        sysUser[0].setEmployeeNumber(snSysUser[0].getEmployee_number());
+                        sysUser[0].setFirstName(snSysUser[0].getFirst_name());
+                        sysUser[0].setUserName(snSysUser[0].getUser_name());
+                        sysUser[0].setLastName(snSysUser[0].getLast_name());
+                        sysUser[0].setVip(snSysUser[0].getVip());
+                        sysUser[0].setSolver(snSysUser[0].getU_solver());
+                        sysUser[0].setMobilePhone(snSysUser[0].getMobile_phone());
+                        sysUser[0].setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", App.Value()));
+                        domain[0] = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), App.Value());
+                        if (domain[0] != null)
+                            sysUser[0].setDomain(domain[0]);
+                        company[0] = getCompanyByIntegrationId((JSONObject) snSysUserJson, SnTable.Company.get(), App.Value());
+                        if (company[0] != null)
+                            sysUser[0].setCompany(company[0]);
+                        location[0] = getLocationByIntegrationId((JSONObject) snSysUserJson, "location", App.Value());
+                        if (location[0] != null)
+                            sysUser[0].setLocation(location[0]);
+                        department[0] = getDepartmentByIntegrationId((JSONObject) snSysUserJson, "department", App.Value());
+                        if (department[0] != null)
+                            sysUser[0].setDepartment(department[0]);
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = sysUserService.findByIntegrationId(sysUser[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            sysUser[0].setId(exists[0].getId());
+                            sysUser[0].setPassword(exists[0].getPassword());
+                            tagAction[0] = App.UpdateConsole();
                         }
-                        sysUserService.save(sysUser);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(company), util.getFieldDisplay(location), util.getFieldDisplay(department));
-
-
+                        sysUserService.save(sysUser[0]);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysUser[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(location[0]), Util.getFieldDisplay(department[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snSysUsers;
     }
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Company getCompanyByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return companyService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Location getLocationByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return locationService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Department getDepartmentByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return departmentService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public String getIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return integrationId;
         } else
             return "";

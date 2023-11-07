@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -12,9 +11,9 @@ import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.ICompanyService;
 import com.logicalis.apisolver.services.IDomainService;
 import com.logicalis.apisolver.services.ILocationService;
-import com.logicalis.apisolver.services.servicenow.ISnLocationService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -30,10 +29,8 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnLocationController {
-
-    @Autowired
-    private ISnLocationService snLocationService;
     @Autowired
     private ILocationService locationService;
     @Autowired
@@ -42,207 +39,196 @@ public class SnLocationController {
     private IDomainService domainService;
     @Autowired
     private ICompanyService companyService;
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+    @Autowired
+    private Rest rest;
+
     @GetMapping("/sn_locations")
     public List<SnLocation> show() {
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnLocation> snLocations = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
-
+        String[] sparmOffSets = Util.offSets500000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Location] ";
-        Util util = new Util();
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
+            log.info(tag.concat("(Get All Domains)"));
             List<Company> companies = companyService.findAll();
-            System.out.println(tag.concat("(Get All Companies)"));
-
-            Rest rest = new Rest();
+            log.info(tag.concat("(Get All Companies)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            String result;
+            JSONParser parser = new JSONParser();
+            JSONArray ListSnLocationJson = new JSONArray();
+            final SnLocation[] snLocation = {new SnLocation()};
+            final Location[] location = new Location[1];
+            final String[] domainSysId = new String[1];
+            final Domain[] domain = new Domain[1];
+            final String[] companySysId = new String[1];
+            final String[] tagAction = new String[1];
+            final Location[] exists = new Location[1];
+            final Company[] company = {new Company()};
+            JSONObject resultJson;
+            APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.Location().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.Location().concat(sparmOffSet)).concat(")")));
+                result = rest.responseByEndPoint(EndPointSN.Location().concat(sparmOffSet));
+                log.info(tag.concat("(".concat(EndPointSN.Location().concat(sparmOffSet)).concat(")")));
 
                 endTime = (System.currentTimeMillis() - startTime);
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = (JSONObject) parser.parse(result);
-                JSONArray ListSnLocationJson = new JSONArray();
-
+                resultJson = (JSONObject) parser.parse(result);
+                ListSnLocationJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnLocationJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnLocationJson.forEach(snLocationJson -> {
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SnLocation snLocation = new SnLocation();
                     try {
-                        snLocation = objectMapper.readValue(snLocationJson.toString(), SnLocation.class);
-                        snLocations.add(snLocation);
-                        Location location = new Location();
-                        location.setActive(snLocation.isActive());
-                        location.setName(snLocation.getName());
-                        location.setCity(snLocation.getCity());
-                        location.setCountry(snLocation.getCountry());
-                        location.setLatitude(snLocation.getLatitude());
-                        location.setLongitude(snLocation.getLongitude());
-                        location.setIntegrationId(snLocation.getsys_id());
-                        String domainSysId = util.getIdByJson((JSONObject) snLocationJson, SnTable.Domain.get(), app.Value());
-                        Domain domain = util.filterDomain(domains, domainSysId);
-                        if (domain != null)
-                            location.setDomain(domain);
-
-                        String companySysId = util.getIdByJson((JSONObject) snLocationJson, SnTable.Company.get(), app.Value());
-                        Company company = util.filterCompany(companies, companySysId);
-                        if (company != null)
-                            location.setCompany(company);
-
-                        String tagAction = app.CreateConsole();
-                        Location exists = locationService.findByIntegrationId(location.getIntegrationId());
-                        if (exists != null) {
-                            location.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                        snLocation[0] = mapper.readValue(snLocationJson.toString(), SnLocation.class);
+                        snLocations.add(snLocation[0]);
+                        location[0] = new Location();
+                        location[0].setActive(snLocation[0].isActive());
+                        location[0].setName(snLocation[0].getName());
+                        location[0].setCity(snLocation[0].getCity());
+                        location[0].setCountry(snLocation[0].getCountry());
+                        location[0].setLatitude(snLocation[0].getLatitude());
+                        location[0].setLongitude(snLocation[0].getLongitude());
+                        location[0].setIntegrationId(snLocation[0].getsys_id());
+                        domainSysId[0] = Util.getIdByJson((JSONObject) snLocationJson, SnTable.Domain.get(), App.Value());
+                        domain[0] = Util.filterDomain(domains, domainSysId[0]);
+                        if (domain[0] != null)
+                            location[0].setDomain(domain[0]);
+                        companySysId[0] = Util.getIdByJson((JSONObject) snLocationJson, SnTable.Company.get(), App.Value());
+                        company[0] = Util.filterCompany(companies, companySysId[0]);
+                        if (company[0] != null)
+                            location[0].setCompany(company[0]);
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = locationService.findByIntegrationId(location[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            location[0].setId(exists[0].getId());
+                            tagAction[0] = App.UpdateConsole();
                         }
-                        locationService.save(location);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(location)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
-
+                        locationService.save(location[0]);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(location[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snLocations;
     }
 
     @GetMapping("/sn_locationsSolverByQuery")
     public List<SnLocation> show(String query) {
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnLocation> snLocations = new ArrayList<>();
-        String[] sparmOffSets = util.offSets500000();
+        String[] sparmOffSets = Util.offSets500000();
 
         long startTime = 0;
         long endTime = 0;
         String tag = "[Location] ";
-        Util util = new Util();
         try {
-
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+            String result;
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JSONParser parser = new JSONParser();
+            JSONArray ListSnLocationJson = new JSONArray();
+            JSONObject resultJson;
+            final Location[] location = new Location[1];
+            final SnLocation[] snLocation = {new SnLocation()};
+            final Domain[] domain = new Domain[1];
+            final Company[] company = new Company[1];
+            final String[] tagAction = new String[1];
+            final Location[] exists = new Location[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
-
-                String result = rest.responseByEndPoint(endPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
-
+                result = rest.responseByEndPoint(EndPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet));
+                log.info(tag.concat("(".concat(EndPointSN.LocationByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
                 endTime = (System.currentTimeMillis() - startTime);
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = (JSONObject) parser.parse(result);
-                JSONArray ListSnLocationJson = new JSONArray();
-
+                resultJson = (JSONObject) parser.parse(result);
+                ListSnLocationJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnLocationJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnLocationJson.forEach(snLocationJson -> {
-
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SnLocation snLocation = new SnLocation();
-
+                    snLocation[0] = new SnLocation();
                     try {
+                        snLocation[0] = mapper.readValue(snLocationJson.toString(), SnLocation.class);
+                        snLocations.add(snLocation[0]);
+                        location[0] = new Location();
+                        location[0].setActive(snLocation[0].isActive());
+                        location[0].setName(snLocation[0].getName());
+                        location[0].setCity(snLocation[0].getCity());
+                        location[0].setCountry(snLocation[0].getCountry());
+                        location[0].setLatitude(snLocation[0].getLatitude());
+                        location[0].setLongitude(snLocation[0].getLongitude());
+                        location[0].setIntegrationId(snLocation[0].getsys_id());
+                        domain[0] = getDomainByIntegrationId((JSONObject) snLocationJson, SnTable.Domain.get(), App.Value());
+                        if (domain[0] != null)
+                            location[0].setDomain(domain[0]);
+                        company[0] = getCompanyByIntegrationId((JSONObject) snLocationJson, SnTable.Company.get(), App.Value());
+                        if (company[0] != null)
+                            location[0].setCompany(company[0]);
 
-                        snLocation = objectMapper.readValue(snLocationJson.toString(), SnLocation.class);
-                        snLocations.add(snLocation);
-                        Location location = new Location();
-                        location.setActive(snLocation.isActive());
-                        location.setName(snLocation.getName());
-                        location.setCity(snLocation.getCity());
-                        location.setCountry(snLocation.getCountry());
-                        location.setLatitude(snLocation.getLatitude());
-                        location.setLongitude(snLocation.getLongitude());
-                        location.setIntegrationId(snLocation.getsys_id());
-                        Domain domain = getDomainByIntegrationId((JSONObject) snLocationJson, SnTable.Domain.get(), app.Value());
-                        if (domain != null)
-                            location.setDomain(domain);
-
-                        Company company = getCompanyByIntegrationId((JSONObject) snLocationJson, SnTable.Company.get(), app.Value());
-                        if (company != null)
-                            location.setCompany(company);
-
-                        String tagAction = app.CreateConsole();
-                        Location exists = locationService.findByIntegrationId(location.getIntegrationId());
-                        if (exists != null) {
-                            location.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = locationService.findByIntegrationId(location[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            location[0].setId(exists[0].getId());
+                            tagAction[0] = App.UpdateConsole();
                         }
-                        locationService.save(location);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(location)), util.getFieldDisplay(company), util.getFieldDisplay(domain));
-
+                        locationService.save(location[0]);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(location[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
                         count[0] = count[0] + 1;
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.info(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.info(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snLocations;
     }
 
     public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public Company getCompanyByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return companyService.findByIntegrationId(integrationId);
         } else
             return null;
     }
-
 }

@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -15,9 +14,9 @@ import com.logicalis.apisolver.model.servicenow.SnCompany;
 import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.ICompanyService;
 import com.logicalis.apisolver.services.IDomainService;
-import com.logicalis.apisolver.services.servicenow.ISnCompanyService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -29,100 +28,98 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnCompanyController {
-
-    @Autowired
-    private ISnCompanyService snCompanyService;
     @Autowired
     private ICompanyService companyService;
     @Autowired
     private IAPIExecutionStatusService statusService;
     @Autowired
     private IDomainService domainService;
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+    @Autowired
+    private Rest rest;
 
     @GetMapping("/sn_companies")
     public List<SnCompany> show() {
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnCompany> snCompanies = new ArrayList<>();
         long startTime = 0;
         long endTime = 0;
-        Util util = new Util();
         String tag = "[Company] ";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
+            log.info(tag.concat("(Get All Domains)"));
             startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(endPointSN.Company());
+            String result = rest.responseByEndPoint(EndPointSN.Company());
             endTime = (System.currentTimeMillis() - startTime);
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
             JSONParser parser = new JSONParser();
             JSONObject resultJson = (JSONObject) parser.parse(result);
             JSONArray ListSnCompanyJson = new JSONArray();
+            final SnCompany[] snCompany = new SnCompany[1];
+            final Company[] company = new Company[1];
+            final String[] domainSysId = new String[1];
+            final Domain[] domain = new Domain[1];
+            final Company[] exists = new Company[1];
+            final String[] tagAction = new String[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             if (resultJson.get("result") != null)
                 ListSnCompanyJson = (JSONArray) parser.parse(resultJson.get("result").toString());
             final int[] count = {1};
             ListSnCompanyJson.forEach(snCompanyJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
                 try {
-                    SnCompany snCompany = objectMapper.readValue(snCompanyJson.toString(), SnCompany.class);
-                    snCompanies.add(snCompany);
-                    Company company = new Company();
-                    company.setActive(snCompany.isActive());
-                    company.setName(snCompany.getName());
-                    company.setIntegrationId(snCompany.getSys_id());
-                    company.setSolver(snCompany.getU_solver());
+                    snCompany[0] = mapper.readValue(snCompanyJson.toString(), SnCompany.class);
+                    snCompanies.add(snCompany[0]);
+                    company[0] = new Company();
+                    company[0].setActive(snCompany[0].isActive());
+                    company[0].setName(snCompany[0].getName());
+                    company[0].setIntegrationId(snCompany[0].getSys_id());
+                    company[0].setSolver(snCompany[0].getU_solver());
 
-                    String domainSysId = util.getIdByJson((JSONObject) snCompanyJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
-                    if (domain != null)
-                        company.setDomain(domain);
+                    domainSysId[0] = Util.getIdByJson((JSONObject) snCompanyJson, SnTable.Domain.get(), App.Value());
+                    domain[0] = Util.filterDomain(domains, domainSysId[0]);
+                    if (domain[0] != null)
+                        company[0].setDomain(domain[0]);
 
-
-                    Company exists = companyService.findByIntegrationId(company.getIntegrationId());
-                    String tagAction = app.CreateConsole();
-                    if (exists != null) {
-                        company.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                    exists[0] = companyService.findByIntegrationId(company[0].getIntegrationId());
+                    tagAction[0] = App.CreateConsole();
+                    if (!Objects.isNull(exists[0])) {
+                        company[0].setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
 
-                    util.printData(tag,
+                    Util.printData(tag,
                             count[0],
-                            tagAction.concat(company != null ? company.getName() != "" ? company.getName() : app.Name() : app.Name()),
-                            (domain != null ? domain.getName() != "" ? domain.getName() : app.Domain() : app.Domain()));
+                            tagAction[0].concat(!Objects.isNull(company[0])? ( !Objects.isNull(company[0].getName()) && !company[0].getName().equals("")) ? company[0].getName() : App.Name() : App.Name()),
+                            (!Objects.isNull(domain[0]) ? (!Objects.isNull(domain[0].getName()) && !domain[0].getName().equals("")) ? domain[0].getName() : App.Domain() : App.Domain()));
 
-                    companyService.save(company);
+                    companyService.save(company[0]);
                     count[0] = count[0] + 1;
                 } catch (JsonProcessingException e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
 
             apiResponse = mapper.readValue(result, APIResponse.class);
-
-            APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Company());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            status.setUri(EndPointSN.Company());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
             statusService.save(status);
 
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snCompanies;
     }
 }

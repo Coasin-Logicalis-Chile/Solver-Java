@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.Rol;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class RolController {
-
 	@Autowired
 	private IRolService rolService;
 	
@@ -31,10 +29,8 @@ public class RolController {
 	
 	@GetMapping("/rol/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		Rol rol = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			rol = rolService.findById(id);
 		} catch(DataAccessException e){
@@ -42,12 +38,10 @@ public class RolController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(rol == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<Rol>(rol, HttpStatus.OK);
 	}
 
@@ -55,7 +49,6 @@ public class RolController {
 	@PostMapping("/rol")
 	public ResponseEntity<?> create(@RequestBody Rol rol) {
 		Rol newRol = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newRol = rolService.save(rol);
@@ -66,24 +59,19 @@ public class RolController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("rol", newRol);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/rol/{id}")
 	public ResponseEntity<?> update(@RequestBody Rol rol, @PathVariable Long id) {
-
 		Rol currentRol = rolService.findById(id);
 		Rol rolUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentRol == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentRol.setName(rol.getName());
 			rolUpdated = rolService.save(currentRol);
@@ -95,14 +83,12 @@ public class RolController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("rol", rolUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/rol/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			rolService.delete(id);

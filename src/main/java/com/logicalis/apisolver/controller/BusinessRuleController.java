@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.BusinessRule;
@@ -15,12 +14,12 @@ import org.springframework.web.bind.annotation.*;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class BusinessRuleController {
-
 	@Autowired
 	private IBusinessRuleService businessRuleService;
 	
@@ -43,11 +42,10 @@ public class BusinessRuleController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		
-		if(businessRule == null){
+		if(Objects.isNull(businessRule)){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<BusinessRule>(businessRule, HttpStatus.OK);
 	}
 
@@ -79,7 +77,7 @@ public class BusinessRuleController {
 		
 		Map<String, Object> response = new HashMap<>();
 
-		if (currentBusinessRule == null) {
+		if (Objects.isNull(currentBusinessRule)) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}

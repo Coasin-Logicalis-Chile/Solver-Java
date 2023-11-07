@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.TypeBusinessRule;
@@ -16,12 +15,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
 public class TypeBusinessRuleController {
-
 	@Autowired
 	private ITypeBusinessRuleService typeBusinessRuleService;
 	
@@ -32,10 +29,8 @@ public class TypeBusinessRuleController {
 	
 	@GetMapping("/typeBusinessRule/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		TypeBusinessRule typeBusinessRule = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			typeBusinessRule = typeBusinessRuleService.findById(id);
 		} catch(DataAccessException e){
@@ -43,12 +38,10 @@ public class TypeBusinessRuleController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(typeBusinessRule == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<TypeBusinessRule>(typeBusinessRule, HttpStatus.OK);
 	}
 
@@ -56,7 +49,6 @@ public class TypeBusinessRuleController {
 	@PostMapping("/typeBusinessRule")
 	public ResponseEntity<?> create(@RequestBody TypeBusinessRule typeBusinessRule) {
 		TypeBusinessRule newTypeBusinessRule = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newTypeBusinessRule = typeBusinessRuleService.save(typeBusinessRule);
@@ -67,24 +59,19 @@ public class TypeBusinessRuleController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("typeBusinessRule", newTypeBusinessRule);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/typeBusinessRule/{id}")
 	public ResponseEntity<?> update(@RequestBody TypeBusinessRule typeBusinessRule, @PathVariable Long id) {
-
 		TypeBusinessRule currentTypeBusinessRule = typeBusinessRuleService.findById(id);
 		TypeBusinessRule typeBusinessRuleUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentTypeBusinessRule == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentTypeBusinessRule.setName(typeBusinessRule.getName());
 			typeBusinessRuleUpdated = typeBusinessRuleService.save(currentTypeBusinessRule);
@@ -96,14 +83,12 @@ public class TypeBusinessRuleController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("typeBusinessRule", typeBusinessRuleUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/typeBusinessRule/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			typeBusinessRuleService.delete(id);

@@ -20,21 +20,16 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class DomainController {
-
 	@Autowired
 	private IDomainService domainService;
-	
 	@GetMapping("/domains")
 	public List<Domain> index() {
 		return domainService.findAll();
 	}
-	
 	@GetMapping("/domain/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		Domain domain = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			domain = domainService.findById(id);
 		} catch(DataAccessException e){
@@ -42,12 +37,10 @@ public class DomainController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(domain == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<Domain>(domain, HttpStatus.OK);
 	}
 
@@ -55,7 +48,6 @@ public class DomainController {
 	@PostMapping("/domain")
 	public ResponseEntity<?> create(@RequestBody Domain domain) {
 		Domain newDomain = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newDomain = domainService.save(domain);
@@ -66,28 +58,22 @@ public class DomainController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("domain", newDomain);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/domain/{id}")
 	public ResponseEntity<?> update(@RequestBody Domain domain, @PathVariable Long id) {
-
 		Domain currentDomain = domainService.findById(id);
 		Domain domainUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentDomain == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentDomain.setName(domain.getName());
 			domainUpdated = domainService.save(currentDomain);
-
 		} catch (DataAccessException e) {
 			response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -95,14 +81,12 @@ public class DomainController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("domain", domainUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/domain/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			domainService.delete(id);
@@ -114,24 +98,6 @@ public class DomainController {
 		response.put("mensaje", Messages.DeleteOK.get());
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
-	/*@GetMapping("/domain/{name}")
-	public ResponseEntity<?> show(@PathVariable String name) {
-		Domain domain = null;
-		Map<String, Object> response = new HashMap<>();
-		try{
-			domain = domainService.findByName(name);
-		} catch(DataAccessException e){
-			response.put("mensaje", Errors.dataAccessExceptionQuery.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		if(domain == null){
-			//response.put("mensaje", Messages.notExist.get(name));
-			response.put("mensaje", "El registro ".concat(name.concat(" no existe en la base de datos!")));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<Domain>(domain, HttpStatus.OK);
-	}*/
 
 	@GetMapping("/domain/{integration_id}")
 	public ResponseEntity<?> show(@PathVariable String integration_id) {
@@ -145,13 +111,10 @@ public class DomainController {
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
 		if(domain == null){
-			//response.put("mensaje", Messages.notExist.get(name));
 			response.put("mensaje", "El registro ".concat(integration_id.concat(" no existe en la base de datos!")));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
 		return new ResponseEntity<Domain>(domain, HttpStatus.OK);
 	}
-
-
 }
 

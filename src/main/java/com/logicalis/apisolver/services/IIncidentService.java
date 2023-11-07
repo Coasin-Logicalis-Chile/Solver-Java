@@ -11,6 +11,8 @@ import java.util.List;
 
 public interface IIncidentService {
 
+    public long count();
+
     public List<Incident> findAll();
 
     public Page<Incident> findAll(Pageable pageRequest);

@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.Department;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class DepartmentController {
-
 	@Autowired
 	private IDepartmentService departmentService;
 	
@@ -31,10 +29,8 @@ public class DepartmentController {
 	
 	@GetMapping("/department/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		Department department = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			department = departmentService.findById(id);
 		} catch(DataAccessException e){
@@ -42,20 +38,17 @@ public class DepartmentController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(department == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<Department>(department, HttpStatus.OK);
 	}
+
 	@GetMapping("/department/{integrationId}")
 	public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {
-
 		Department department = null;
 		Map<String, Object> response = new HashMap<>();
-
 		try{
 			department = departmentService.findByIntegrationId(  integrationId);
 		} catch(DataAccessException e){
@@ -63,19 +56,16 @@ public class DepartmentController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-
 		if(department == null){
 			response.put("mensaje", Messages.notExist.get(integrationId.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		return new ResponseEntity<Department>(department, HttpStatus.OK);
 	}
 	@Secured("ROLE_ADMIN")
 	@PostMapping("/department")
 	public ResponseEntity<?> create(@RequestBody Department department) {
 		Department newDepartment = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newDepartment = departmentService.save(department);
@@ -86,28 +76,22 @@ public class DepartmentController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("department", newDepartment);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/department/{id}")
 	public ResponseEntity<?> update(@RequestBody Department department, @PathVariable Long id) {
-
 		Department currentDepartment = departmentService.findById(id);
 		Department departmentUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentDepartment == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentDepartment.setName(department.getName());
 			departmentUpdated = departmentService.save(currentDepartment);
-
 		} catch (DataAccessException e) {
 			response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
@@ -115,14 +99,12 @@ public class DepartmentController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("department", departmentUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/department/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			departmentService.delete(id);

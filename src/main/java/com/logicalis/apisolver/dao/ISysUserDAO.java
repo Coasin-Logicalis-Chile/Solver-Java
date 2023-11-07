@@ -12,15 +12,6 @@ import java.util.List;
 public interface ISysUserDAO extends PagingAndSortingRepository<SysUser, Long> {
 
     public SysUser findByEmail(String email);
-   /* @Query(value = "SELECT DISTINCT a.id,\n" +
-            "a.integration_id as integrationId,\n" +
-            "a.name\n" +
-            "FROM sys_user a\n" +
-            "WHERE a.email = ?1\n" +
-            "AND a.solver IS TRUE\n" +
-            "AND a.active IS TRUE\n" +
-            "limit (1)", nativeQuery = true)
-    public SysUserFields findByEmailAndSolver(String email);*/
 
     public SysUser findByEmailAndSolver(String email, boolean solver);
 
@@ -66,6 +57,7 @@ public interface ISysUserDAO extends PagingAndSortingRepository<SysUser, Long> {
             "INNER JOIN company d ON c.company = d.id\n" +
             "WHERE (?1 = 0 OR d.id = ?1)\n" +
             "AND a.active IS TRUE\n" +
+            "AND (b.user_type != 'comodin' OR b.user_type is NULL)\n" +
             "ORDER  BY b.name ASC", nativeQuery = true)
     public List<SysUserFields> findUserGroupsByFilters(Long company);
 
@@ -78,7 +70,8 @@ public interface ISysUserDAO extends PagingAndSortingRepository<SysUser, Long> {
             "INNER JOIN company b ON a.company = b.id\n" +
             "INNER JOIN sys_user_group c ON a.id = c.sys_user\n" +
             "WHERE a.company = ?1\n" +
-            "AND c.sys_group IN (SELECT sys_group FROM sys_user_group a WHERE sys_user = ?2)\n" +
+            "AND (a.user_type != 'comodin' OR a.user_type is NULL)\n" +
+            "and exists ( SELECT 'x'  FROM sys_user_group a WHERE  a.sys_group = c.sys_group and sys_user = ?2)\n" +
             "ORDER  BY a.name ASC", nativeQuery = true)
     public List<SysUserFields> findSysUsersByMySysGroups(Long company, Long sysUser);
 }

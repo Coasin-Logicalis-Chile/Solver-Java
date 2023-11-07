@@ -14,7 +14,6 @@ public class Incident implements Serializable {
     private Long id;
     @Column(unique = true)
     private String integrationId;
-    //private String parent;
 
     @Column(unique = true)
     private String number;
@@ -111,7 +110,6 @@ public class Incident implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "resolved_by", referencedColumnName = "id")
     private SysUser resolvedBy;
-
 
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "solver_resolved_by", referencedColumnName = "id")

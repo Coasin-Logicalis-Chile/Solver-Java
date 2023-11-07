@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -7,12 +6,11 @@ import com.google.gson.Gson;
 import com.logicalis.apisolver.model.*;
 import com.logicalis.apisolver.model.enums.App;
 import com.logicalis.apisolver.model.enums.EndPointSN;
-import com.logicalis.apisolver.model.servicenow.SnSysUser;
 import com.logicalis.apisolver.model.servicenow.SnSysUserGroup;
 import com.logicalis.apisolver.services.*;
-import com.logicalis.apisolver.services.servicenow.ISnSysUserGroupService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
@@ -28,124 +26,111 @@ import java.util.List;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnSysUserGroupController {
-
-    @Autowired
-    private ISnSysUserGroupService snSysUserGroupService;
     @Autowired
     private ISysUserGroupService sysUserGroupService;
     @Autowired
     private ISysUserService sysUserService;
     @Autowired
-    private IDomainService domainService;
-    @Autowired
     private ISysGroupService sysGroupService;
     @Autowired
     private IAPIExecutionStatusService statusService;
-
-    private Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+    @Autowired
+    private Rest rest;
 
     @GetMapping("/sn_sys_user_groups")
     public List<SnSysUserGroup> show() {
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUserGroup> snSysUserGroups = new ArrayList<>();
-        String[] sparmOffSets = util.offSets99000();
+        String[] sparmOffSets = Util.offSets99000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[SysUserGroup] ";
         try {
-            Rest rest = new Rest();
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+            String result;
+            ObjectMapper mapper = new ObjectMapper();
+            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            JSONParser parser = new JSONParser();
+            JSONObject resultJson = new JSONObject();
+            JSONArray ListSnSysUserGroupJson = new JSONArray();
+            final String[] tagAction = new String[1];
+            final SnSysUserGroup[] snSysUserGroup = {new SnSysUserGroup()};
+            Gson gson = new Gson();
+            final SysUserGroup[] sysUserGroup = {new SysUserGroup()};
+            final SysUser[] sysUser = new SysUser[1];
+            final SysGroup[] sysGroup = new SysGroup[1];
+            final SysUserGroup[] exists = new SysUserGroup[1];
+            APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
-                String result = rest.responseByEndPoint(endPointSN.SysUserGroup().concat(sparmOffSet));
-                System.out.println(tag.concat("(".concat(endPointSN.SysUserGroup().concat(sparmOffSet)).concat(")")));
-                ObjectMapper mapper = new ObjectMapper();
-                mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                JSONParser parser = new JSONParser();
-                JSONObject resultJson = new JSONObject();
-                JSONArray ListSnSysUserGroupJson = new JSONArray();
-
+                result = rest.responseByEndPoint(EndPointSN.SysUserGroup().concat(sparmOffSet));
+                log.info(tag.concat("(".concat(EndPointSN.SysUserGroup().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
+                ListSnSysUserGroupJson.clear();
                 if (resultJson.get("result") != null)
                     ListSnSysUserGroupJson = (JSONArray) parser.parse(resultJson.get("result").toString());
 
                 ListSnSysUserGroupJson.stream().forEach(snSysUserGroupJson -> {
 
-                    String tagAction = app.CreateConsole();
-                    ObjectMapper objectMapper = new ObjectMapper();
-                    objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                    SnSysUserGroup snSysUserGroup = new SnSysUserGroup();
+                    tagAction[0] = App.CreateConsole();
                     try {
-                    //    snSysUserGroup = objectMapper.readValue(snSysUserGroupJson.toString(), SnSysUserGroup.class);
-                        Gson gson = new Gson();
-                        snSysUserGroup = gson.fromJson(snSysUserGroupJson.toString(), SnSysUserGroup.class);
-
-                        snSysUserGroups.add(snSysUserGroup);
-                        SysUserGroup sysUserGroup = new SysUserGroup();
-                        sysUserGroup.setIntegrationId(snSysUserGroup.getSys_id());
-                        sysUserGroup.setActive(snSysUserGroup.isActive());
-                        SysUser sysUser = getSysUserByIntegrationId((JSONObject) snSysUserGroupJson, "user", app.Value());
-                        if (sysUser != null)
-                            sysUserGroup.setSysUser(sysUser);
-
-                        SysGroup sysGroup = getSysGroupByIntegrationId((JSONObject) snSysUserGroupJson, "group", app.Value());
-                        if (sysGroup != null)
-                            sysUserGroup.setSysGroup(sysGroup);
-
-                        SysUserGroup exists = sysUserGroupService.findByIntegrationId(sysUserGroup.getIntegrationId());
-
-                        if (exists != null) {
-                            sysUserGroup.setId(exists.getId());
-                            tagAction = app.UpdateConsole();
+                        snSysUserGroup[0] = gson.fromJson(snSysUserGroupJson.toString(), SnSysUserGroup.class);
+                        snSysUserGroups.add(snSysUserGroup[0]);
+                        sysUserGroup[0] = new SysUserGroup();
+                        sysUserGroup[0].setIntegrationId(snSysUserGroup[0].getSys_id());
+                        sysUserGroup[0].setActive(snSysUserGroup[0].isActive());
+                        sysUser[0] = getSysUserByIntegrationId((JSONObject) snSysUserGroupJson, "user", App.Value());
+                        if (sysUser[0] != null)
+                            sysUserGroup[0].setSysUser(sysUser[0]);
+                        sysGroup[0] = getSysGroupByIntegrationId((JSONObject) snSysUserGroupJson, "group", App.Value());
+                        if (sysGroup[0] != null)
+                            sysUserGroup[0].setSysGroup(sysGroup[0]);
+                        exists[0] = sysUserGroupService.findByIntegrationId(sysUserGroup[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            sysUserGroup[0].setId(exists[0].getId());
+                            tagAction[0] = App.UpdateConsole();
                         }
-
-                        sysUserGroup.setActive(true);
-                        util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(sysUserGroup)), util.getFieldDisplay(sysUser));
-                        sysUserGroupService.save(sysUserGroup);
+                        sysUserGroup[0].setActive(true);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(sysUserGroup[0])), Util.getFieldDisplay(sysUser[0]));
+                        sysUserGroupService.save(sysUserGroup[0]);
                         count[0] = count[0] + 1;
-
                     } catch (Exception e) {
-                        System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                     }
                 });
-
                 apiResponse = mapper.readValue(result, APIResponse.class);
-                APIExecutionStatus status = new APIExecutionStatus();
-                status.setUri(endPointSN.Location());
-                status.setUserAPI(app.SNUser());
-                status.setPasswordAPI(app.SNPassword());
+                status.setUri(EndPointSN.Location());
+                status.setUserAPI(App.SNUser());
+                status.setPasswordAPI(App.SNPassword());
                 status.setError(apiResponse.getError());
                 status.setMessage(apiResponse.getMessage());
                 endTime = (System.currentTimeMillis() - startTime);
                 status.setExecutionTime(endTime);
                 statusService.save(status);
             }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snSysUserGroups;
     }
 
     public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 
     public SysGroup getSysGroupByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysGroupService.findByIntegrationId(integrationId);
         } else
             return null;
     }
 }
-

@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.ScCategory;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class ScCategoryController {
-
 	@Autowired
 	private IScCategoryService scCategoryService;
 	
@@ -31,10 +29,8 @@ public class ScCategoryController {
 	
 	@GetMapping("/scCategory/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		ScCategory scCategory = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			scCategory = scCategoryService.findById(id);
 		} catch(DataAccessException e){
@@ -42,12 +38,10 @@ public class ScCategoryController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(scCategory == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<ScCategory>(scCategory, HttpStatus.OK);
 	}
 
@@ -55,7 +49,6 @@ public class ScCategoryController {
 	@PostMapping("/scCategory")
 	public ResponseEntity<?> create(@RequestBody ScCategory scCategory) {
 		ScCategory newScCategory = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newScCategory = scCategoryService.save(scCategory);
@@ -66,24 +59,19 @@ public class ScCategoryController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("scCategory", newScCategory);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/scCategory/{id}")
 	public ResponseEntity<?> update(@RequestBody ScCategory scCategory, @PathVariable Long id) {
-
 		ScCategory currentScCategory = scCategoryService.findById(id);
 		ScCategory scCategoryUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentScCategory == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentScCategory.setTitle(scCategory.getTitle());
 			scCategoryUpdated = scCategoryService.save(currentScCategory);
@@ -95,14 +83,12 @@ public class ScCategoryController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("scCategory", scCategoryUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/scCategory/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			scCategoryService.delete(id);

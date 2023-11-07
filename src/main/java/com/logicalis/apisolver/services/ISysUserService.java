@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.services;
 
 import com.logicalis.apisolver.model.SysUser;
@@ -25,8 +24,6 @@ public interface ISysUserService {
     public void delete(Long id);
 
     public SysUser findByEmail(String email);
-
-    // public SysUserFields findByEmailAndSolver(String email);
 
     public SysUser getCodeByEmailAndSolver(String email, boolean solver);
 

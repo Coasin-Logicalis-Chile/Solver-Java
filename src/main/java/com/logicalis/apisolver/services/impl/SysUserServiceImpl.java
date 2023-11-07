@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +37,7 @@ public class SysUserServiceImpl implements ISysUserService, UserDetailsService {
         // SysUser a = dao.findByEmailAndSolver(userName, true);
         SysUser user = dao.findByEmailAndSolver(userName, true);//dao.findByUserName(userName);
 
-        if (user == null) {
+        if (Objects.isNull(user)) {
             logger.error("Error en el login: no existe el usuario '" + userName + "' en el sistema!");
             throw new UsernameNotFoundException("Error en el login: no existe el usuario '" + userName + "' en el sistema!");
         }

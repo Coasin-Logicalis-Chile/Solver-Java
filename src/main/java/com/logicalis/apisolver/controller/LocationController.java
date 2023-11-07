@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.Location;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class LocationController {
-
 	@Autowired
 	private ILocationService locationService;
 	
@@ -31,10 +29,8 @@ public class LocationController {
 	
 	@GetMapping("/location/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		Location location = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			location = locationService.findById(id);
 		} catch(DataAccessException e){
@@ -47,7 +43,6 @@ public class LocationController {
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<Location>(location, HttpStatus.OK);
 	}
 
@@ -73,7 +68,6 @@ public class LocationController {
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/location/{id}")
 	public ResponseEntity<?> update(@RequestBody Location location, @PathVariable Long id) {
-
 		Location currentLocation = locationService.findById(id);
 		Location locationUpdated = null;
 		
@@ -132,24 +126,5 @@ public class LocationController {
 		}
 		return new ResponseEntity<Location>(location, HttpStatus.OK);
 	}
-/*
-	@GetMapping("/location/{integration_id}")
-	public ResponseEntity<?> findByIntegrationId(@PathVariable String integration_id) {
-		Location location = null;
-		Map<String, Object> response = new HashMap<>();
-		try{
-			location = locationService.findByIntegrationId(integration_id);
-		} catch(DataAccessException e){
-			response.put("mensaje", Errors.dataAccessExceptionQuery.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		if(location == null){
-			//response.put("mensaje", Messages.notExist.get(name));
-			response.put("mensaje", "El registro ".concat(integration_id.concat(" no existe en la base de datos!")));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
-		}
-		return new ResponseEntity<Location>(location, HttpStatus.OK);
-	}*/
 }
 

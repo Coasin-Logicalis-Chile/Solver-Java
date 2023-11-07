@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.*;
@@ -12,29 +11,24 @@ import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.SysUserCode;
 import com.logicalis.apisolver.view.SysUserRequest;
 import com.logicalis.apisolver.view.SysUserSolver;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.env.Environment;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SysUserController {
-
-    @Autowired
-    private PlatformTransactionManager transactionManager;
     @Autowired
     private ISysUserService sysUserService;
     @Autowired
@@ -42,16 +36,11 @@ public class SysUserController {
     @Autowired
     private ICompanyService companyService;
     @Autowired
-    private IDomainService domainService;
-    @Autowired
     private ILocationService locationService;
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
-    private Environment environment;
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+    private Rest rest;
 
     @GetMapping("/sysUsers")
     public List<SysUser> index() {
@@ -60,10 +49,8 @@ public class SysUserController {
 
     @GetMapping("/sys_user/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
-
         SysUser sysUser = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysUser = sysUserService.findById(id);
         } catch (DataAccessException e) {
@@ -71,21 +58,17 @@ public class SysUserController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
         if (sysUser == null) {
             response.put("mensaje", Messages.notExist.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysUser>(sysUser, HttpStatus.OK);
     }
 
     @GetMapping("/sysUserByIntegrationId/{integrationId}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {
-
         SysUser sysUser = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysUser = sysUserService.findByIntegrationId(integrationId);
         } catch (DataAccessException e) {
@@ -93,22 +76,17 @@ public class SysUserController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (sysUser == null) {
+        if (Objects.isNull(sysUser)) {
             response.put("mensaje", Messages.notExist.get(integrationId));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysUser>(sysUser, HttpStatus.OK);
     }
 
-
     @GetMapping("/sysUser/{userName}")
     public ResponseEntity<?> userName(@PathVariable String userName) {
-
         SysUser sysUser = null;
         Map<String, Object> response = new HashMap<>();
-
         try {
             sysUser = sysUserService.findByUserName(userName);
         } catch (DataAccessException e) {
@@ -116,12 +94,10 @@ public class SysUserController {
             response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
-        if (sysUser == null) {
+        if (Objects.isNull(sysUser)) {
             response.put("mensaje", Messages.notExist.get(userName));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         return new ResponseEntity<SysUser>(sysUser, HttpStatus.OK);
     }
 
@@ -129,7 +105,6 @@ public class SysUserController {
     @PostMapping("/sysUser")
     public ResponseEntity<?> create(@RequestBody SysUser sysUser) {
         SysUser newSysUser = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
             newSysUser = sysUserService.save(sysUser);
@@ -140,38 +115,32 @@ public class SysUserController {
         }
         response.put("mensaje", Messages.createOK.get());
         response.put("sysUser", newSysUser);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/resetPassword/{id}")
     public ResponseEntity<?> update(@RequestBody JSONObject sysUserSolver, @PathVariable Long id) {
         SysUser currentSysUser = null;
-
         Map<String, Object> response = new HashMap<>();
         try {
-            currentSysUser = sysUserService.findById(util.parseIdJson(sysUserSolver.toString(), "params", "id"));
-            // currentSysUser.setPassword(Base64.getEncoder().encodeToString(util.parseJson(sysUserSolver.toString(), "params", "password").getBytes()));
-            if(passwordEncoder.matches(util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
+            currentSysUser = sysUserService.findById(Util.parseIdJson(sysUserSolver.toString(), "params", "id"));
+            if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
                  response.put("mensaje", Messages.PasswordFailed.get());
                  response.put("repetida", true);
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
             }else{
-                currentSysUser.setPassword(passwordEncoder.encode(util.parseJson(sysUserSolver.toString(), "params", "password")));
+                currentSysUser.setPassword(passwordEncoder.encode(Util.parseJson(sysUserSolver.toString(), "params", "password")));
                 currentSysUser = sysUserService.save(currentSysUser);
                 response.put("mensaje", Messages.createOK.get());
                 response.put("repetida", false);
                 response.put("sysUser", currentSysUser);
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
             }
-            
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-
         }
-        
     }
 
     @PutMapping("/sysUserSN")
@@ -179,16 +148,15 @@ public class SysUserController {
         SysUser currentSysUser = new SysUser();
         SysUser sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
-        if (currentSysUser == null) {
+        if (Objects.isNull(currentSysUser)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserRequest.getSys_id()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             SysUser sysUser = new SysUser();
-            String tagAction = app.CreateConsole();
+            String tagAction = App.CreateConsole();
             String tag = "[SysUser] ";
+            log.info("Estableciendo nuevos atributos al Objeto sysUser: {}", sysUserRequest.getSys_id());
             sysUser.setActive(sysUserRequest.getActive());
             sysUser.setEmail(sysUserRequest.getEmail().toLowerCase(Locale.ROOT));
             sysUser.setEmployeeNumber(sysUserRequest.getEmployee_number());
@@ -202,70 +170,45 @@ public class SysUserController {
             sysUser.setUserType(sysUserRequest.getU_user_type());
             sysUser.setSolver(sysUserRequest.getU_solver());
             String pass = passwordEncoder.encode(sysUserRequest.getU_solver_password());
-            System.out.println(sysUserRequest.getU_solver_password());
             sysUser.setPassword(pass);
-
             Company company = companyService.findByIntegrationId(sysUserRequest.getCompany());
             sysUser.setCompany(company);
             sysUser.setDomain(company.getDomain());
 
-          /*if (util.hasData(sysUserRequest.getSys_domain())) {
-                Domain domain = domainService.findByIntegrationId(sysUserRequest.getSys_domain());
-                if (domain != null)
-                    sysUser.setDomain(domain);
-            } else {
-                sysUser.setDomain(null);
-            }*/
-
-            if (util.hasData(sysUserRequest.getManager())) {
+            sysUser.setManager(null);
+            if (Util.hasData(sysUserRequest.getManager())) {
                 SysUser manager = sysUserService.findByIntegrationId(sysUserRequest.getManager());
                 sysUser.setManager(manager.getIntegrationId());
-            } else {
-                sysUser.setManager(null);
             }
-
-            /*if (util.hasData(sysUserRequest.getCompany())) {
-                Company company = companyService.findByIntegrationId(sysUserRequest.getCompany());
-                if (company != null)
-                    sysUser.setCompany(company);
-            } else {
-                sysUser.setCompany(null);
-            }]*/
-            if (util.hasData(sysUserRequest.getDepartment())) {
+            sysUser.setDepartment(null);
+            if (Util.hasData(sysUserRequest.getDepartment())) {
                 Department department = departmentService.findByIntegrationId(sysUserRequest.getDepartment());
                 if (department != null)
                     sysUser.setDepartment(department);
-            } else {
-                sysUser.setDepartment(null);
             }
-
-            if (util.hasData(sysUserRequest.getLocation())) {
+            sysUser.setLocation(null);
+            if (Util.hasData(sysUserRequest.getLocation())) {
                 Location location = locationService.findByIntegrationId(sysUserRequest.getLocation());
                 if (location != null)
                     sysUser.setLocation(location);
-            } else {
-                sysUser.setLocation(null);
             }
-
-
             SysUser exists = sysUserService.findByIntegrationId(sysUser.getIntegrationId());
-            if (exists != null) {
+            if (!Objects.isNull(exists)) {
                 sysUser.setId(exists.getId());
-                tagAction = app.UpdateConsole();
+                tagAction = App.UpdateConsole();
             }
-
+            log.info("Guardando Usuario en la Base de Datos: {}", sysUser.getIntegrationId());
             sysUserUpdated = sysUserService.save(sysUser);
-            util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(sysUser.getCompany()), util.getFieldDisplay(sysUser.getDomain()));
-
+            Util.printData(tag, tagAction.concat(Util.getFieldDisplay(sysUser)), Util.getFieldDisplay(sysUser.getCompany()), Util.getFieldDisplay(sysUser.getDomain()));
+            log.info("Usuario Actualizado correctamente: {}", sysUser.getIntegrationId());
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("Error al actualizar Usuario: {}", e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUser", sysUserUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
@@ -274,70 +217,58 @@ public class SysUserController {
         SysUser currentSysUser = new SysUser();
         SysUser sysUserCurrent, sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
-        if (currentSysUser == null) {
+        if (Objects.isNull(currentSysUser)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(sysUserSolver.getId().toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             sysUserCurrent = sysUserService.findById(id);
             String code = String.valueOf(new Random().nextInt(9999999));
             sysUserCurrent.setCode(code);
             sysUserUpdated = sysUserService.save(sysUserCurrent);
-            //util.printData(tag, tagAction.concat(util.getFieldDisplay(sysUser)), util.getFieldDisplay(sysUser.getCompany()), util.getFieldDisplay(sysUser.getDomain()));
-
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUser", sysUserUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @PutMapping("/sysUserCodeUpdate/{id}")
     public ResponseEntity<?> update(@RequestBody SysUserCode sysUserCode, @PathVariable Long id) {
         Map<String, Object> response = new HashMap<>();
-        Rest rest = new Rest();
         SysUser sysUserCurrent = null;
-        if (id == null) {
+        if (Objects.isNull(id)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             sysUserCurrent = sysUserService.findById(id);
-            rest.putSysUser(endPointSN.PutSysUser(), sysUserCurrent);
+            rest.putSysUser(EndPointSN.PutSysUser(), sysUserCurrent);
         } catch (DataAccessException e) {
-            System.out.println("error " + e.getMessage());
+            log.error("error " + e.getMessage());
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
             response.put("error", e.getMessage());
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUser", sysUserCurrent);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @PutMapping("/sysUser/{id}")
     public ResponseEntity<?> update(@RequestBody SysUser sysUser, @PathVariable Long id) {
-
         SysUser currentSysUser = sysUserService.findById(id);
         SysUser sysUserUpdated = null;
-
         Map<String, Object> response = new HashMap<>();
-
-        if (currentSysUser == null) {
+        if (Objects.isNull(currentSysUser)) {
             response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
-
         try {
             currentSysUser.setName(sysUser.getName());
             sysUserUpdated = sysUserService.save(currentSysUser);
@@ -349,14 +280,12 @@ public class SysUserController {
         }
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUser", sysUserUpdated);
-
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
     @Secured("ROLE_ADMIN")
     @DeleteMapping("/sysUser/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id) {
-
         Map<String, Object> response = new HashMap<>();
         try {
             sysUserService.delete(id);
@@ -369,23 +298,19 @@ public class SysUserController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
-
     @GetMapping("/sysUsersByMySysGroups")
     public ResponseEntity<List<SysUserFields>> findSysUsersByMySysGroups(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company,
                                                                          @NotNull @RequestParam(value = "sysUser", required = true, defaultValue = "0") Long sysUser) {
         List<SysUserFields> sysUsers = sysUserService.findSysUsersByMySysGroups(company, sysUser);
         ResponseEntity<List<SysUserFields>> pageResponseEntity = new ResponseEntity<>(sysUsers, HttpStatus.OK);
-
         return pageResponseEntity;
     }
-
 
     @GetMapping("/sysUserByEmailAndSolverAndCode")
     public ResponseEntity<SysUser> getCodeByEmailAndSolver(@NotNull @RequestParam(value = "email", required = true, defaultValue = "0") String email,
                                                            @NotNull @RequestParam(value = "solver", required = true, defaultValue = "true") boolean solver,
                                                            @NotNull @RequestParam(value = "code", required = true, defaultValue = "") String code) {
-        System.out.println(code);
-        System.out.println(code);
+        log.info(code);
         SysUser sysUser = sysUserService.findByEmailAndSolver(email, solver);
         BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
         SysUser currentRecord = null;
@@ -403,35 +328,10 @@ public class SysUserController {
     }
 
     @GetMapping("/sysUserByEmailAndSolver")
-
     public ResponseEntity<SysUser> findByEmailAndSolver(@NotNull @RequestParam(value = "email", required = true, defaultValue = "0") String email,
                                                         @NotNull @RequestParam(value = "solver", required = true, defaultValue = "true") boolean solver) throws Exception {
-
-
-        //String code = String.valueOf(new Random().nextInt(9999999));
         SysUser sysUser = sysUserService.findByEmailAndSolver(email, solver);
-        //sysUser.setLocked(true);
-        //SysUser sysUserRecord = sysUser;
-        //sysUserRecord.setCode(code);
-        //save(sysUserRecord);
-       /*TransactionStatus transaction = this.transactionManager.getTransaction(null);
-
-        try {
-            sysUserService.save(sysUserRecord);
-            this.transactionManager.commit(transaction);
-        } catch (Throwable ex) {
-            this.transactionManager.rollback(transaction);
-
-        }*/
-        //SysUser currentRecord = new SysUser();
-        //currentRecord.setId(sysUser.getId());
-        //currentRecord.setEmail(sysUser.getEmail());
-        //currentRecord.setLocked(sysUser.getLocked());
-        //currentRecord.setCode(code);
-        //currentRecord.setIntegrationId(sysUser.getIntegrationId());
         ResponseEntity<SysUser> pageResponseEntity = new ResponseEntity<>(sysUser, HttpStatus.OK);
-        //sysUserService.save(sysUser);
-        //SysUser updateSysUser = rest.putSysUser(endPointSN.PutSysUser.get(), currentRecord);
         return pageResponseEntity;
     }
 
@@ -448,12 +348,10 @@ public class SysUserController {
     }
 
     public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
-        String integrationId = util.getIdByJson(jsonObject, levelOne, levelTwo);
-        if (util.hasData(integrationId)) {
+        String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
+        if (Util.hasData(integrationId)) {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;
     }
-
 }
-

@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller.servicenow;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
@@ -14,316 +13,196 @@ import com.logicalis.apisolver.model.servicenow.SnChoice;
 import com.logicalis.apisolver.services.IAPIExecutionStatusService;
 import com.logicalis.apisolver.services.IChoiceService;
 import com.logicalis.apisolver.services.IDomainService;
-import com.logicalis.apisolver.services.servicenow.ISnChoiceService;
 import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
+import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class SnChoiceController {
-
-    @Autowired
-    private ISnChoiceService snChoiceService;
     @Autowired
     private IChoiceService choiceService;
     @Autowired
     private IDomainService domainService;
     @Autowired
     private IAPIExecutionStatusService statusService;
-    Util util = new Util();
-    App app = new App();
-    EndPointSN endPointSN = new EndPointSN();
+    @Autowired
+    private Rest rest;
 
     @GetMapping("/sn_choices_incidents")
     public List<SnChoice> show() {
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnChoice> snChoices = new ArrayList<>();
-        // String[] sparmOffSets = new String[]{"0", "5000", "10000", "15000", "20000", "25000", "30000", "35000", "40000", "45000", "50000", "55000", "60000", "65000"};
-        Util util = new Util();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Choice] ";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
+            log.info(tag.concat("(Get All Domains)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
-            //for (String sparmOffSet : sparmOffSets) {
-            // String result = rest.responseByEndPoint(endPointSN.Choice().concat(sparmOffSet));
-            // System.out.println(tag.concat("(".concat(endPointSN.Choice().concat(sparmOffSet)).concat(")")));
-            String result = rest.responseByEndPoint(endPointSN.ChoiceIncident());
-            System.out.println(tag.concat("(".concat(endPointSN.ChoiceIncident())));
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            String result = rest.responseByEndPoint(EndPointSN.ChoiceIncident());
+            log.info(tag.concat("(".concat(EndPointSN.ChoiceIncident())));
             JSONParser parser = new JSONParser();
             JSONObject resultJson = new JSONObject();
             JSONArray ListSnChoiceJson = new JSONArray();
-
             resultJson = (JSONObject) parser.parse(result);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            final Choice[] choice = {new Choice()};
+            final String[] domainSysId = new String[1];
+            final Domain[] domain = new Domain[1];
+            final String[] tagAction = new String[1];
+            final Choice[] exists = new Choice[1];
+            APIExecutionStatus status = new APIExecutionStatus();
+            final SnChoice[] snChoice = {new SnChoice()};
             if (resultJson.get("result") != null)
                 ListSnChoiceJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
             ListSnChoiceJson.stream().forEach(snChoiceJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                SnChoice snChoice = new SnChoice();
                 try {
-                    snChoice = objectMapper.readValue(snChoiceJson.toString(), SnChoice.class);
-                    snChoices.add(snChoice);
-                    Choice choice = new Choice();
-                    choice.setElement(snChoice.getElement());
-                    choice.setLanguage(snChoice.getLanguage());
-                    choice.setName(snChoice.getName());
-                    choice.setLabel(snChoice.getLabel());
-                    choice.setIntegrationId(snChoice.getSys_id());
-                    choice.setValue(snChoice.getValue());
-                    choice.setInactive(snChoice.isInactive());
-                    choice.setName(snChoice.getName());
-                    choice.setSolver(snChoice.getU_Solver());
-                    choice.setSolverDependentValue(snChoice.getU_solver_dependent_value());
+                    snChoice[0] = objectMapper.readValue(snChoiceJson.toString(), SnChoice.class);
+                    snChoices.add(snChoice[0]);
+                    choice[0] = new Choice();
+                    choice[0].setElement(snChoice[0].getElement());
+                    choice[0].setLanguage(snChoice[0].getLanguage());
+                    choice[0].setName(snChoice[0].getName());
+                    choice[0].setLabel(snChoice[0].getLabel());
+                    choice[0].setIntegrationId(snChoice[0].getSys_id());
+                    choice[0].setValue(snChoice[0].getValue());
+                    choice[0].setInactive(snChoice[0].isInactive());
+                    choice[0].setName(snChoice[0].getName());
+                    choice[0].setSolver(snChoice[0].getU_Solver());
+                    choice[0].setSolverDependentValue(snChoice[0].getU_solver_dependent_value());
 
-                    String domainSysId = util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
-                    if (domain != null)
-                        choice.setDomain(domain);
+                    domainSysId[0] = Util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), App.Value());
+                    domain[0] = Util.filterDomain(domains, domainSysId[0]);
+                    if (domain[0] != null)
+                        choice[0].setDomain(domain[0]);
 
-                    String tagAction = app.CreateConsole();
-                    Choice exists = choiceService.findByIntegrationId(choice.getIntegrationId());
-                    if (exists != null) {
-                        choice.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
+                    tagAction[0] = App.CreateConsole();
+                    exists[0] = choiceService.findByIntegrationId(choice[0].getIntegrationId());
+                    if (exists[0] != null) {
+                        choice[0].setId(exists[0].getId());
+                        tagAction[0] = App.UpdateConsole();
                     }
-                    choiceService.save(choice);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(choice)), util.getFieldDisplay(domain));
+                    choiceService.save(choice[0]);
+                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(choice[0])), Util.getFieldDisplay(domain[0]));
                     count[0] = count[0] + 1;
                 } catch (Exception e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
                 }
             });
-
-            apiResponse = mapper.readValue(result, APIResponse.class);
-            APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            apiResponse = objectMapper.readValue(result, APIResponse.class);
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
             status.setExecutionTime(endTime);
             statusService.save(status);
-            // }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snChoices;
     }
 
     @GetMapping("/sn_choices_by_filter")
     public List<SnChoice> show(String query) {
-        System.out.println(app.Start());
+        log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnChoice> snChoices = new ArrayList<>();
-        String[] sparmOffSets = util.offSets50000();
-        // String[] sparmOffSets = new String[]{"0", "5000", "10000", "15000", "20000", "25000", "30000", "35000", "40000", "45000", "50000", "55000", "60000", "65000"};
-        Util util = new Util();
+        String[] sparmOffSets = Util.offSets50000();
         long startTime = 0;
         long endTime = 0;
         String tag = "[Choice] ";
         String result = "";
         try {
             List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
+            log.info(tag.concat("(Get All Domains)"));
             startTime = System.currentTimeMillis();
             final int[] count = {1};
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            //for (String sparmOffSet : sparmOffSets) {
-            // String result = rest.responseByEndPoint(endPointSN.Choice().concat(sparmOffSet));
-            // System.out.println(tag.concat("(".concat(endPointSN.Choice().concat(sparmOffSet)).concat(")")));
-            //String result = rest.responseByEndPoint(endPointSN.ChoiceIncident.get());
-            //System.out.println(tag.concat("(".concat(endPointSN.ChoiceIncident.get())));
-            for (String sparmOffSet : sparmOffSets) {
-              result = rest.responseByEndPoint(endPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet));
-            System.out.println(tag.concat("(".concat(endPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
-
             JSONParser parser = new JSONParser();
             JSONObject resultJson = new JSONObject();
             JSONArray ListSnChoiceJson = new JSONArray();
-
-            resultJson = (JSONObject) parser.parse(result);
-            if (resultJson.get("result") != null)
-                ListSnChoiceJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
-            ListSnChoiceJson.stream().forEach(snChoiceJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                SnChoice snChoice = new SnChoice();
-                try {
-                    snChoice = objectMapper.readValue(snChoiceJson.toString(), SnChoice.class);
-                    snChoices.add(snChoice);
-                    Choice choice = new Choice();
-                    choice.setElement(snChoice.getElement());
-                    choice.setLanguage(snChoice.getLanguage());
-                    choice.setName(snChoice.getName());
-                    choice.setLabel(snChoice.getLabel());
-                    choice.setIntegrationId(snChoice.getSys_id());
-                    choice.setValue(snChoice.getValue());
-                    choice.setInactive(snChoice.isInactive());
-                    choice.setName(snChoice.getName());
-                    choice.setSolver(snChoice.getU_Solver());
-                    choice.setSolverDependentValue(snChoice.getU_solver_dependent_value());
-
-                    String domainSysId = util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
-                    if (domain != null)
-                        choice.setDomain(domain);
-
-                    String tagAction = app.CreateConsole();
-                    Choice exists = choiceService.findByIntegrationId(choice.getIntegrationId());
-                    if (exists != null) {
-                        choice.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
-                    }
-                    choiceService.save(choice);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(choice)), util.getFieldDisplay(domain));
-                    count[0] = count[0] + 1;
-                } catch (Exception e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-                }
-            });
-            };
-            apiResponse = mapper.readValue(result, APIResponse.class);
+            ObjectMapper objectMapper = new ObjectMapper();
+            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+            final SnChoice[] snChoice = {new SnChoice()};
+            final Choice[] choice = {new Choice()};
+            final String[] domainSysId = new String[1];
+            final Domain[] domain = new Domain[1];
+            final String[] tagAction = new String[1];
+            final Choice[] exists = new Choice[1];
             APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
+            for (String sparmOffSet : sparmOffSets) {
+                result = rest.responseByEndPoint(EndPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet));
+                log.info(tag.concat("(".concat(EndPointSN.ChoiceByQuery().replace("QUERY", query).concat(sparmOffSet)).concat(")")));
+                ListSnChoiceJson.clear();
+                resultJson = (JSONObject) parser.parse(result);
+                if (resultJson.get("result") != null)
+                    ListSnChoiceJson = (JSONArray) parser.parse(resultJson.get("result").toString());
+                ListSnChoiceJson.stream().forEach(snChoiceJson -> {
+                    try {
+                        snChoice[0] = objectMapper.readValue(snChoiceJson.toString(), SnChoice.class);
+                        snChoices.add(snChoice[0]);
+                        choice[0] = new Choice();
+                        choice[0].setElement(snChoice[0].getElement());
+                        choice[0].setLanguage(snChoice[0].getLanguage());
+                        choice[0].setName(snChoice[0].getName());
+                        choice[0].setLabel(snChoice[0].getLabel());
+                        choice[0].setIntegrationId(snChoice[0].getSys_id());
+                        choice[0].setValue(snChoice[0].getValue());
+                        choice[0].setInactive(snChoice[0].isInactive());
+                        choice[0].setName(snChoice[0].getName());
+                        choice[0].setSolver(snChoice[0].getU_Solver());
+                        choice[0].setSolverDependentValue(snChoice[0].getU_solver_dependent_value());
+
+                        domainSysId[0] = Util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), App.Value());
+                        domain[0] = Util.filterDomain(domains, domainSysId[0]);
+                        if (domain[0] != null)
+                            choice[0].setDomain(domain[0]);
+
+                        tagAction[0] = App.CreateConsole();
+                        exists[0] = choiceService.findByIntegrationId(choice[0].getIntegrationId());
+                        if (exists[0] != null) {
+                            choice[0].setId(exists[0].getId());
+                            tagAction[0] = App.UpdateConsole();
+                        }
+                        choiceService.save(choice[0]);
+                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(choice[0])), Util.getFieldDisplay(domain[0]));
+                        count[0] = count[0] + 1;
+                    } catch (Exception e) {
+                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
+                    }
+                });
+            }
+            apiResponse = mapper.readValue(result, APIResponse.class);
+            status.setUri(EndPointSN.Location());
+            status.setUserAPI(App.SNUser());
+            status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
             status.setMessage(apiResponse.getMessage());
             endTime = (System.currentTimeMillis() - startTime);
             status.setExecutionTime(endTime);
             statusService.save(status);
-            // }
-
         } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
+            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
-        System.out.println(app.End());
+        log.info(App.End());
         return snChoices;
     }
-    /*@GetMapping("/sn_choices_by_filter")
-    public List<SnChoice> show(@NotNull @RequestParam(value = "table", required = true, defaultValue = "incident") String table) {
-        System.out.println(app.Start());
-        APIResponse apiResponse = null;
-        List<SnChoice> snChoices = new ArrayList<>();
-        Util util = new Util();
-        long startTime = 0;
-        long endTime = 0;
-        String tag = "[Choice] ";
-        try {
-            List<Domain> domains = domainService.findAll();
-            System.out.println(tag.concat("(Get All Domains)"));
-            Rest rest = new Rest();
-            startTime = System.currentTimeMillis();
-            final int[] count = {1};
-            String result = "";
-            switch (table) {
-                case "incident":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceIncident.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceIncident.get())));
-                case "request":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceRequest.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceRequest.get())));
-                case "sc_req_item":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceRequest.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceRequest.get())));
-                case "task_sla":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceTaskSla.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceTaskSla.get())));
-                case "task":
-                    result = rest.responseByEndPoint(endPointSN.ChoiceTask.get());
-                    System.out.println(tag.concat("(".concat(endPointSN.ChoiceTaskSla.get())));
-            }
-
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JSONParser parser = new JSONParser();
-            JSONObject resultJson = new JSONObject();
-            JSONArray ListSnChoiceJson = new JSONArray();
-
-            resultJson = (JSONObject) parser.parse(result);
-            if (resultJson.get("result") != null)
-                ListSnChoiceJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
-            ListSnChoiceJson.stream().forEach(snChoiceJson -> {
-                ObjectMapper objectMapper = new ObjectMapper();
-                objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-                SnChoice snChoice = new SnChoice();
-                try {
-                    snChoice = objectMapper.readValue(snChoiceJson.toString(), SnChoice.class);
-                    snChoices.add(snChoice);
-                    Choice choice = new Choice();
-                    choice.setElement(snChoice.getElement());
-                    choice.setLanguage(snChoice.getLanguage());
-                    choice.setName(snChoice.getName());
-                    choice.setLabel(snChoice.getLabel());
-                    choice.setIntegrationId(snChoice.getSys_id());
-                    choice.setValue(snChoice.getValue());
-                    choice.setInactive(snChoice.isInactive());
-                    choice.setName(snChoice.getName());
-                    choice.setSolver(snChoice.getU_Solver());
-                    choice.setSolverDependentValue(snChoice.getU_solver_dependent_value());
-                    String domainSysId = util.getIdByJson((JSONObject) snChoiceJson, SnTable.Domain.get(), app.Value());
-                    Domain domain = util.filterDomain(domains, domainSysId);
-                    if (domain != null)
-                        choice.setDomain(domain);
-
-                    String tagAction = app.CreateConsole();
-                    Choice exists = choiceService.findByIntegrationId(choice.getIntegrationId());
-                    if (exists != null) {
-                        choice.setId(exists.getId());
-                        tagAction = app.UpdateConsole();
-                    }
-                    choiceService.save(choice);
-                    util.printData(tag, count[0], tagAction.concat(util.getFieldDisplay(choice)), util.getFieldDisplay(domain));
-
-                    count[0] = count[0] + 1;
-                } catch (Exception e) {
-                    System.out.println(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-                }
-            });
-
-            apiResponse = mapper.readValue(result, APIResponse.class);
-            APIExecutionStatus status = new APIExecutionStatus();
-            status.setUri(endPointSN.Location());
-            status.setUserAPI(app.SNUser());
-            status.setPasswordAPI(app.SNPassword());
-            status.setError(apiResponse.getError());
-            status.setMessage(apiResponse.getMessage());
-            endTime = (System.currentTimeMillis() - startTime);
-            status.setExecutionTime(endTime);
-            statusService.save(status);
-            // }
-
-        } catch (Exception e) {
-            System.out.println(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
-        }
-        System.out.println(app.End());
-        return snChoices;
-    }*/
-
 }

@@ -1,4 +1,3 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.Contract;
@@ -20,7 +19,6 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/v1")
 public class ContractController {
-
     @Autowired
     private IContractService contractService;
 
@@ -53,7 +51,6 @@ public class ContractController {
 
     @GetMapping("/contract/{integrationId}")
     public ResponseEntity<?> show(@PathVariable String integrationId) {
-
         Contract contract = null;
         Map<String, Object> response = new HashMap<>();
 
@@ -95,7 +92,6 @@ public class ContractController {
     @Secured("ROLE_ADMIN")
     @PutMapping("/contract/{id}")
     public ResponseEntity<?> update(@RequestBody Contract contract, @PathVariable Long id) {
-
         Contract currentContract = contractService.findById(id);
         Contract contractUpdated = null;
 

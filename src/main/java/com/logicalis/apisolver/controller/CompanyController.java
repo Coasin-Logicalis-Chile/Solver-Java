@@ -1,10 +1,10 @@
-
 package com.logicalis.apisolver.controller;
 
 import com.logicalis.apisolver.model.Company;
 import com.logicalis.apisolver.model.enums.Errors;
 import com.logicalis.apisolver.model.enums.Messages;
 import com.logicalis.apisolver.services.ICompanyService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -19,22 +19,21 @@ import java.util.Map;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class CompanyController {
-
 	@Autowired
 	private ICompanyService companyService;
 	
 	@GetMapping("/companies")
 	public List<Company> index() {
+		log.info("Solicitud GET recibida en /companies");
 		return companyService.findAll();
 	}
 	
 	@GetMapping("/company/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
-		
 		Company company = null;
 		Map<String, Object> response = new HashMap<>();
-		
 		try{
 			company = companyService.findById(id);
 		} catch(DataAccessException e){
@@ -42,12 +41,10 @@ public class CompanyController {
 			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
-		
 		if(company == null){
 			response.put("mensaje", Messages.notExist.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-		
 		return new ResponseEntity<Company>(company, HttpStatus.OK);
 	}
 
@@ -55,7 +52,6 @@ public class CompanyController {
 	@PostMapping("/company")
 	public ResponseEntity<?> create(@RequestBody Company company) {
 		Company newCompany = null;
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			newCompany = companyService.save(company);
@@ -66,24 +62,19 @@ public class CompanyController {
 		}
 		response.put("mensaje", Messages.createOK.get());
 		response.put("company", newCompany);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@PutMapping("/company/{id}")
 	public ResponseEntity<?> update(@RequestBody Company company, @PathVariable Long id) {
-
 		Company currentCompany = companyService.findById(id);
 		Company companyUpdated = null;
-		
 		Map<String, Object> response = new HashMap<>();
-
 		if (currentCompany == null) {
 			response.put("mensaje",Errors.dataAccessExceptionUpdate.get(id.toString()));
 			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
 		}
-
 		try {
 			currentCompany.setName(company.getName());
 			companyUpdated = companyService.save(currentCompany);
@@ -95,14 +86,12 @@ public class CompanyController {
 		}
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("company", companyUpdated);
-
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
 	@Secured("ROLE_ADMIN")
 	@DeleteMapping("/company/{id}")
 	public ResponseEntity<?> delete(@PathVariable Long id) {
-
 		Map<String, Object> response = new HashMap<>();
 		try {
 			companyService.delete(id);
