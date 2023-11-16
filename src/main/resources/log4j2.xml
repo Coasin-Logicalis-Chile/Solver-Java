@@ -6,14 +6,28 @@
     <Appenders>
         <RollingFile name="file"
                      fileName="${filename}/solver.log"
-                     filePattern="${filename}/solver-%d{yyyy-MM-dd}.log">
+                     filePattern="${filename}/$${date:yyyy-MM}/solver-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss:SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
             </PatternLayout>
             <Policies>
+                <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
+                <!--
                 <TimeBasedTriggeringPolicy interval="1" modulate="true" />
-                <SizeBasedTriggeringPolicy size="10 MB" />
+                -->
+                <SizeBasedTriggeringPolicy size="250 MB" />
             </Policies>
+            <DefaultRolloverStrategy max="10">
+                <Delete basePath="${filename}" maxDepth="2">
+                    <IfFileName glob="*/solver-*.log.gz" />
+                    <IfLastModified age="P14D">
+                        <IfAny>
+                            <IfAccumulatedFileSize exceeds="4 GB" />
+                            <IfAccumulatedFileCount exceeds="16" />
+                        </IfAny>
+                    </IfLastModified>
+                </Delete>
+            </DefaultRolloverStrategy>
         </RollingFile>
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout

@@ -34,6 +34,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Objects;
 
 @Slf4j
 public class Rest {
@@ -55,24 +56,32 @@ public class Rest {
     }
 
     public String responseByEndPoint(final String endPoint) {
+        LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
         this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-        return this.restTemplate.getForObject(endPoint, String.class);
+        ResponseEntity<String> jsonResponse = restTemplate.getForEntity(endPoint, String.class);
+        String response = String.valueOf(jsonResponse);
+        LogSolver.insertResponse("SERVICENOW", endPoint, "GET", "", response, jsonResponse.getStatusCode(), "");
+        LogSolver.insertEndService("SERVICENOW", endPoint, "GET");
+        return response;
     }
 
-    public String responseByEndPoint(final String endPoint, JSONObject json) {
+    public String responseByEndPoint(String endPoint, JSONObject json) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        URI uri = null;
         try {
-            uri = new URI(endPoint);
+            endPoint = !Objects.isNull(endPoint)? endPoint: "";
+            URI uri = new URI(endPoint);
+            HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
+            LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
+            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", endPoint, "GET", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
+            LogSolver.insertEndService("SERVICENOW", endPoint, "GET");
+            return String.valueOf(jsonResponse);
         } catch (URISyntaxException e) {
             log.error("Context", e);
         }
-        HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-        ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
-
-        return String.valueOf(jsonResponse);
+        return "";
     }
 
     @Async
@@ -108,7 +117,10 @@ public class Rest {
             body.add("file", fileEntity);
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+            LogSolver.insertInitService("SERVICENOW", url, requestMethod.toString());
             ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", url, requestMethod.toString(), requestEntity.getBody().toString(), response.getBody(), response.getStatusCode(), headers.toString());
+            LogSolver.insertEndService("SERVICENOW", url, requestMethod.toString());
             log.info("file upload status code: " + response.getStatusCode());
 
         } catch (IOException | NoSuchFieldException | IllegalAccessException e) {
@@ -149,7 +161,10 @@ public class Rest {
             body.add("file", fileEntity);
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+            LogSolver.insertInitService("SERVICENOW", url, requestMethod.toString());
             ResponseEntity<String> responseEntity = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", url, requestMethod.toString(), requestEntity.getBody().toString(), responseEntity.getBody(), responseEntity.getStatusCode(), headers.toString());
+            LogSolver.insertEndService("SERVICENOW", url, requestMethod.toString());
             Gson gson = new Gson();
             JsonObject response = gson.fromJson(responseEntity.getBody(), JsonObject.class);
             JsonObject result = (JsonObject) response.get("result");
@@ -172,33 +187,38 @@ public class Rest {
     }
 
     public File responseFileByEndPointSOAsync(SnAttachment attachment, RestTemplate restTemplate, String attachmentDir) {
-        File file = restTemplate.execute(attachment.getDownload_link(), HttpMethod.GET, null, clientHttpResponse -> {
+        LogSolver.insertInitService("SERVICENOW",  attachment.getDownload_link(), HttpMethod.GET.toString());
+        ResponseEntity<File> responseEntity = restTemplate.execute(attachment.getDownload_link(), HttpMethod.GET, null, clientHttpResponse -> {
             File fileRest = new File(attachmentDir.concat(attachment.getSys_id().concat(".".concat(FilenameUtils.getExtension(attachment.getFile_name())))));
             StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(fileRest));
             log.info(fileRest.getAbsolutePath());
-            return fileRest;
+            return ResponseEntity.ok().body(fileRest);
         });
-        return file;
+        LogSolver.insertResponse("SERVICENOW", attachment.getDownload_link(), "GET", "", responseEntity.getBody().toString(), responseEntity.getStatusCode(),"");
+        LogSolver.insertEndService("SERVICENOW", attachment.getDownload_link(), HttpMethod.GET.toString());
+        return responseEntity.getBody();
     }
 
     @Async
     public File responseFileByEndPointSOAsync(Attachment attachment, RestTemplate restTemplate, String filePath) {
         String finalFilePath = generatePathDirectory(attachment, filePath);
-        File file = restTemplate.execute(attachment.getDownloadLinkSN(), HttpMethod.GET, null, clientHttpResponse -> {
+        LogSolver.insertInitService("SERVICENOW",  attachment.getDownloadLinkSN(), HttpMethod.GET.toString());
+        ResponseEntity<File> responseEntity = restTemplate.execute(attachment.getDownloadLinkSN(), HttpMethod.GET, null, clientHttpResponse -> {
             File fileRest = new File(finalFilePath);
             StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(fileRest));
             String tag = "[Attachment] ";
             log.info(tag.concat(fileRest.getAbsolutePath()));
-            return fileRest;
+            return ResponseEntity.ok().body(fileRest);
         });
-        return file;
+        LogSolver.insertResponse("SERVICENOW", attachment.getDownloadLinkSN(), "GET", "", responseEntity.getBody().toString(), responseEntity.getStatusCode(), "");
+        LogSolver.insertEndService("SERVICENOW", attachment.getDownloadLinkSN(), HttpMethod.GET.toString());
+        return responseEntity.getBody();
     }
 
     public String generatePathDirectory(Attachment attachment, String filePath) {
         try {
             filePath = getPathDirectory(attachment, filePath);
             Path path = Paths.get(filePath);
-
             File directory = new File(filePath);
             if (!directory.exists()) {
                 Files.createDirectories(path);
@@ -237,23 +257,25 @@ public class Rest {
             Files.createDirectories(path);
             log.info(path.toString());
             filePath = getFilePathDirectory(attachment, filePath);
-
         } catch (IOException e) {
             log.error("Context", e);
         }
         String finalFilePath = filePath;
-        File file = restTemplate.execute(attachment.getDownloadLinkSN(), HttpMethod.GET, null, clientHttpResponse -> {
+        LogSolver.insertInitService("SERVICENOW", attachment.getDownloadLinkSN(), HttpMethod.GET.toString());
+        ResponseEntity<File> responseEntity = restTemplate.execute(attachment.getDownloadLinkSN(), HttpMethod.GET, null, clientHttpResponse -> {
             log.info(finalFilePath);
             File fileRest = new File(finalFilePath);
             log.info(finalFilePath);
             StreamUtils.copy(clientHttpResponse.getBody(), new FileOutputStream(fileRest));
             log.info(fileRest.getAbsolutePath());
-            return fileRest;
+            return ResponseEntity.ok().body(fileRest);
         });
-        return file;
+        LogSolver.insertResponse("SERVICENOW", attachment.getDownloadLinkSN(), "GET", "", responseEntity.getBody().toString(), responseEntity.getStatusCode(), "");
+        LogSolver.insertEndService("SERVICENOW", attachment.getDownloadLinkSN(), HttpMethod.GET.toString());
+        return responseEntity.getBody();
     }
 
-    public Journal addJournal(final String endPoint, Journal journal) {
+    public Journal addJournal(String endPoint, Journal journal) {
         JournalRequest journalRequest = new JournalRequest();
         String createBy = "";
         if (journal.getCreateBy() != null)
@@ -264,134 +286,152 @@ public class Rest {
         journalRequest.setValue(!createBy.equals("") ? createBy.concat(": ").concat(journal.getValue()) : journal.getValue());
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        URI uri = null;
         try {
-            uri = new URI(endPoint);
+            endPoint = !Objects.isNull(endPoint)? endPoint: "";
+            URI uri = new URI(endPoint);
+            HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
+            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            LogSolver.insertInitService("SERVICENOW", endPoint, "POST");
+            ResponseEntity<String> responseEntity = restTemplate.postForEntity(uri, httpEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", endPoint, "POST", httpEntity.getBody().toString(), responseEntity.getBody(), responseEntity.getStatusCode(), httpEntity.getHeaders().toString());
+            LogSolver.insertEndService("SERVICENOW", endPoint, "POST");
+            journal.setCreatedOn(Util.parseJson(responseEntity.getBody(), "result", "sys_created_on"));
+            journal.setIntegrationId(Util.parseJson(responseEntity.getBody(), "result", "sys_id"));
         } catch (URISyntaxException e) {
             log.error("Context", e);
         }
-        HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-        String json = restTemplate.postForObject(uri, httpEntity, String.class);
-        journal.setCreatedOn(Util.parseJson(json, "result", "sys_created_on"));
-        journal.setIntegrationId(Util.parseJson(json, "result", "sys_id"));
         return journal;
     }
 
     @Async
-    public Incident putIncident(final String endPoint, Incident incident) {
+    public Incident putIncident(String endPoint, Incident incident) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        URI uri = null;
         try {
-            uri = new URI(endPoint);
+            endPoint = !Objects.isNull(endPoint)? endPoint: "";
+            URI uri = new URI(endPoint);
+            String strUri = !Objects.isNull(uri) ? uri.toString() : "";
+            JSONObject json = new JSONObject();
+            json.put("assignmentGroup", Util.isNullIntegration(incident.getAssignmentGroup()));
+            json.put("assignedTo", Util.isNullIntegration(incident.getAssignedTo()));
+            json.put("integrationId", incident.getIntegrationId());
+            json.put("description", incident.getDescription());
+            json.put("shortDescription", incident.getShortDescription());
+            json.put("closeNotes", incident.getCloseNotes());
+            json.put("closeCode", incident.getCloseCode());
+            json.put("resolvedAt", incident.getResolvedAt() != null && !incident.getResolvedAt().equals("") ? incident.getResolvedAt().replace("T", " ") : "");
+            json.put("resolvedBy", Util.isNullIntegration(incident.getResolvedBy()));
+            json.put("state", incident.getState());
+            json.put("incidentState", incident.getIncidentState());
+            json.put("impact", incident.getImpact());
+            json.put("urgency", incident.getUrgency());
+            json.put("priority", incident.getPriority());
+            json.put("knowledge", incident.getKnowledge());
+            json.put("reasonPending", incident.getReasonPending());
+            HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
+            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
+            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
+            LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
+            String search = "\"result\":";
+            if (jsonResponse.toString().contains(search)) {
+                String responseSplit = jsonResponse.toString().replaceAll(" ", "").split(search)[1];
+                responseSplit = "{\"result\":".concat(responseSplit.split("}}")[0]).concat("}}");
+                incident.setState(Util.parseJson(responseSplit, "result", "state"));
+            }
         } catch (URISyntaxException e) {
             log.error("Context", e);
-        }
-        JSONObject json = new JSONObject();
-        json.put("assignmentGroup", Util.isNullIntegration(incident.getAssignmentGroup()));
-        json.put("assignedTo", Util.isNullIntegration(incident.getAssignedTo()));
-        json.put("integrationId", incident.getIntegrationId());
-        json.put("description", incident.getDescription());
-        json.put("shortDescription", incident.getShortDescription());
-        json.put("closeNotes", incident.getCloseNotes());
-        json.put("closeCode", incident.getCloseCode());
-        json.put("resolvedAt", incident.getResolvedAt() != null && !incident.getResolvedAt().equals("") ? incident.getResolvedAt().replace("T", " ") : "");
-        json.put("resolvedBy", Util.isNullIntegration(incident.getResolvedBy()));
-        json.put("state", incident.getState());
-        json.put("incidentState", incident.getIncidentState());
-        json.put("impact", incident.getImpact());
-        json.put("urgency", incident.getUrgency());
-        json.put("priority", incident.getPriority());
-        json.put("knowledge", incident.getKnowledge());
-        json.put("reasonPending", incident.getReasonPending());
-        HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-        ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
-        String search = "\"result\":";
-        if (jsonResponse.toString().contains(search)) {
-            String responseSplit = jsonResponse.toString().replaceAll(" ", "").split(search)[1];
-            responseSplit = "{\"result\":".concat(responseSplit.split("}}")[0]).concat("}}");
-            incident.setState(Util.parseJson(responseSplit, "result", "state"));
         }
         return incident;
     }
 
-    public SysUser putSysUser(final String endPoint, SysUser sysUser) {
+    public SysUser putSysUser(String endPoint, SysUser sysUser) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        URI uri = null;
         try {
-            uri = new URI(endPoint);
+            endPoint = !Objects.isNull(endPoint)? endPoint: "";
+            URI uri = new URI(endPoint);
+            JSONObject json = new JSONObject();
+            json.put("code", sysUser.getCode());
+            json.put("integrationId", sysUser.getIntegrationId());
+            HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
+            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
+            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
+            LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
+            String search = "\"result\":";
+            if (jsonResponse.toString().contains(search)) {
+                String responseSplit = jsonResponse.toString();
+            }
         } catch (URISyntaxException e) {
             log.error("Context", e);
-        }
-        JSONObject json = new JSONObject();
-        json.put("code", sysUser.getCode());
-        json.put("integrationId", sysUser.getIntegrationId());
-        HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-        ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
-        String search = "\"result\":";
-        if (jsonResponse.toString().contains(search)) {
-            String responseSplit = jsonResponse.toString();
         }
         return sysUser;
     }
 
-    public ScRequestItem putScRequestItem(final String endPoint, ScRequestItem scRequestItem) {
+    public ScRequestItem putScRequestItem(String endPoint, ScRequestItem scRequestItem) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        URI uri = null;
         try {
-            uri = new URI(endPoint);
+            endPoint = !Objects.isNull(endPoint)? endPoint: "";
+            URI uri = new URI(endPoint);
+            String strUri = !Objects.isNull(uri) ? uri.toString() : "";
+            JSONObject json = new JSONObject();
+            json.put("assignmentGroup", scRequestItem.getAssignmentGroup().getIntegrationId());
+            json.put("assignedTo", scRequestItem.getAssignedTo().getIntegrationId());
+            json.put("integrationId", scRequestItem.getIntegrationId());
+            json.put("description", scRequestItem.getDescription());
+            json.put("short_description", scRequestItem.getShortDescription());
+            json.put("state", scRequestItem.getState());
+            HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
+            LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
+            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
+            LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
         } catch (URISyntaxException e) {
             log.error("Context", e);
         }
-        JSONObject json = new JSONObject();
-        json.put("assignmentGroup", scRequestItem.getAssignmentGroup().getIntegrationId());
-        json.put("assignedTo", scRequestItem.getAssignedTo().getIntegrationId());
-        json.put("integrationId", scRequestItem.getIntegrationId());
-        json.put("description", scRequestItem.getDescription());
-        json.put("short_description", scRequestItem.getShortDescription());
-        json.put("state", scRequestItem.getState());
-        HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-        ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
         return scRequestItem;
     }
 
-    public ScTask putScTask(final String endPoint, ScTask scTask) {
+    public ScTask putScTask(String endPoint, ScTask scTask) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        URI uri = null;
         try {
-            uri = new URI(endPoint);
+            endPoint = !Objects.isNull(endPoint)? endPoint: "";
+            URI uri = new URI(endPoint);
+            String strUri = !Objects.isNull(uri) ? uri.toString() : "";
+            JSONObject json = new JSONObject();
+            json.put("solverId",scTask.getId());
+            json.put("assignmentGroup", Util.isNullIntegration(scTask.getAssignmentGroup()));
+            json.put("assignedTo", Util.isNullIntegration(scTask.getAssignedTo()));
+            json.put("scalingAssignmentGroup", Util.isNullIntegration(scTask.getScalingAssignmentGroup()));
+            json.put("scalingAssignedTo", Util.isNullIntegration(scTask.getScalingAssignedTo()));
+            json.put("scaling", scTask.getScaling());
+            json.put("integrationId", scTask.getIntegrationId());
+            json.put("description", scTask.getDescription());
+            json.put("shortDescription", scTask.getShortDescription());
+            json.put("state", scTask.getState());
+            json.put("priority",scTask.getPriority());
+            json.put("closeNotes", scTask.getCloseNotes());
+            json.put("closedAt", scTask.getClosedAt() != null && !scTask.getClosedAt().equals("") ? scTask.getClosedAt().replace("T", " ") : "");
+            json.put("closedBy", Util.isNullIntegration(scTask.getClosedBy()));
+            json.put("reasonPending", scTask.getReasonPending());
+            HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
+            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
+            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody().toString(), jsonResponse.getStatusCode(), headers.toString() );
+            LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
+            String tag = "[ScTask]";
+            String tagAction = "(Update in ServiceNow)";
+            Util.printData(tag, tagAction, Util.getFieldDisplay(scTask), Util.getFieldDisplay(scTask.getAssignedTo()));
         } catch (URISyntaxException e) {
             log.error("Context", e);
         }
-        JSONObject json = new JSONObject();
-        json.put("solverId",scTask.getId());
-        json.put("assignmentGroup", Util.isNullIntegration(scTask.getAssignmentGroup()));
-        json.put("assignedTo", Util.isNullIntegration(scTask.getAssignedTo()));
-        json.put("scalingAssignmentGroup", Util.isNullIntegration(scTask.getScalingAssignmentGroup()));
-        json.put("scalingAssignedTo", Util.isNullIntegration(scTask.getScalingAssignedTo()));
-        json.put("scaling", scTask.getScaling());
-        json.put("integrationId", scTask.getIntegrationId());
-        json.put("description", scTask.getDescription());
-        json.put("shortDescription", scTask.getShortDescription());
-        json.put("state", scTask.getState());
-        json.put("priority",scTask.getPriority());
-        json.put("closeNotes", scTask.getCloseNotes());
-        json.put("closedAt", scTask.getClosedAt() != null && !scTask.getClosedAt().equals("") ? scTask.getClosedAt().replace("T", " ") : "");
-        json.put("closedBy", Util.isNullIntegration(scTask.getClosedBy()));
-        json.put("reasonPending", scTask.getReasonPending());
-        HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-        restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-        ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
-        String tag = "[ScTask]";
-        String tagAction = "(Update in ServiceNow)";
-        Util.printData(tag, tagAction, Util.getFieldDisplay(scTask), Util.getFieldDisplay(scTask.getAssignedTo()));
         return scTask;
     }
 }

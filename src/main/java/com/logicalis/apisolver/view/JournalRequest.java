@@ -1,5 +1,8 @@
 package com.logicalis.apisolver.view;
 
+import lombok.Data;
+
+@Data
 public class JournalRequest {
     private String element;
     private String element_id;
