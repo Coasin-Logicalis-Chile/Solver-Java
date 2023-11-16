@@ -8,7 +8,7 @@
                      fileName="${filename}/solver.log"
                      filePattern="${filename}/$${date:yyyy-MM}/solver-%d{yyyy-MM-dd}-%i.log.gz">
             <PatternLayout>
-                <pattern>%d{yyyy-MM-dd HH:mm:ss} [%t] %-5level %logger{36} - %msg%n</pattern>
+                <pattern>%d{yyyy-MM-dd HH:mm:ss:SSS} [%t] %-5level %logger{36} - %msg%n</pattern>
             </PatternLayout>
             <Policies>
                 <CronTriggeringPolicy schedule="0 0 0 * * ?"/>
