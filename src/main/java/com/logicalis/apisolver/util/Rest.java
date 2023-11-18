@@ -59,7 +59,7 @@ public class Rest {
         LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
         this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.getForEntity(endPoint, String.class);
-        String response = String.valueOf(jsonResponse);
+        String response = String.valueOf(jsonResponse.getBody());
         LogSolver.insertResponse("SERVICENOW", endPoint, "GET", "", response, jsonResponse.getStatusCode(), "");
         LogSolver.insertEndService("SERVICENOW", endPoint, "GET");
         return response;
