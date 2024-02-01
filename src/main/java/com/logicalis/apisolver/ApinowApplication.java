@@ -18,7 +18,7 @@ public class ApinowApplication {
 	}
 
 	/**
-	 * Metodo que imprime la informacion de memoria que inicia usando la aplicacion en el
+	 * Metodo que imprime la informacion de memoria que inicia usando la aplicación en el
 	 * contenedor.
 	 */
 	public static void printInfo() {

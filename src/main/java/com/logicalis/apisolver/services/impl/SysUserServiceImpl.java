@@ -47,7 +47,15 @@ public class SysUserServiceImpl implements ISysUserService, UserDetailsService {
                 .map(role -> new SimpleGrantedAuthority(role.getName()))
                 .collect(Collectors.toList());
 
-        return new User(userName, user.getPassword(), user.getActive(), true, true, true, authorities);
+        String password = user.getPassword();
+        // Revisa la ultima contraseña registrada de la compañia Scotiabank Chile
+        if (user.getCompany().getId() == 14){
+            String[] partes = user.getPassword().split("\\$2a\\$10\\$");
+            int cantidad = user.getPassword().split("\\$2a\\$10\\$").length - 1;
+            password = "$2a$10$"+partes[cantidad];
+        }
+
+        return new User(userName, password, user.getActive(), true, true, true, authorities);
     }
 
     @Override

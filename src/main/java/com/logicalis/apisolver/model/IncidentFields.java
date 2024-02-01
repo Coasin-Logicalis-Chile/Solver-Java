@@ -48,4 +48,6 @@ public interface IncidentFields {
     String getParent();
 
     String getUser_type();
+
+    String getBusiness_service();
 }
