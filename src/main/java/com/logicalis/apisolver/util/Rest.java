@@ -34,7 +34,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.Objects;
+import java.util.UUID;
+import java.time.format.DateTimeFormatter;
 
 @Slf4j
 public class Rest {
@@ -278,25 +283,74 @@ public class Rest {
     public Journal addJournal(String endPoint, Journal journal) {
         JournalRequest journalRequest = new JournalRequest();
         String createBy = "";
-        if (journal.getCreateBy() != null)
+
+        if (journal.getCreateBy() != null){
             createBy = journal.getCreateBy().getName();
+        }
         journalRequest.setElement(journal.getOrigin());
         journalRequest.setElement_id(journal.getElement());
         journalRequest.setName(journal.getName());
+
         journalRequest.setValue(!createBy.equals("") ? createBy.concat(": ").concat(journal.getValue()) : journal.getValue());
+
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
+        System.out.println("headers: "+headers);
+
         try {
             endPoint = !Objects.isNull(endPoint)? endPoint: "";
             URI uri = new URI(endPoint);
+
             HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
+
             restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             LogSolver.insertInitService("SERVICENOW", endPoint, "POST");
+
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(uri, httpEntity, String.class);
+
+            log.info("httpEntity: "+httpEntity);
+            log.info("httpEntity Body: "+httpEntity.getBody());
+
             LogSolver.insertResponse("SERVICENOW", endPoint, "POST", httpEntity.getBody().toString(), responseEntity.getBody(), responseEntity.getStatusCode(), httpEntity.getHeaders().toString());
             LogSolver.insertEndService("SERVICENOW", endPoint, "POST");
-            journal.setCreatedOn(Util.parseJson(responseEntity.getBody(), "result", "sys_created_on"));
-            journal.setIntegrationId(Util.parseJson(responseEntity.getBody(), "result", "sys_id"));
+
+            log.info("========================== Add Journal Info ==========================");
+            log.info("EndPoint: "+endPoint);
+            log.info("responseEntity: "+responseEntity);
+            log.info("responseEntity Body: "+responseEntity.getBody());
+            log.info("responseEntity Header: "+responseEntity.getHeaders());
+            log.info("responseEntity Header get Class: "+responseEntity.getClass());
+            log.info("responseEntity Header get Status code Value: "+responseEntity.getStatusCodeValue());
+            log.info("responseEntity Header get Status code: "+responseEntity.getStatusCode());
+
+            if (responseEntity.getBody() != null){
+                journal.setCreatedOn(Util.parseJson(responseEntity.getBody(), "result", "sys_created_on"));
+                journal.setIntegrationId(Util.parseJson(responseEntity.getBody(), "result", "sys_id"));
+            }else{
+
+
+                log.info("responseEntity.getBody() is Null ");
+
+
+                if (httpEntity.getBody().getSys_created_on() != null){
+                    journal.setCreatedOn(httpEntity.getBody().getSys_created_on());
+                }else{
+                    LocalDateTime fechaActual = LocalDateTime.now();
+                    DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+                    String fechaFormateada = fechaActual.format(formatter);
+                    //Date date = Date.from(fechaActual.atZone(ZoneId.systemDefault()).toInstant());
+                    journal.setCreatedOn(fechaFormateada);
+                }
+
+                if (httpEntity.getBody().getElement_id() != null){
+                    UUID uuid = UUID.randomUUID();
+                    String formattedUUID = uuid.toString().replace("-", "");
+                    log.info("UUID: "+ formattedUUID);
+                    journal.setIntegrationId(formattedUUID);
+                }
+
+            }
+
         } catch (URISyntaxException e) {
             log.error("Context", e);
         }
@@ -356,9 +410,16 @@ public class Rest {
             json.put("code", sysUser.getCode());
             json.put("integrationId", sysUser.getIntegrationId());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
+
             restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
             ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+
+            System.out.println("=========================");
+            System.out.println("Posible Null: "+httpEntity.getBody().toString());
+            System.out.println("=========================");
+
             LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
             String search = "\"result\":";

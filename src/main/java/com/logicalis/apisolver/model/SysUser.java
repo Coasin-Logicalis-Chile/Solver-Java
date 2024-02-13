@@ -6,6 +6,10 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.ZoneId;
 
 @Entity
 public class SysUser implements Serializable {
@@ -26,6 +30,8 @@ public class SysUser implements Serializable {
 
     //   @Column(nullable = false)
     private String name;
+
+    private Date date_update_password;
 
     @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(name = "sys_user_rol", joinColumns = @JoinColumn(name = "id_user"), inverseJoinColumns = @JoinColumn(name = "id_rol"), uniqueConstraints = {
@@ -71,16 +77,28 @@ public class SysUser implements Serializable {
     private String manager;
     @Column(columnDefinition = "boolean default false")
     private boolean locked;
-    @Column(columnDefinition = "varchar(255) default 'default'")
-    private String userType;
 
-    public String getUserType() {
+    /*@ManyToOne
+    @JoinColumn(name = "user_type", referencedColumnName = "id")
+    private UserType user_type;*/
+
+    @Column(columnDefinition = "int8 default 0")
+    private Long userType;
+
+
+    public Long getUserType() {
         return userType;
     }
 
-    public void setUserType(String userType) {
-        this.userType = userType;
+    public void setUserType(String nameUserType) {
+        this.userType = Long.valueOf(nameUserType);
     }
+
+    /*
+    public UserType getUserType() { return user_type;}
+
+    public void setUserType(UserType userType) { this.user_type =userType ; }
+    */
 
     public String getName() {
         return name;
@@ -103,12 +121,46 @@ public class SysUser implements Serializable {
         this.id = id;
     }
 
-    public String getPassword() {
-        return password;
+    private long CalculoTiempo(){
+        if (date_update_password != null){
+            LocalDateTime fechaEspecifica = date_update_password.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
+            LocalDateTime fechaActual = LocalDateTime.now();
+            System.out.println(fechaActual.toString());
+
+            Duration duracion = Duration.between(fechaEspecifica, fechaActual);
+
+            // La diferencia en días, horas, minutos y segundos
+            long dias = duracion.toDays();
+            //long horas = duracion.toHours() % 24;
+            //long minutos = duracion.toMinutes() % 60;
+            //long segundos = duracion.getSeconds() % 60;
+            return dias;
+
+        }else{
+            // Cambiar la contraseña para tener update
+            return 0;
+        }
     }
+
+    public String getPassword() { return password; }
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    // Revisa la caducidad de las contraseñas anteriores solo de la compañia Scotiabank Chile
+    public Boolean isPasswordExpired(long days_expiration){
+        long dayUpdate = CalculoTiempo();
+        if (dayUpdate >= days_expiration){ return true;
+        }else{  return false;  }
+    }
+
+    public Date getDateUpdatePassword() {
+        return date_update_password;
+    }
+
+    public void setdateUpdatePassword(Date date_update_password) {
+        this.date_update_password = date_update_password;
     }
 
     public String getEmail() {
@@ -291,4 +343,6 @@ public class SysUser implements Serializable {
      * es un atributo statico necesario
      */
     private static final long serialVersionUID = 1L;
+
+
 }

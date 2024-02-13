@@ -71,4 +71,4 @@ public enum Errors {
 
 	public abstract String get();
 	public abstract String get(String concat);
-} 
+}

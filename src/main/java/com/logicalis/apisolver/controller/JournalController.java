@@ -292,14 +292,18 @@ public class JournalController {
     @PostMapping("/journal")
     public ResponseEntity<?> create(@RequestBody String json) {
         log.info("Init creating Jornal");
+        log.info("json: "+ json);
         Map<String, Object> response = new HashMap<>();
         Journal addJournal = new Journal();
+
         try {
             Journal journal = new Journal();
+
             journal.setValue(Util.parseJson(json, "journal", "value"));
             journal.setOrigin(Util.parseJson(json, "journal", "origin"));
             journal.setName(Util.parseJson(json, "journal", "name"));
             journal.setElement(Util.parseJson(json, "journal", "element"));
+
             if (journal.getName().equals(SnTable.Incident.get())) {
                 Incident incident = incidentService.findByIntegrationId(journal.getElement());
                 if (incident != null) {
@@ -314,6 +318,12 @@ public class JournalController {
                 }
             }
             journal.setCreateBy(sysUserService.findById(Util.parseIdJson(json, "journal", "createBy")));
+
+            System.out.println("===================");
+            System.out.println(EndPointSN.PostJournal());
+            System.out.println(journal);
+            System.out.println("===================");
+
             addJournal = rest.addJournal(EndPointSN.PostJournal(), journal);
             log.info("Guardando Journal en la Base de Datos: {}", addJournal.getIntegrationId());
             journalService.save(addJournal);

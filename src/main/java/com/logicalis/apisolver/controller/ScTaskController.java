@@ -768,14 +768,29 @@ public class ScTaskController {
                                                                             @NotNull @RequestParam(value = "createdOnTo", required = true, defaultValue = "") String createdOnTo,
                                                                             String field,
                                                                             String direction) {
-        List<ScTask> list = new ArrayList<>();
-        Sort sort = direction.toUpperCase().equals("DESC") ? Sort.by(field).descending() : Sort.by(field).ascending();
+
+        log.info("========================== Find Paginated Request By Filters Info ==========================");
+
+        //Sort sort = direction.toUpperCase().equals("DESC") ? Sort.by(field).descending() : Sort.by(field).ascending();
+        Sort sort;
+        if(direction.toUpperCase().equals("DESC")){ sort = Sort.by(field).descending();
+        }else{ sort =  Sort.by(field).ascending(); }
+
+        if (field.toLowerCase().equals("created_on") || field.toLowerCase().equals("updated_on")){
+            if(direction.toUpperCase().equals("DESC")){ sort = Sort.by(field).ascending();
+            }else{ sort =  Sort.by(field).descending(); }
+        }
+
         Pageable pageRequest;
         if (size > 0) {
             pageRequest = PageRequest.of(page, size, sort);
         } else {
             pageRequest = SortedUnpaged.getInstance(sort);
         }
+
+        log.info(pageRequest.toString());
+        log.info("Field Criteria: "+field);
+
         Page<ScTaskFields> pageResult = scTaskService.findPaginatedScTasksByFilters(pageRequest, filter.toUpperCase(), assignedTo, company, state, openUnassigned, solved, scaling, scalingAssignedTo, assignedToGroup, closed, open, sysGroups, sysUsers, states, priorities, createdOnFrom, createdOnTo);
         ResponseEntity<Page<ScTaskFields>> pageResponseEntity = new ResponseEntity<>(pageResult, HttpStatus.OK);
         return pageResponseEntity;

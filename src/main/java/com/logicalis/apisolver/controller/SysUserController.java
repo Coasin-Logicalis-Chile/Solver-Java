@@ -22,6 +22,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.util.Date;
 import java.util.*;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
@@ -124,18 +127,59 @@ public class SysUserController {
         Map<String, Object> response = new HashMap<>();
         try {
             currentSysUser = sysUserService.findById(Util.parseIdJson(sysUserSolver.toString(), "params", "id"));
-            if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
-                 response.put("mensaje", Messages.PasswordFailed.get());
-                 response.put("repetida", true);
-                return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-            }else{
-                currentSysUser.setPassword(passwordEncoder.encode(Util.parseJson(sysUserSolver.toString(), "params", "password")));
+
+
+            if (currentSysUser.getCompany().getId() == 14){
+                String[] partes = currentSysUser.getPassword().split("\\$2a\\$10\\$");
+                int cantidad = partes.length - 1;
+
+                for (String parte : partes) {
+                    if (!parte.isEmpty()) {
+                        String passwordreset="$2a$10$"+parte;
+                        if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), passwordreset)){
+                            System.out.println("Reset");
+                            response.put("mensaje", Messages.PasswordFailed.get());
+                            response.put("repetida", true);
+                            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+                        }
+                    }
+                }
+                String password;
+                if (cantidad < 3){
+                    password = currentSysUser.getPassword().concat(passwordEncoder.encode(Util.parseJson(sysUserSolver.toString(), "params", "password")));
+                }else{
+                    password = "$2a$10$"+partes[cantidad-1]+"$2a$10$"+partes[cantidad] + passwordEncoder.encode(Util.parseJson(sysUserSolver.toString(), "params", "password"));
+                }
+
+                currentSysUser.setPassword(password);
+
+                LocalDateTime fechaActual = LocalDateTime.now();
+                Date date = Date.from(fechaActual.atZone(ZoneId.systemDefault()).toInstant());
+                currentSysUser.setdateUpdatePassword(date);
+
                 currentSysUser = sysUserService.save(currentSysUser);
                 response.put("mensaje", Messages.createOK.get());
                 response.put("repetida", false);
                 response.put("sysUser", currentSysUser);
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+
+
+            }else{
+                if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
+                    System.out.println("Reset");
+                    response.put("mensaje", Messages.PasswordFailed.get());
+                    response.put("repetida", true);
+                    return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+                }else{
+                    currentSysUser.setPassword(passwordEncoder.encode(Util.parseJson(sysUserSolver.toString(), "params", "password")));
+                    currentSysUser = sysUserService.save(currentSysUser);
+                    response.put("mensaje", Messages.createOK.get());
+                    response.put("repetida", false);
+                    response.put("sysUser", currentSysUser);
+                    return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
+                }
             }
+
         } catch (DataAccessException e) {
             response.put("mensaje", Errors.dataAccessExceptionInsert.get());
             response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
@@ -167,7 +211,9 @@ public class SysUserController {
             sysUser.setIntegrationId(sysUserRequest.getSys_id());
             sysUser.setVip(sysUserRequest.getVip());
             sysUser.setCode(sysUserRequest.getU_solver_code());
+
             sysUser.setUserType(sysUserRequest.getU_user_type());
+
             sysUser.setSolver(sysUserRequest.getU_solver());
             String pass = passwordEncoder.encode(sysUserRequest.getU_solver_password());
             sysUser.setPassword(pass);
@@ -242,7 +288,7 @@ public class SysUserController {
         Map<String, Object> response = new HashMap<>();
         SysUser sysUserCurrent = null;
         if (Objects.isNull(id)) {
-            response.put("mensaje", Errors.dataAccessExceptionUpdate.get(id.toString()));
+            response.put("mensaje", "Error: El registro con el id: no existe en la base de datos.");
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         try {
@@ -354,4 +400,5 @@ public class SysUserController {
         } else
             return null;
     }
+
 }

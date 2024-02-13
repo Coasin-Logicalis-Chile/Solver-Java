@@ -27,8 +27,8 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     ",      a.service_level AS service_level\n" +
     ",      a.specification_level AS specification_level\n" +
     ",      b.name AS assignment_group\n" +
-    ",      TO_CHAR(a.created_on, 'DD-MM-YYYY HH24:MI:SS') AS created_on\n" +
-    ",      TO_CHAR(a.updated_on, 'DD-MM-YYYY HH24:MI:SS') AS updated_on\n" +
+    ",      a.created_on AS created_on\n" +
+    ",      a.updated_on AS updated_on \n" +
     ",      h.name AS assigned_to \n" +
     ",      j.name AS caller\n" +
     ",      COALESCE(f.vip, false) AS vip\n" +
@@ -91,6 +91,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     "                     AND (a.created_on >= CAST(?17 AS timestamp) and a.created_on <= CAST(?18 AS timestamp)))) \n" +
     "         AND a.delete IS FALSE",nativeQuery = true)
 public Page<IncidentFields> findPaginatedIncidentsByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String incidentParent, String scRequestParent, String scRequestItemParent, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
+
 
     @Query(value = "SELECT a.id AS id,  \n" +
             "    a.number AS number,  \n" +
