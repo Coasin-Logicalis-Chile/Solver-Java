@@ -2,6 +2,7 @@ package com.logicalis.apisolver.model;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.List;
 
 @Entity
 public class Company implements Serializable {
@@ -19,6 +20,9 @@ public class Company implements Serializable {
     @OneToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "domain", referencedColumnName = "id")
     private Domain domain;
+
+    @Column(columnDefinition = "int8 default 0")
+    private Long password_expiration_days;
 
     public Domain getDomain() {
         return domain;
@@ -68,6 +72,16 @@ public class Company implements Serializable {
     public void setSolver(boolean solver) {
         this.solver = solver;
     }
+
+
+    public Long getPasswordExpirationDays() {
+        return password_expiration_days;
+    }
+
+    public void setPasswordExpirationDays(Long password_expiration_days) {
+        this.password_expiration_days = password_expiration_days;
+    }
+
 
     /**
      *

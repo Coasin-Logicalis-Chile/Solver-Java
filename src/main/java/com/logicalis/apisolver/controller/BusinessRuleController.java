@@ -4,6 +4,7 @@ import com.logicalis.apisolver.model.BusinessRule;
 import com.logicalis.apisolver.model.enums.Errors;
 import com.logicalis.apisolver.model.enums.Messages;
 import com.logicalis.apisolver.services.IBusinessRuleService;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
@@ -19,6 +20,7 @@ import java.util.Objects;
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
+@Slf4j
 public class BusinessRuleController {
 	@Autowired
 	private IBusinessRuleService businessRuleService;

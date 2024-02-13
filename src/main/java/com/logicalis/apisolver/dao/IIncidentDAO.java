@@ -14,7 +14,7 @@ import java.util.List;
 public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>, JpaSpecificationExecutor<Incident> {
     public Incident findTopByActive(boolean active);
 
-    @Query(value = "SELECT distinct a.id   AS id\n" +
+    @Query(value = "SELECT distinct a.id AS id\n" +
             ",      a.number AS number\n" +
             ",      a.short_description AS short_description\n" +
             ",      d.label  AS state\n" +
@@ -27,8 +27,9 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             ",      a.service_level AS service_level\n" +
             ",      a.specification_level AS specification_level\n" +
             ",      b.name AS assignment_group\n" +
-            ",      TO_CHAR(a.created_on, 'DD-MM-YYYY HH24:MI:SS') AS created_on\n" +
-            ",      TO_CHAR(a.updated_on, 'DD-MM-YYYY HH24:MI:SS') AS updated_on\n" +
+            ",	    COALESCE(k.name,'') AS business_service\n" +
+            ",      a.created_on AS created_on\n" +
+            ",      a.updated_on AS updated_on \n" +
             ",      h.name AS assigned_to \n" +
             ",      j.name AS caller\n" +
             ",      COALESCE(f.vip, false) AS vip\n" +
@@ -39,12 +40,13 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "FROM incident a \n" +
             "     INNER JOIN choice         d ON a.state            = d.value AND  d.name = 'incident' AND d.element = 'state' \n" +
             "     INNER JOIN choice         g ON a.incident_state   = g.value AND  g.name = 'incident' AND g.element = 'incident_state' \n" +
-            "     INNER join sys_group      b on  a.assignment_group=  b.id  and     b.active is TRUE \n" +
-            "     LEFT  OUTER JOIN choice   e ON a.priority         = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
-            "     LEFT  OUTER JOIN sys_user f ON a.task_for         = f.id \n" +
-            "     LEFT  OUTER JOIN sys_user h ON a.assigned_to      = h.id \n" +
-            "     LEFT  OUTER JOIN incident i ON a.incident_parent  = i.integration_id \n" +
-            "     LEFT  OUTER JOIN sys_user j ON a.caller           = j.id \n" +
+            "     INNER JOIN sys_group      b ON a.assignment_group = b.id    AND  b.active is TRUE \n" +
+            "     LEFT  OUTER JOIN ci_service k ON a.ci_service	      = k.id \n" +
+            "     LEFT  OUTER JOIN choice     e ON a.priority         = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
+            "     LEFT  OUTER JOIN sys_user   f ON a.task_for         = f.id \n" +
+            "     LEFT  OUTER JOIN sys_user   h ON a.assigned_to      = h.id \n" +
+            "     LEFT  OUTER JOIN incident   i ON a.incident_parent  = i.integration_id \n" +
+            "     LEFT  OUTER JOIN sys_user   j ON a.caller           = j.id \n" +
             "WHERE (  " +
             "              ?1= '' OR UPPER(a.number      \n" +
             "              || coalesce(a.short_description, '')    \n" +
@@ -57,6 +59,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "              || coalesce(a.service_level, '')    \n" +
             "              || coalesce(a.specification_level, '')    \n" +
             "              || coalesce(b.name, '')    \n" +
+            "    	       || coalesce(k.name, '')    \n" +
             "              || coalesce(h.name, '')    \n" +
             "              || a.integration_id ) like ?1)" +
             "         AND (?2 = 0   OR a.assigned_to = ?2) \n" +
@@ -92,7 +95,6 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
             "                     AND (a.created_on BETWEEN TO_DATE(?17,'YYYY-MM-DD') \n" +
             "                               AND TO_DATE(?18,'YYYY-MM-DD'))))\n" +
             "         AND a.delete IS FALSE",nativeQuery = true)
-
     public Page<IncidentFields> findPaginatedIncidentsByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String incidentParent, String scRequestParent, String scRequestItemParent, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
     @Query(value = "SELECT a.id AS id,  \n" +

@@ -11,6 +11,7 @@ import com.logicalis.apisolver.util.Rest;
 import com.logicalis.apisolver.util.Util;
 import com.logicalis.apisolver.view.IncidentRequest;
 import com.logicalis.apisolver.view.IncidentSolver;
+
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -19,6 +20,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -27,10 +30,7 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -123,15 +123,36 @@ public class IncidentController {
                                                                                 String field,
                                                                                 String direction) {
 
-        Sort sort = direction.toUpperCase().equals("DESC") ? Sort.by(field) : Sort.by(field).ascending();
-        Pageable pageRequest;
-        if (size > 0) {
-            pageRequest = PageRequest.of(page, size, sort);
-        } else {
-            pageRequest = SortedUnpaged.getInstance(sort);
+
+        log.info("========================== Find Paginated Incidents By Filters Info ==========================");
+
+        Sort sort;
+        if(direction.toUpperCase().equals("DESC")){ sort = Sort.by(field).descending();
+        }else{ sort =  Sort.by(field).ascending(); }
+
+        if (field.toLowerCase().equals("created_on") || field.toLowerCase().equals("updated_on")){
+            if(direction.toUpperCase().equals("DESC")){ sort = Sort.by(field).ascending();
+            }else{ sort =  Sort.by(field).descending(); }
         }
+
+        Pageable pageRequest;
+        if (size > 0) { pageRequest = PageRequest.of(page, size, sort);
+        } else { pageRequest = SortedUnpaged.getInstance(sort); }
+
+        log.info(pageRequest.toString());
+        log.info("Field Criteria: "+field);
+
         Page<IncidentFields> pageResult = incidentService.findPaginatedIncidentsByFilters(pageRequest, filter.toUpperCase(), assignedTo, company, state, openUnassigned, solved, incidentParent, scRequestParent, scRequestItemParent, assignedToGroup, closed, open, sysGroups, sysUsers, states, priorities, createdOnFrom, createdOnTo);
         ResponseEntity<Page<IncidentFields>> pageResponseEntity = new ResponseEntity<>(pageResult, HttpStatus.OK);
+
+        List<IncidentFields> contenido = pageResponseEntity.getBody().getContent();
+        log.debug("=============== Contenido ===============");
+        for (IncidentFields elemento : contenido) {
+            log.debug("sysInfo: "+ elemento.getNumber()+", "+elemento.getShort_description()+", "+elemento.getAssigned_to()+", "+elemento.getCategory()+", "+elemento.getId()+", "+elemento.getState()+","+elemento.getCreated_on()+", "+elemento.getUpdated_on());
+
+        }
+
+        log.info("=================================================================");
 
         return pageResponseEntity;
     }
@@ -296,7 +317,7 @@ public class IncidentController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         try {
-            log.info("Actualiz y estableciendo nuevos atributos, Incidente: {}", currentIncident.getNumber());
+            log.info("Actualizar y estableciendo nuevos atributos, Incidente: {}", currentIncident.getNumber());
             String levelOne = SnTable.Incident.get();
             SysUser assignedTo = getSysUserByIntegrationId(Util.parseJson(json, levelOne, Field.AssignedTo.get()));
             currentIncident.setAssignedTo(assignedTo);

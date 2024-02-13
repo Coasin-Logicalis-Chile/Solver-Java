@@ -47,6 +47,7 @@ public class SnSysUserController {
 
     @GetMapping("/sn_sys_users")
     public List<SnSysUser> show() {
+        System.out.println("Llego a esta Lista");
         log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
@@ -143,6 +144,7 @@ public class SnSysUserController {
 
     @GetMapping("/sn_sys_users_solver")
     public List<SnSysUser> show(boolean query) {
+        System.out.println("Llego a esta parte 2");
         log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
@@ -193,7 +195,9 @@ public class SnSysUserController {
                         sysUser[0].setVip(snSysUser[0].getVip());
                         sysUser[0].setSolver(snSysUser[0].getU_solver());
                         sysUser[0].setMobilePhone(snSysUser[0].getMobile_phone());
+
                         sysUser[0].setUserType(snSysUser[0].getU_user_type());
+
                         sysUser[0].setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", App.Value()));
                         domain[0] = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), App.Value());
                         if (domain[0] != null)
@@ -243,6 +247,7 @@ public class SnSysUserController {
     }
     @GetMapping("/snSyUsersSolverByQuery")
     public List<SnSysUser> show(String query) {
+        System.out.println("llego a esta parte 3");
         log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();

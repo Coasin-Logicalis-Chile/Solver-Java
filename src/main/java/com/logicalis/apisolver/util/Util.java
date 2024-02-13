@@ -91,12 +91,13 @@ public class Util {
 
     public static String parseJson(String journal, String levelOne, String levelTwo) {
         JSONParser parser = new JSONParser();
+
         try {
             return ((JSONObject) parser.parse(((JSONObject) parser.parse(journal)).get(levelOne).toString())).get(levelTwo).toString();
         } catch (ParseException e) {
             log.error("Context", e);
         }
-        return "";
+        return null;
     }
 
     public static String parseJson(String journal, String levelOne) {

@@ -26,8 +26,8 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
             "g.label AS priority,\n" +
             "i.name AS configuration_item,\n" +
             "d.name AS assignment_group,\n" +
-            "TO_CHAR(a.created_on, 'DD-MM-YYYY HH24:MI:SS') AS created_on,\n" +
-            "TO_CHAR(a.updated_on, 'DD-MM-YYYY HH24:MI:SS') AS updated_on,\n" +
+            "a.created_on AS created_on,\n" +
+            "a.updated_on AS updated_on, \n" +
             "k.name  AS assigned_to,\n" +
             "l.name  AS requested_for,\n" +
             "COALESCE(j.vip,false) AS vip,\n" +
