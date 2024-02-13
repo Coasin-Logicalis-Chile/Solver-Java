@@ -91,6 +91,9 @@ public class SnGroupController {
                     exists[0] = groupService.findByIntegrationId(group[0].getIntegrationId());
                     if (exists[0] != null) {
                         group[0].setId(exists[0].getId());
+                        if(exists[0].getActive() == false){
+                            group[0].setActive(false);
+                        }
                         tagAction[0] = App.UpdateConsole();
                     }
                     current[0] = groupService.save(group[0]);
