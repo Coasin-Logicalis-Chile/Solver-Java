@@ -27,6 +27,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     ",      a.service_level AS service_level\n" +
     ",      a.specification_level AS specification_level\n" +
     ",      b.name AS assignment_group\n" +
+    ",	    COALESCE(k.name,'') AS business_service\n" +
     ",      a.created_on AS created_on\n" +
     ",      a.updated_on AS updated_on \n" +
     ",      h.name AS assigned_to \n" +
@@ -40,6 +41,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     "     INNER JOIN choice         d ON a.state            = d.value AND  d.name = 'incident' AND d.element = 'state' \n" +
     "     INNER JOIN choice         g ON a.incident_state   = g.value AND  g.name = 'incident' AND g.element = 'incident_state' \n" +
     "     INNER join sys_group      b on  a.assignment_group=  b.id  and     b.active is TRUE \n" +
+    "     LEFT  OUTER JOIN ci_service k ON a.ci_service	      = k.id \n" +
     "     LEFT  OUTER JOIN choice   e ON a.priority         = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
     "     LEFT  OUTER JOIN sys_user f ON a.task_for         = f.id \n" +
     "     LEFT  OUTER JOIN sys_user h ON a.assigned_to      = h.id \n" +
@@ -57,6 +59,7 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     "              || coalesce(a.service_level, '')    \n" +
     "              || coalesce(a.specification_level, '')    \n" +
     "              || coalesce(b.name, '')    \n" +
+    "              || coalesce(k.name, '')    \n" +
     "              || coalesce(h.name, '')    \n" +
     "              || a.integration_id ) like ?1)" +
     "         AND (?2 = 0   OR a.assigned_to = ?2) \n" +
