@@ -14,88 +14,84 @@ import java.util.List;
 public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>, JpaSpecificationExecutor<Incident> {
     public Incident findTopByActive(boolean active);
 
-    @Query(value = "SELECT distinct a.id AS id\n" +
-            ",      a.number AS number\n" +
-            ",      a.short_description AS short_description\n" +
-            ",      d.label  AS state\n" +
-            ",      a.category AS category\n" +
-            ",      a.subcategory AS subcategory\n" +
-            ",      CAST(a.active AS varchar) AS active\n" +
-            ",      e.label AS priority\n" +
-            ",      a.ambite_level AS ambite_level\n" +
-            ",      a.platform_level AS platform_level\n" +
-            ",      a.service_level AS service_level\n" +
-            ",      a.specification_level AS specification_level\n" +
-            ",      b.name AS assignment_group\n" +
-            ",	    COALESCE(k.name,'') AS business_service\n" +
-            ",      a.created_on AS created_on\n" +
-            ",      a.updated_on AS updated_on \n" +
-            ",      h.name AS assigned_to \n" +
-            ",      j.name AS caller\n" +
-            ",      COALESCE(f.vip, false) AS vip\n" +
-            ",      a.incident_parent AS incident_parent\n" +
-            ",      a.count_parent AS count_parent\n" +
-            ",      f.user_type AS user_type\n" +
-            ",      COALESCE(i.number,'') as parent\n" +
-            "FROM incident a \n" +
-            "     INNER JOIN choice         d ON a.state            = d.value AND  d.name = 'incident' AND d.element = 'state' \n" +
-            "     INNER JOIN choice         g ON a.incident_state   = g.value AND  g.name = 'incident' AND g.element = 'incident_state' \n" +
-            "     INNER JOIN sys_group      b ON a.assignment_group = b.id    AND  b.active is TRUE \n" +
-            "     LEFT  OUTER JOIN ci_service k ON a.ci_service	      = k.id \n" +
-            "     LEFT  OUTER JOIN choice     e ON a.priority         = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
-            "     LEFT  OUTER JOIN sys_user   f ON a.task_for         = f.id \n" +
-            "     LEFT  OUTER JOIN sys_user   h ON a.assigned_to      = h.id \n" +
-            "     LEFT  OUTER JOIN incident   i ON a.incident_parent  = i.integration_id \n" +
-            "     LEFT  OUTER JOIN sys_user   j ON a.caller           = j.id \n" +
-            "WHERE (  " +
-            "              ?1= '' OR UPPER(a.number      \n" +
-            "              || coalesce(a.short_description, '')    \n" +
-            "              || coalesce(a.category, '')    \n" +
-            "              || coalesce(d.label, '')    \n" +
-            "              || coalesce(a.subcategory, '')    \n" +
-            "              || coalesce(e.label, '')    \n" +
-            "              || coalesce(a.ambite_level, '')    \n" +
-            "              || coalesce(a.platform_level, '')    \n" +
-            "              || coalesce(a.service_level, '')    \n" +
-            "              || coalesce(a.specification_level, '')    \n" +
-            "              || coalesce(b.name, '')    \n" +
-            "    	       || coalesce(k.name, '')    \n" +
-            "              || coalesce(h.name, '')    \n" +
-            "              || a.integration_id ) like ?1)" +
-            "         AND (?2 = 0   OR a.assigned_to = ?2) \n" +
-            "         AND (?3 = 0  OR a.company = ?3)       \n" +
-            "         AND (?4 = '' OR a.state = ?4)   \n" +
-            "         AND (?5 = false OR (a.assigned_to IS null \n" +
-            "                             AND UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%CANCELADO%'] )) )\n" +
-            "         AND (?6 = false OR UPPER(d.label) like '%RESUELTO%')  \n" +
-            "         AND (?7 = '' OR a.incident_parent = ?7)  \n" +
-            "         AND (?8 = '' OR a.sc_request_parent = ?8)  \n" +
-            "         AND (?9 = '' OR a.sc_request_item_parent = ?9) \n" +
-            "         AND ((?10 = 0 and exists ( select  'x' from sys_user_group c where  c.sys_group = a.assignment_group\n" +
-            "            and c.active is true)) or exists ( select 'x' \n" +
-            "               from   vw_user b \n" +
-            "             where  b.id  = a.assignment_group\n" +
-            "             AND    b.sys_user = ?10\n" +
-            "             and    b.company = a.company) ) \n" +
-            "         AND (?11 = false OR UPPER(d.label) like '%CERRADO%')        \n" +
-            "         AND (?12  = false OR (   UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%'] )\n" +
-            "                        AND UPPER(g.label) NOT LIKE '%RESUELTO%')) \n" +
-            "         AND ((COALESCE(?13) IS null) OR a.assignment_group IN (?13)) \n" +
-            "         AND ((COALESCE(?14) IS null) OR a.assigned_to IN (?14))  \n" +
-            "         AND ((COALESCE(?15) IS null) OR UPPER(d.label) IN (?15)) \n" +
-            "         AND ((COALESCE(?16) IS null) OR UPPER(e.label) IN (?16)) \n" +
-            "         AND ((?17 = '' AND ?18 = '' ) \n" +
-            "                     OR (?17 != '' AND ?18 = '' \n" +
-            "                     AND (a.created_on BETWEEN TO_DATE(?17,'YYYY-MM-DD')\n" +
-            "                                AND CURRENT_DATE)  ) \n" +
-            "                      OR (?17 = '' AND ?18 != ''  \n" +
-            "                      AND (a.created_on BETWEEN TO_DATE(('1900-01-01'),'YYYY-MM-DD') \n" +
-            "                               AND TO_DATE(?18,'YYYY-MM-DD')))\n" +
-            "                     OR (?17 != '' AND ?18 != '' \n" +
-            "                     AND (a.created_on BETWEEN TO_DATE(?17,'YYYY-MM-DD') \n" +
-            "                               AND TO_DATE(?18,'YYYY-MM-DD'))))\n" +
-            "         AND a.delete IS FALSE",nativeQuery = true)
-    public Page<IncidentFields> findPaginatedIncidentsByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String incidentParent, String scRequestParent, String scRequestItemParent, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
+    @Query(value = "SELECT distinct a.id   AS id\n" +
+    ",      a.number AS number\n" +
+    ",      a.short_description AS short_description\n" +
+    ",      d.label  AS state\n" +
+    ",      a.category AS category\n" +
+    ",      a.subcategory AS subcategory\n" +
+    ",      CAST(a.active AS varchar) AS active\n" +
+    ",      e.label AS priority\n" +
+    ",      a.ambite_level AS ambite_level\n" +
+    ",      a.platform_level AS platform_level\n" +
+    ",      a.service_level AS service_level\n" +
+    ",      a.specification_level AS specification_level\n" +
+    ",      b.name AS assignment_group\n" +
+    ",      a.created_on AS created_on\n" +
+    ",      a.updated_on AS updated_on \n" +
+    ",      h.name AS assigned_to \n" +
+    ",      j.name AS caller\n" +
+    ",      COALESCE(f.vip, false) AS vip\n" +
+    ",      a.incident_parent AS incident_parent\n" +
+    ",      a.count_parent AS count_parent\n" +
+    ",      f.user_type AS user_type\n" +
+    ",      COALESCE(i.number,'') as parent\n" +
+    "FROM incident a \n" +
+    "     INNER JOIN choice         d ON a.state            = d.value AND  d.name = 'incident' AND d.element = 'state' \n" +
+    "     INNER JOIN choice         g ON a.incident_state   = g.value AND  g.name = 'incident' AND g.element = 'incident_state' \n" +
+    "     INNER join sys_group      b on  a.assignment_group=  b.id  and     b.active is TRUE \n" +
+    "     LEFT  OUTER JOIN choice   e ON a.priority         = e.value AND  e.name = 'task' AND e.element = 'priority'\n" +
+    "     LEFT  OUTER JOIN sys_user f ON a.task_for         = f.id \n" +
+    "     LEFT  OUTER JOIN sys_user h ON a.assigned_to      = h.id \n" +
+    "     LEFT  OUTER JOIN incident i ON a.incident_parent  = i.integration_id \n" +
+    "     LEFT  OUTER JOIN sys_user j ON a.caller           = j.id \n" +
+    "WHERE (  " +
+    "              ?1= '' OR UPPER(a.number      \n" +
+    "              || coalesce(a.short_description, '')    \n" +
+    "              || coalesce(a.category, '')    \n" +
+    "              || coalesce(d.label, '')    \n" +
+    "              || coalesce(a.subcategory, '')    \n" +
+    "              || coalesce(e.label, '')    \n" +
+    "              || coalesce(a.ambite_level, '')    \n" +
+    "              || coalesce(a.platform_level, '')    \n" +
+    "              || coalesce(a.service_level, '')    \n" +
+    "              || coalesce(a.specification_level, '')    \n" +
+    "              || coalesce(b.name, '')    \n" +
+    "              || coalesce(h.name, '')    \n" +
+    "              || a.integration_id ) like ?1)" +
+    "         AND (?2 = 0   OR a.assigned_to = ?2) \n" +
+    "         AND (?3 = 0  OR a.company = ?3)       \n" +
+    "         AND (?4 = '' OR a.state = ?4)   \n" +
+    "         AND (?5 = false OR (a.assigned_to IS null \n" +
+    "                             AND UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%CANCELADO%'] )) )\n" +
+    "         AND (?6 = false OR UPPER(d.label) like '%RESUELTO%')  \n" +
+    "         AND (?7 = '' OR a.incident_parent = ?7)  \n" +
+    "         AND (?8 = '' OR a.sc_request_parent = ?8)  \n" +
+    "         AND (?9 = '' OR a.sc_request_item_parent = ?9) \n" +
+    "         AND ((?10 = 0 and exists ( select  'x' from sys_user_group c where  c.sys_group = a.assignment_group\n" +
+    "            and c.active is true)) or exists ( select 'x' \n" +
+    "               from   vw_user b \n" +
+    "             where  b.id  = a.assignment_group\n" +
+    "             AND    b.sys_user = ?10\n" +
+    "             and    b.company = a.company) ) \n" +
+    "         AND (?11 = false OR UPPER(d.label) like '%CERRADO%')        \n" +
+    "         AND (?12  = false OR (   UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%'] )\n" +
+    "                        AND UPPER(g.label) NOT LIKE '%RESUELTO%')) \n" +
+    "         AND ((COALESCE(?13) IS null) OR a.assignment_group IN (?13)) \n" +
+    "         AND ((COALESCE(?14) IS null) OR a.assigned_to IN (?14))  \n" +
+    "         AND ((COALESCE(?15) IS null) OR UPPER(d.label) IN (?15)) \n" +
+    "         AND ((COALESCE(?16) IS null) OR UPPER(e.label) IN (?16)) \n" +
+    "         AND ((?17 = '' AND ?18 = '' ) \n" +
+    "                     OR (?17 != '' AND ?18 = '' \n" +
+    "                     AND (a.created_on >= CAST(?17 AS timestamp)\n" +
+    "                                )) \n" +
+    "                      OR (?17 = '' AND ?18 != ''  \n" +
+    "                      AND (a.created_on <= CAST(?18 AS timestamp) and CAST(?18 AS timestamp) >= '1900-01-01')) \n" +
+    "                     OR (?17 != '' AND ?18 != '' \n" +
+    "                     AND (a.created_on >= CAST(?17 AS timestamp) and a.created_on <= CAST(?18 AS timestamp)))) \n" +
+    "         AND a.delete IS FALSE",nativeQuery = true)
+public Page<IncidentFields> findPaginatedIncidentsByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, String incidentParent, String scRequestParent, String scRequestItemParent, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
+
 
     @Query(value = "SELECT a.id AS id,  \n" +
             "    a.number AS number,  \n" +

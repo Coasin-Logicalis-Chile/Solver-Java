@@ -34,4 +34,8 @@ public interface ScTaskFields {
     String getRequested_for();
 
     String getUser_type();
+
+    String getOpened_by();
+
+    String getClosed_at();
 }
