@@ -101,6 +101,7 @@ public class SnAttachmentController {
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
             statusService.save(status);
+
         } catch (Exception e) {
             log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }
@@ -140,20 +141,27 @@ public class SnAttachmentController {
             } catch (IOException e) {
                 log.error(tag.concat("/snAttachment/{id} IOException (I) : ").concat(String.valueOf(e)));
             }
+
             endTime = (System.currentTimeMillis() - startTime);
             HttpHeaders headers = new HttpHeaders();
             headers.add("Content-Disposition", "attachmentResource");
-
             ObjectMapper mapper = new ObjectMapper();
+
+            // ERROR DE MANERA LOCAL  DESDE AQUI =====================
             apiResponse = mapper.readValue("End process", APIResponse.class);
+
             APIExecutionStatus status = new APIExecutionStatus();
             status.setUri(EndPointSN.Attachment().concat(attachment.getIntegrationId()));
+
             status.setUserAPI(App.SNUser());
             status.setPasswordAPI(App.SNPassword());
             status.setError(apiResponse.getError());
+
             status.setMessage(apiResponse.getMessage());
             status.setExecutionTime(endTime);
             statusService.save(status);
+
+
         } catch (Exception e) {
             log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
         }

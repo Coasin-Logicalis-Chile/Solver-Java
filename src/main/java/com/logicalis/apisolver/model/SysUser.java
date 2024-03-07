@@ -90,15 +90,15 @@ public class SysUser implements Serializable {
         return userType;
     }
 
+    /*
     public void setUserType(String nameUserType) {
         this.userType = Long.valueOf(nameUserType);
     }
-
-    /*
-    public UserType getUserType() { return user_type;}
-
-    public void setUserType(UserType userType) { this.user_type =userType ; }
     */
+
+
+    public void setUserType(Long userType) { this.userType = userType ; }
+
 
     public String getName() {
         return name;
@@ -122,13 +122,11 @@ public class SysUser implements Serializable {
     }
 
     private long CalculoTiempo(){
+
         if (date_update_password != null){
             LocalDateTime fechaEspecifica = date_update_password.toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             LocalDateTime fechaActual = LocalDateTime.now();
-            System.out.println(fechaActual.toString());
-
             Duration duracion = Duration.between(fechaEspecifica, fechaActual);
-
             // La diferencia en días, horas, minutos y segundos
             long dias = duracion.toDays();
             //long horas = duracion.toHours() % 24;
@@ -137,8 +135,7 @@ public class SysUser implements Serializable {
             return dias;
 
         }else{
-            // Cambiar la contraseña para tener update
-            return 0;
+            return 0; // Cambiar la contraseña para tener update
         }
     }
 

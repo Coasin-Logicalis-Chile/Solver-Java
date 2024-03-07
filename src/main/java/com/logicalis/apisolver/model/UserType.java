@@ -3,7 +3,6 @@ package com.logicalis.apisolver.model;
 import javax.persistence.*;
 import java.io.Serializable;
 @Entity
-@Table(name = "user_type")
 public class UserType implements Serializable {
 
     @Id

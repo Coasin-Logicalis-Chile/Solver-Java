@@ -42,10 +42,11 @@ public class DomainServiceImpl implements IDomainService {
 		return null;
 	}
 
+	@Override
+	public Domain findTopByActive(boolean active) {	return (Domain) dao.findTopByActive(active); }
 
 	@Override
 	public Domain findByIntegrationId(String integrationId) { return dao.findByIntegrationId(integrationId); }
-	@Override
-	public Domain findTopByActive(boolean active) {	return (Domain) dao.findTopByActive(active);	}
+
 
 }

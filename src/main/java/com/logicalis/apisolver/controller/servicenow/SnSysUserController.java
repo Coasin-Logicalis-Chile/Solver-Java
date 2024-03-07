@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.logicalis.apisolver.model.UserType;
+import com.logicalis.apisolver.services.IUserTypeService;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
@@ -44,6 +47,8 @@ public class SnSysUserController {
     private IDepartmentService departmentService;
     @Autowired
     private Rest rest;
+    @Autowired
+    private  IUserTypeService userTypeService;
 
     @GetMapping("/sn_sys_users")
     public List<SnSysUser> show() {
@@ -144,7 +149,10 @@ public class SnSysUserController {
 
     @GetMapping("/sn_sys_users_solver")
     public List<SnSysUser> show(boolean query) {
-        System.out.println("Llego a esta parte 2");
+
+        List<UserType> allUserType =userTypeService.findAll();
+
+
         log.info(App.Start());
         APIResponse apiResponse = null;
         List<SnSysUser> snSysUsers = new ArrayList<>();
@@ -155,6 +163,7 @@ public class SnSysUserController {
         try {
             startTime = System.currentTimeMillis();
             final int[] count = {1};
+
             String result;
             ObjectMapper mapper = new ObjectMapper();
             mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
@@ -171,6 +180,7 @@ public class SnSysUserController {
             final SysUser[] exists = new SysUser[1];
             APIExecutionStatus status = new APIExecutionStatus();
             for (String sparmOffSet : sparmOffSets) {
+
                 result = rest.responseByEndPoint(EndPointSN.SysUser().concat(sparmOffSet));
                 log.info(tag.concat("(".concat(EndPointSN.SysUser().concat(sparmOffSet)).concat(")")));
                 resultJson = (JSONObject) parser.parse(result);
@@ -196,7 +206,26 @@ public class SnSysUserController {
                         sysUser[0].setSolver(snSysUser[0].getU_solver());
                         sysUser[0].setMobilePhone(snSysUser[0].getMobile_phone());
 
-                        sysUser[0].setUserType(snSysUser[0].getU_user_type());
+                        boolean condicionCumplidaTipoUsuario = false;
+
+                        for (UserType userT : allUserType){
+
+                            if (snSysUser[0].getU_user_type() == null){
+                                sysUser[0].setUserType(0L);
+                                condicionCumplidaTipoUsuario = true;
+                                break;
+                            }
+
+                            if (userT.getName().toLowerCase().equals(snSysUser[0].getU_user_type().toLowerCase())){
+                                sysUser[0].setUserType(userT.getId());
+                                condicionCumplidaTipoUsuario = true;
+                                break;
+                            }
+                        }
+                        // En caso no coincida con ninguno de los tipos de variables que estan en la tabla se asignara "0" - No asignado
+                        if (!condicionCumplidaTipoUsuario) {
+                            sysUser[0].setUserType(0L);
+                        }
 
                         sysUser[0].setManager(getIntegrationId((JSONObject) snSysUserJson, "manager", App.Value()));
                         domain[0] = getDomainByIntegrationId((JSONObject) snSysUserJson, SnTable.Domain.get(), App.Value());
