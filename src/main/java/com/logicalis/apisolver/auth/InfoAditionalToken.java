@@ -29,7 +29,7 @@ public class InfoAditionalToken implements TokenEnhancer {
 
         SysUser  user  = sysUserService.findByEmailAndSolver(oAuth2Authentication.getName(), true);
 
-        if (user.getCompany().getId() == 14 && user.getCompany().getPasswordExpirationDays() != null && user.isPasswordExpired(user.getCompany().getPasswordExpirationDays())) {
+        if (user.getCompany().getPasswordExpiration() && user.getCompany().getPasswordExpirationDays() != null && user.isPasswordExpired(user.getCompany().getPasswordExpirationDays())) {
 
             log.info("Password expiration, please change password");
 

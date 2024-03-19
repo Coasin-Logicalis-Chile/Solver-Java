@@ -133,7 +133,7 @@ public class SysUserController {
         try {
             currentSysUser = sysUserService.findById(Util.parseIdJson(sysUserSolver.toString(), "params", "id"));
 
-            if (currentSysUser.getCompany().getId() == 14){
+            if (currentSysUser.getCompany().getPasswordExpiration()){
                 String[] partes = currentSysUser.getPassword().split("\\$2a\\$10\\$");
                 int cantidad = partes.length - 1;
 
@@ -169,8 +169,13 @@ public class SysUserController {
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 
             }else{
-                if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
-                    System.out.println("Reset");
+
+                String[] partes = currentSysUser.getPassword().split("\\$2a\\$10\\$");
+                int cantidad = partes.length - 1;
+                String lastPassword = "$2a$10$"+partes[cantidad];
+
+                if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), lastPassword)){
+                    log.info("Password Actual, insertar una contraseña diferente");
                     response.put("mensaje", Messages.PasswordFailed.get());
                     response.put("repetida", true);
                     return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
