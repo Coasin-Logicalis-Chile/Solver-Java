@@ -25,16 +25,20 @@ import org.springframework.security.oauth2.provider.token.store.redis.RedisToken
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
+    /*
     @Bean
     public TokenStore tokenStore(RedisConnectionFactory redisConnectionFactory) {
         return new RedisTokenStore(redisConnectionFactory);
     }
+    */
 
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
 
+    /*
     @Autowired
     private TokenStore tokenStore;
+    */
 
     @Autowired
     @Qualifier("authenticationManager")
@@ -46,7 +50,8 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Override
     public void configure(AuthorizationServerSecurityConfigurer security) throws Exception {
 
-        security.tokenKeyAccess("permitAll()").checkTokenAccess("isAuthenticated()");
+        security.tokenKeyAccess("permitAll()")
+                .checkTokenAccess("isAuthenticated()");
     }
 
     @Override
@@ -67,15 +72,15 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         tokenEnhancerChain.setTokenEnhancers(Arrays.asList(infoAditionalToken, accessTokenConverter()));
 
         endpoints.authenticationManager(authenticationManager)
-                .tokenStore(tokenStore)
+                .tokenStore(tokenStore())
                 .accessTokenConverter(accessTokenConverter())
                 .tokenEnhancer(tokenEnhancerChain);
     }
 
-    /*@Bean
+    @Bean
     public JwtTokenStore tokenStore() {
         return new JwtTokenStore(accessTokenConverter());
-    }*/
+    }
 
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {
