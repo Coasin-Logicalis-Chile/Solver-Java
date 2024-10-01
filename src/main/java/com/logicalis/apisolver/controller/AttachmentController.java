@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
 import com.logicalis.apisolver.model.*;
 import com.logicalis.apisolver.model.enums.*;
 import com.logicalis.apisolver.model.utilities.AttachmentInfo;
@@ -745,28 +746,41 @@ public class AttachmentController {
             element = element.split(",")[0];
             String tag = "[Attachment] ";
             String tagAction = App.CreateConsole();
+
             if (!file.isEmpty() && element != null) {
+
                 Attachment current = new Attachment();
                 Attachment attachment;
+
                 String filename = file.getOriginalFilename();
+
                 current.setExtension(".".concat(FilenameUtils.getExtension(filename)));
                 current.setFileName(filename);
                 current.setElement(element);
                 current.setOrigin(type);
+
+                // Para actulizar la misma instancia se debe realizar un cambio al varializar "attachmentService"
                 attachmentService.save(current);
+
                 log.info("Archivo guardado en la base de datos: {}",  current.getFileName());
                 Util.printData(tag, tagAction.concat("BD"), Util.getFieldDisplay(current), current.getElement());
+
                 attachment = rest.sendFileToServiceNow(element, file, type, file.getOriginalFilename());
-                if (!Objects.isNull(attachment))
+                if (!Objects.isNull(attachment)){
                     Util.printData(tag, tagAction.concat("(ServiceNow)"), Util.getFieldDisplay(current), current.getElement());
+                }
+
                 attachment.setId(current.getId());
                 attachment.setExtension(current.getExtension());
                 attachment.setFileName(current.getFileName());
                 attachment.setElement(current.getElement());
                 attachment.setOrigin(current.getOrigin());
+
                 Domain domain = domainService.findByIntegrationId(attachment.getDomain().getIntegrationId());
                 attachment.setDomain(domain);
+
                 String pathDirectory = rest.generatePathDirectory(attachment, environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
+
                 InputStream initialStream = file.getInputStream();
                 byte[] buffer = new byte[initialStream.available()];
                 int count = initialStream.read(buffer);
@@ -779,10 +793,13 @@ public class AttachmentController {
                         attachment.setDownloadLink(pathDirectory);
                     }
                 }
+
                 tagAction = App.UpdateConsole();
                 attachmentService.save(attachment);
+
                 Util.printData(tag, tagAction.concat("(BD)"), Util.getFieldDisplay(attachment), attachment.getElement());
             }
+
         } catch (DataAccessException | IOException e) {
             response.put("mensaje", "Error upload attachment");
             response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));

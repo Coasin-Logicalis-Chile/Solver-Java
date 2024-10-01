@@ -17,12 +17,24 @@ import org.springframework.security.oauth2.provider.token.store.JwtTokenStore;
 
 import java.util.Arrays;
 
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.security.oauth2.provider.token.TokenStore;
+import org.springframework.security.oauth2.provider.token.store.redis.RedisTokenStore;
+
 @Configuration
 @EnableAuthorizationServer
 public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdapter {
 
+    @Bean
+    public TokenStore tokenStore(RedisConnectionFactory redisConnectionFactory) {
+        return new RedisTokenStore(redisConnectionFactory);
+    }
+
     @Autowired
     private BCryptPasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TokenStore tokenStore;
 
     @Autowired
     @Qualifier("authenticationManager")
@@ -55,15 +67,15 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
         tokenEnhancerChain.setTokenEnhancers(Arrays.asList(infoAditionalToken, accessTokenConverter()));
 
         endpoints.authenticationManager(authenticationManager)
-                .tokenStore(tokenStore())
+                .tokenStore(tokenStore)
                 .accessTokenConverter(accessTokenConverter())
                 .tokenEnhancer(tokenEnhancerChain);
     }
 
-    @Bean
+    /*@Bean
     public JwtTokenStore tokenStore() {
         return new JwtTokenStore(accessTokenConverter());
-    }
+    }*/
 
     @Bean
     public JwtAccessTokenConverter accessTokenConverter() {

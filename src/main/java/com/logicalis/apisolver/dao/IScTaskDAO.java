@@ -77,16 +77,27 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
     "AND e.active IS TRUE", nativeQuery = true)
 public Page<ScTaskFields> findPaginatedScTasksByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
-    @Query(value = "SELECT DISTINCT a.id AS id ,a.anumber AS number,a.short_description AS short_description\n" +
-            " ,a.flabel AS state ,a.bnumber AS request ,a.cnumber AS request_item,a.hname AS business_service\n" +
-            " ,a.dactive AS active,a.glabel AS priority ,a.iname AS configuration_item,a.dname AS assignment_group\n" +
-            " ,TO_CHAR(a.created_on, 'DD-MM-YYYY HH24:MI:SS') AS created_on\n" +
-            " ,TO_CHAR(a.updated_on, 'DD-MM-YYYY HH24:MI:SS') AS updated_on\n" +
-            " ,a.kname  AS assigned_to,a.lname  AS requested_for ,COALESCE(a.vip,false) AS vip,a.juser_type AS user_type \n" +
+    @Query(value = "SELECT DISTINCT a.id AS id,\n" +
+            "a.anumber AS number,\n" +
+            "a.short_description AS short_description,\n" +
+            "a.flabel AS state,\n" +
+            "a.bnumber AS request ,\n" +
+            "a.cnumber AS request_item,\n" +
+            "a.hname AS business_service,\n" +
+            "a.dactive AS active,\n" +
+            "a.glabel AS priority,\n" +
+            "a.iname AS configuration_item,\n" +
+            "a.dname AS assignment_group,\n" +
+            "a.created_on AS created_on,\n" +
+            "a.updated_on AS updated_on,\n" +
+            "a.kname  AS assigned_to,\n" +
+            "a.lname  AS requested_for,\n" +
+            "COALESCE(a.vip,false) AS vip,\n" +
+            "a.juser_type AS user_type \n" +
             "FROM view_request a \n" +
             "     INNER JOIN sys_group      d ON a.assignment_group = d.id \n" +
             "     INNER JOIN sys_user_group e ON e.sys_group        = d.id \n" +
-            "WHERE ('' = '' OR UPPER(a.number     \n" +
+            "WHERE (?1 = '' OR UPPER(a.number     \n" +
             "              || coalesce(a.short_description, '')     \n" +
             "              || coalesce(a.integration_id, '')     \n" +
             "              || coalesce(a.flabel, '')     \n" +
@@ -98,21 +109,16 @@ public Page<ScTaskFields> findPaginatedScTasksByFilters(Pageable pageRequest, St
             "              || coalesce(a.kname, '')     \n" +
             "              || coalesce(a.glabel, '')) like ?1)\n" +
             "              AND (?2 = 0 OR a.company = ?2)\n" +
-            "              AND (?3 = 0 OR (a.scaling_assignment_group IN (SELECT sys_group \n" +
-            "                                        FROM sys_user_group \n" +
+            "              AND (?3 = 0 OR (a.scaling_assignment_group IN (SELECT sys_group FROM sys_user_group \n" +
             "                                        WHERE sys_user = ?3)))\n" +
             "              AND ((COALESCE(?4, '') = '') OR a.assignment_group IN (?4))\n" +
             "              AND ((COALESCE(?5, '') = '') OR a.assigned_to IN (?5))\n" +
-            "              AND ((COALESCE(?6, '') = '') OR UPPER(a.flabel) IN (?7))\n" +
+            "              AND ((COALESCE(?6, '') = '') OR UPPER(a.flabel) IN (?6))\n" +
             "              AND ((COALESCE(?7, '') = '') OR UPPER(a.glabel) IN (?7))\n" +
-            "              AND ((?8 = '' AND ?9 = '' ) OR (?8 != '' AND ?9 = '' \n" +
-            "                                             AND (a.created_on BETWEEN TO_TIMESTAMP(?8,'YYYY-MM-DD HH24:MI:SS') \n" +
-            "                                             AND TO_TIMESTAMP((CURRENT_DATE || ' 23:59:59'),'YYYY-MM-DD HH24:MI:SS'))) \n" +
-            "                                          OR (?8 = '' AND ?9 != ''  \n" +
-            "                                              AND (a.created_on BETWEEN TO_TIMESTAMP(('1900-01-01 00:00:00'),'YYYY-MM-DD HH24:MI:SS') \n" +
-            "                                              AND TO_TIMESTAMP(?9,'YYYY-MM-DD HH24:MI:SS'))) \n" +
-            "                                          OR (?8 != '' AND ?9 != ''  AND (a.created_on BETWEEN TO_TIMESTAMP(?8,'YYYY-MM-DD HH24:MI:SS') \n" +
-            "                                              AND TO_TIMESTAMP(?9,'YYYY-MM-DD HH24:MI:SS')))) \n" +
+            "               AND ((?8 = '' AND ?9 = '') OR \n" +
+            "                   (?8 != '' AND ?9 = '' AND a.created_on >= TO_TIMESTAMP(?8,'YYYY-MM-DD HH24:MI:SS') AND a.created_on <= TO_TIMESTAMP((CURRENT_DATE || ' 23:59:59'),'YYYY-MM-DD HH24:MI:SS')) OR \n" +
+            "                   (?8 = '' AND ?9 != '' AND a.created_on >= TO_TIMESTAMP(('1900-01-01 00:00:00'),'YYYY-MM-DD HH24:MI:SS') AND a.created_on <= TO_TIMESTAMP(?9,'YYYY-MM-DD HH24:MI:SS')) OR \n" +
+            "                   (?8 != '' AND ?9 != '' AND a.created_on BETWEEN TO_TIMESTAMP(?8,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?9,'YYYY-MM-DD HH24:MI:SS'))) \n" +
             "              AND a.scaling IS TRUE \n" +
             "              AND a.aactive IS TRUE \n" +
             "              AND UPPER(a.state) NOT LIKE '%RESUELTO%' \n" +

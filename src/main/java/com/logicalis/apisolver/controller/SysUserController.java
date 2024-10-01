@@ -21,6 +21,9 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 
+import com.logicalis.apisolver.model.UserType;
+import com.logicalis.apisolver.services.IUserTypeService;
+
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -44,6 +47,8 @@ public class SysUserController {
     private BCryptPasswordEncoder passwordEncoder;
     @Autowired
     private Rest rest;
+    @Autowired
+    private  IUserTypeService userTypeService;
 
     @GetMapping("/sysUsers")
     public List<SysUser> index() {
@@ -128,16 +133,16 @@ public class SysUserController {
         try {
             currentSysUser = sysUserService.findById(Util.parseIdJson(sysUserSolver.toString(), "params", "id"));
 
-
-            if (currentSysUser.getCompany().getId() == 14){
+            if (currentSysUser.getCompany().getPasswordExpiration()){
                 String[] partes = currentSysUser.getPassword().split("\\$2a\\$10\\$");
                 int cantidad = partes.length - 1;
 
+                // Validación de que no se repita las contraseñas
                 for (String parte : partes) {
                     if (!parte.isEmpty()) {
                         String passwordreset="$2a$10$"+parte;
                         if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), passwordreset)){
-                            System.out.println("Reset");
+                            log.info("Password repetida, Response Fallido");
                             response.put("mensaje", Messages.PasswordFailed.get());
                             response.put("repetida", true);
                             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
@@ -163,10 +168,14 @@ public class SysUserController {
                 response.put("sysUser", currentSysUser);
                 return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 
-
             }else{
-                if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), currentSysUser.getPassword())){
-                    System.out.println("Reset");
+
+                String[] partes = currentSysUser.getPassword().split("\\$2a\\$10\\$");
+                int cantidad = partes.length - 1;
+                String lastPassword = "$2a$10$"+partes[cantidad];
+
+                if(passwordEncoder.matches(Util.parseJson(sysUserSolver.toString(), "params", "password"), lastPassword)){
+                    log.info("Password Actual, insertar una contraseña diferente");
                     response.put("mensaje", Messages.PasswordFailed.get());
                     response.put("repetida", true);
                     return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
@@ -190,6 +199,9 @@ public class SysUserController {
     @PutMapping("/sysUserSN")
     public ResponseEntity<?> update(@RequestBody SysUserRequest sysUserRequest) {
         SysUser currentSysUser = new SysUser();
+        List<UserType> allUserType =userTypeService.findAll();
+        boolean condicionCumplidaTipoUsuario = false;
+
         SysUser sysUserUpdated = null;
         Map<String, Object> response = new HashMap<>();
         if (Objects.isNull(currentSysUser)) {
@@ -212,7 +224,24 @@ public class SysUserController {
             sysUser.setVip(sysUserRequest.getVip());
             sysUser.setCode(sysUserRequest.getU_solver_code());
 
-            sysUser.setUserType(sysUserRequest.getU_user_type());
+            for (UserType userT : allUserType){
+
+                if (sysUserRequest.getU_user_type() == null){
+                    sysUser.setUserType(0L);
+                    condicionCumplidaTipoUsuario = true;
+                    break;
+                }
+
+                if (userT.getName().toLowerCase().equals(sysUserRequest.getU_user_type().toLowerCase())){
+                    sysUser.setUserType(userT.getId());
+                    condicionCumplidaTipoUsuario = true;
+                    break;
+                }
+            }
+            // En caso no coincida con ninguno de los tipos de variables que estan en la tabla se asignara "0" - No asignado
+            if (!condicionCumplidaTipoUsuario) {
+                sysUser.setUserType(0L);
+            }
 
             sysUser.setSolver(sysUserRequest.getU_solver());
             String pass = passwordEncoder.encode(sysUserRequest.getU_solver_password());
@@ -224,19 +253,25 @@ public class SysUserController {
             sysUser.setManager(null);
             if (Util.hasData(sysUserRequest.getManager())) {
                 SysUser manager = sysUserService.findByIntegrationId(sysUserRequest.getManager());
-                sysUser.setManager(manager.getIntegrationId());
+                if (manager != null){
+                    sysUser.setManager(manager.getIntegrationId());
+                }else{
+                    log.info("Variable manager is null");
+                }
             }
             sysUser.setDepartment(null);
             if (Util.hasData(sysUserRequest.getDepartment())) {
                 Department department = departmentService.findByIntegrationId(sysUserRequest.getDepartment());
-                if (department != null)
+                if (department != null){
                     sysUser.setDepartment(department);
+                }
             }
             sysUser.setLocation(null);
             if (Util.hasData(sysUserRequest.getLocation())) {
                 Location location = locationService.findByIntegrationId(sysUserRequest.getLocation());
-                if (location != null)
+                if (location != null){
                     sysUser.setLocation(location);
+                }
             }
             SysUser exists = sysUserService.findByIntegrationId(sysUser.getIntegrationId());
             if (!Objects.isNull(exists)) {
@@ -356,6 +391,7 @@ public class SysUserController {
     public ResponseEntity<SysUser> getCodeByEmailAndSolver(@NotNull @RequestParam(value = "email", required = true, defaultValue = "0") String email,
                                                            @NotNull @RequestParam(value = "solver", required = true, defaultValue = "true") boolean solver,
                                                            @NotNull @RequestParam(value = "code", required = true, defaultValue = "") String code) {
+        log.info("sysUserByEmailAndSolverAndCode");
         log.info(code);
         SysUser sysUser = sysUserService.findByEmailAndSolver(email, solver);
         BCryptPasswordEncoder bcrypt = new BCryptPasswordEncoder();
@@ -376,6 +412,7 @@ public class SysUserController {
     @GetMapping("/sysUserByEmailAndSolver")
     public ResponseEntity<SysUser> findByEmailAndSolver(@NotNull @RequestParam(value = "email", required = true, defaultValue = "0") String email,
                                                         @NotNull @RequestParam(value = "solver", required = true, defaultValue = "true") boolean solver) throws Exception {
+        log.info("sysUserByEmailAndSolver");
         SysUser sysUser = sysUserService.findByEmailAndSolver(email, solver);
         ResponseEntity<SysUser> pageResponseEntity = new ResponseEntity<>(sysUser, HttpStatus.OK);
         return pageResponseEntity;
@@ -388,7 +425,13 @@ public class SysUserController {
 
     @GetMapping("/findUserGroupsByFilters")
     public ResponseEntity<List<SysUserFields>> findUserGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
+
+
+
         List<SysUserFields> sysUserFields = sysUserService.findUserGroupsByFilters(company);
+
+
+
         ResponseEntity<List<SysUserFields>> pageResponseEntity = new ResponseEntity<>(sysUserFields, HttpStatus.OK);
         return pageResponseEntity;
     }

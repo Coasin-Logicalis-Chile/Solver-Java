@@ -1,6 +1,7 @@
 package com.logicalis.apisolver.auth;
 
 import com.logicalis.apisolver.model.SysUser;
+
 import com.logicalis.apisolver.services.ISysUserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,12 +22,14 @@ public class InfoAditionalToken implements TokenEnhancer {
     @Autowired
     private ISysUserService sysUserService;
 
+
     @Override
     public OAuth2AccessToken enhance(OAuth2AccessToken oAuth2AccessToken, OAuth2Authentication oAuth2Authentication) {
         // SysUserFields userFields = sysUserService.findByEmailAndSolver(oAuth2Authentication.getName());
 
         SysUser  user  = sysUserService.findByEmailAndSolver(oAuth2Authentication.getName(), true);
-        if (user.getCompany().getId() == 14 && user.isPasswordExpired(user.getCompany().getPasswordExpirationDays())) {
+
+        if (user.getCompany().getPasswordExpiration() && user.getCompany().getPasswordExpirationDays() != null && user.isPasswordExpired(user.getCompany().getPasswordExpirationDays())) {
 
             log.info("Password expiration, please change password");
 
@@ -60,7 +63,9 @@ public class InfoAditionalToken implements TokenEnhancer {
         log.info("integrationId: "+ user.getIntegrationId());
         log.info("company: "+ user.getCompany().getName());
         log.info("Access successful, token allowed: oAuth2AccessToken");
+
         log.info("=================================================================");
+
 
         return oAuth2AccessToken;
     }

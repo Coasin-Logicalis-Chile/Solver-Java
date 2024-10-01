@@ -24,6 +24,9 @@ public class Company implements Serializable {
     @Column(columnDefinition = "int8 default 0")
     private Long password_expiration_days;
 
+    @Column(columnDefinition = "boolean default false")
+    private boolean password_expiration;
+
     public Domain getDomain() {
         return domain;
     }
@@ -83,9 +86,16 @@ public class Company implements Serializable {
     }
 
 
-    /**
-     *
-     */
+    public boolean getPasswordExpiration() {
+        return password_expiration;
+    }
+
+    public void setPasswordExpiration(boolean password_expiration) {
+        this.password_expiration = password_expiration;
+    }
+
+
+
     private static final long serialVersionUID = 1L;
 
 }
