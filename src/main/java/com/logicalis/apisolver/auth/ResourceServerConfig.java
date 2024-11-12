@@ -1,4 +1,4 @@
-package com.logicalis.apisolver.auth;
+/*package com.logicalis.apisolver.auth;
 
 
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
@@ -19,7 +19,6 @@ import java.util.Arrays;
 
 @Configuration
 @EnableResourceServer
-@Order(2)
 public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
 
     @Override
@@ -131,4 +130,4 @@ public class ResourceServerConfig extends ResourceServerConfigurerAdapter {
         return bean;
     }
 }
-
+    */
