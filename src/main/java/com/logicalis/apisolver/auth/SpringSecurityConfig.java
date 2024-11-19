@@ -17,6 +17,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -62,6 +63,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http
+        .addFilterBefore(new BearerTokenPresenceFilter(), UsernamePasswordAuthenticationFilter.class)
         .cors().configurationSource(corsConfigurationSource())
         .and()
         .csrf().disable()
@@ -85,7 +87,10 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}")
                 .permitAll()
                 .antMatchers("/oauth2/**", "/login/**").permitAll()
-                .anyRequest().authenticated();
+                .anyRequest().access("isAuthenticated() or hasAuthority('ROLE_ANONYMOUS')")
+                .and()
+                .oauth2Login()
+                .successHandler(successHandler);
     }
 
     // Configuración de CORS

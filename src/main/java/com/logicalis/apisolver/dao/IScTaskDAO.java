@@ -78,52 +78,41 @@ public interface IScTaskDAO extends CrudRepository<ScTask, Long> {
 public Page<ScTaskFields> findPaginatedScTasksByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
     @Query(value = "SELECT DISTINCT a.id AS id,\n" +
-            "a.anumber AS number,\n" +
-            "a.short_description AS short_description,\n" +
-            "a.flabel AS state,\n" +
-            "a.bnumber AS request ,\n" +
-            "a.cnumber AS request_item,\n" +
-            "a.hname AS business_service,\n" +
-            "a.dactive AS active,\n" +
-            "a.glabel AS priority,\n" +
-            "a.iname AS configuration_item,\n" +
-            "a.dname AS assignment_group,\n" +
-            "a.created_on AS created_on,\n" +
-            "a.updated_on AS updated_on,\n" +
-            "a.kname  AS assigned_to,\n" +
-            "a.lname  AS requested_for,\n" +
-            "COALESCE(a.vip,false) AS vip,\n" +
-            "a.juser_type AS user_type \n" +
-            "FROM view_request a \n" +
-            "     INNER JOIN sys_group      d ON a.assignment_group = d.id \n" +
-            "     INNER JOIN sys_user_group e ON e.sys_group        = d.id \n" +
-            "WHERE (?1 = '' OR UPPER(a.number     \n" +
-            "              || coalesce(a.short_description, '')     \n" +
-            "              || coalesce(a.integration_id, '')     \n" +
-            "              || coalesce(a.flabel, '')     \n" +
-            "              || coalesce(a.bnumber, '')     \n" +
-            "              || coalesce(a.cnumber, '')     \n" +
-            "              || coalesce(a.hname, '')     \n" +
-            "              || coalesce(a.iname, '')     \n" +
-            "              || coalesce(a.dname, '')     \n" +
-            "              || coalesce(a.kname, '')     \n" +
-            "              || coalesce(a.glabel, '')) like ?1)\n" +
-            "              AND (?2 = 0 OR a.company = ?2)\n" +
-            "              AND (?3 = 0 OR (a.scaling_assignment_group IN (SELECT sys_group FROM sys_user_group \n" +
-            "                                        WHERE sys_user = ?3)))\n" +
-            "              AND ((COALESCE(?4, '') = '') OR a.assignment_group IN (?4))\n" +
-            "              AND ((COALESCE(?5, '') = '') OR a.assigned_to IN (?5))\n" +
-            "              AND ((COALESCE(?6, '') = '') OR UPPER(a.flabel) IN (?6))\n" +
-            "              AND ((COALESCE(?7, '') = '') OR UPPER(a.glabel) IN (?7))\n" +
-            "               AND ((?8 = '' AND ?9 = '') OR \n" +
-            "                   (?8 != '' AND ?9 = '' AND a.created_on >= TO_TIMESTAMP(?8,'YYYY-MM-DD HH24:MI:SS') AND a.created_on <= TO_TIMESTAMP((CURRENT_DATE || ' 23:59:59'),'YYYY-MM-DD HH24:MI:SS')) OR \n" +
-            "                   (?8 = '' AND ?9 != '' AND a.created_on >= TO_TIMESTAMP(('1900-01-01 00:00:00'),'YYYY-MM-DD HH24:MI:SS') AND a.created_on <= TO_TIMESTAMP(?9,'YYYY-MM-DD HH24:MI:SS')) OR \n" +
-            "                   (?8 != '' AND ?9 != '' AND a.created_on BETWEEN TO_TIMESTAMP(?8,'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(?9,'YYYY-MM-DD HH24:MI:SS'))) \n" +
-            "              AND a.scaling IS TRUE \n" +
-            "              AND a.aactive IS TRUE \n" +
-            "              AND UPPER(a.state) NOT LIKE '%RESUELTO%' \n" +
-            "              AND d.active IS TRUE \n" +
-            "              AND e.active IS TRUE",nativeQuery = true)
+       "a.anumber AS number,\n" +
+       "a.short_description AS short_description,\n" +
+       "a.flabel AS state,\n" +
+       "a.bnumber AS request,\n" +
+       "a.cnumber AS request_item,\n" +
+       "a.hname AS business_service,\n" +
+       "a.dactive AS active,\n" +
+       "a.glabel AS priority,\n" +
+       "a.iname AS configuration_item,\n" +
+       "a.dname AS assignment_group,\n" +
+       "a.created_on AS created_on,\n" +
+       "a.updated_on AS updated_on,\n" +
+       "a.kname AS assigned_to,\n" +
+       "a.lname AS requested_for,\n" +
+       "COALESCE(a.vip, false) AS vip,\n" +
+       "a.juser_type AS user_type\n" +
+"FROM view_request a\n" +
+"INNER JOIN sys_group d ON a.assignment_group = d.id\n" +
+"INNER JOIN sys_user_group e ON e.sys_group = d.id\n" +
+"WHERE (:filter = '' OR UPPER(a.number || COALESCE(a.short_description, '') || COALESCE(a.integration_id, '') || COALESCE(a.flabel, '') || COALESCE(a.bnumber, '') || COALESCE(a.cnumber, '') || COALESCE(a.hname, '') || COALESCE(a.iname, '') || COALESCE(a.dname, '') || COALESCE(a.kname, '') || COALESCE(a.glabel, '')) LIKE :filter)\n" +
+"  AND (:company = 0 OR a.company = :company)\n" +
+"  AND (:sysUser = 0 OR (a.scaling_assignment_group IN (SELECT sys_group FROM sys_user_group WHERE sys_user = :sysUser)))\n" +
+"  AND ((COALESCE(:sysGroups, NULL) IS NULL OR a.assignment_group IN (:sysGroups)))\n" +
+"  AND ((COALESCE(:sysUsers, NULL) IS NULL OR a.assigned_to IN (:sysUsers)))\n" +
+"  AND ((COALESCE(:states, NULL) IS NULL OR UPPER(a.flabel) IN (:states)))\n" +
+"  AND ((COALESCE(:priorities, NULL) IS NULL OR UPPER(a.glabel) IN (:priorities)))\n" +
+"  AND ((:createdOnFrom = '' AND :createdOnTo = '') \n" +
+"       OR (:createdOnFrom != '' AND :createdOnTo = '' AND a.created_on >= TO_TIMESTAMP(:createdOnFrom, 'YYYY-MM-DD HH24:MI:SS') AND a.created_on <= TO_TIMESTAMP((CURRENT_DATE || ' 23:59:59'), 'YYYY-MM-DD HH24:MI:SS'))\n" +
+"       OR (:createdOnFrom = '' AND :createdOnTo != '' AND a.created_on >= TO_TIMESTAMP('1900-01-01 00:00:00', 'YYYY-MM-DD HH24:MI:SS') AND a.created_on <= TO_TIMESTAMP(:createdOnTo, 'YYYY-MM-DD HH24:MI:SS'))\n" +
+"       OR (:createdOnFrom != '' AND :createdOnTo != '' AND a.created_on BETWEEN TO_TIMESTAMP(:createdOnFrom, 'YYYY-MM-DD HH24:MI:SS') AND TO_TIMESTAMP(:createdOnTo, 'YYYY-MM-DD HH24:MI:SS')))\n" +
+"  AND a.scaling IS TRUE\n" +
+"  AND a.aactive IS TRUE\n" +
+"  AND UPPER(a.state) NOT LIKE '%RESUELTO%'\n" +
+"  AND d.active IS TRUE\n" +
+"  AND e.active IS TRUE\n" ,nativeQuery = true)
     public Page<ScTaskFields> findPaginatedScTasksScalingByFilters(Pageable pageRequest, String filter, Long company, Long sysUser, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
     @Query(value = "SELECT DISTINCT a.id AS id ,a.anumber AS number,a.short_description AS short_description\n" +
@@ -153,27 +142,25 @@ public Page<ScTaskFields> findPaginatedScTasksByFilters(Pageable pageRequest, St
             "AND (?5 = false OR (a.assigned_to IS null AND UPPER(a.flabel) NOT LIKE ALL (ARRAY['%CERRADO%','%CANCELADO%'])))\n" +
             "AND (?6 = false OR UPPER(a.flabel) like '%RESUELTO%')\n" +
             "AND (?7 = false OR a.scaling = ?7)\n" +
-            "AND (?9 = 0 OR e.sys_user = ?9)\n" +
-            "AND (?10 = false OR UPPER(a.flabel) LIKE '%CERRADO%')\n" +
-            "AND (?11 = false OR (UPPER(a.flabel) NOT LIKE '%CERRADO%' AND UPPER(a.flabel) NOT LIKE '%CANCELADO%'))\n" +
-            "AND (((COALESCE(?12) IS null) OR a.assignment_group IN (?12))\n" +
-            "      OR (?8 = 0 OR (a.scaling IS TRUE AND a.scaling_assigned_to = ?8\n" +
-            "          AND (UPPER(a.flabel) NOT LIKE ALL (ARRAY['%CERRADO%', '%RESUELTO%']) ))))\n" +
-            "AND ((COALESCE(?13) IS null) OR a.assigned_to IN (?13))\n" +
-            "AND ((COALESCE(?14) IS null) OR UPPER(a.flabel) IN (?14))\n" +
-            "AND ((COALESCE(?15) IS null) OR UPPER(a.glabel) IN (?15))\n" +
-            "AND ( (?16 = '' AND ?17 = '' )\n" +
-            "     OR (?16 != '' AND ?17 = ''  AND (a.created_on BETWEEN TO_DATE(?16,'YYYY-MM-DD')\n" +
+            "AND (?8 = 0 OR e.sys_user = ?8)\n" +
+            "AND (?9 = false OR UPPER(a.flabel) LIKE '%CERRADO%')\n" +
+            "AND (?10 = false OR (UPPER(a.flabel) NOT LIKE '%CERRADO%' AND UPPER(a.flabel) NOT LIKE '%CANCELADO%'))\n" +
+            "AND ((COALESCE(?11) IS null) OR a.assignment_group IN (?11))\n" +
+            "AND ((COALESCE(?12) IS null) OR a.assigned_to IN (?12))\n" +
+            "AND ((COALESCE(?13) IS null) OR UPPER(a.flabel) IN (?13))\n" +
+            "AND ((COALESCE(?14) IS null) OR UPPER(a.glabel) IN (?14))\n" +
+            "AND ( (?15 = '' AND ?16 = '' )\n" +
+            "     OR (?15 != '' AND ?16 = ''  AND (a.created_on BETWEEN TO_DATE(?15,'YYYY-MM-DD')\n" +
             "              AND CURRENT_DATE ))\n" +
-            "     OR (?16 ='' AND ?17!=''  AND (a.created_on BETWEEN TO_DATE('1900-01-01','YYYY-MM-DD')\n" +
-            "           AND TO_DATE(?17,'YYYY-MM-DD')))\n" +
-            "     OR (?16!='' AND ?17!= ''  AND (a.created_on BETWEEN TO_DATE(?16,'YYYY-MM-DD')\n" +
-            "           AND TO_DATE(?17,'YYYY-MM-DD')))" +
+            "     OR (?15 ='' AND ?16!=''  AND (a.created_on BETWEEN TO_DATE('1900-01-01','YYYY-MM-DD')\n" +
+            "           AND TO_DATE(?16,'YYYY-MM-DD')))\n" +
+            "     OR (?15!='' AND ?16!= ''  AND (a.created_on BETWEEN TO_DATE(?15,'YYYY-MM-DD')\n" +
+            "           AND TO_DATE(?16,'YYYY-MM-DD')))" +
             ")\n" +
             "AND UPPER(a.flabel) NOT LIKE ALL (ARRAY['%CERRADO%', '%CANCELADO%'])\n" +
             "AND d.active       IS TRUE\n" +
             "AND e.active       IS TRUE", nativeQuery = true)
-    public Page<ScTaskFields> findPaginatedScTasksSLAByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long scalingAssignedTo, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
+    public Page<ScTaskFields> findPaginatedScTasksSLAByFilters(Pageable pageRequest, String filter, Long assignedTo, Long company, String state, boolean openUnassigned, boolean solved, boolean scaling, Long assignedToGroup, boolean closed, boolean open, List<Long> sysGroups, List<Long> sysUsers, List<String> states, List<String> priorities, String createdOnFrom, String createdOnTo);
 
     @Query(value = "select count(DISTINCT a.number)\n" +
             "from  vw_countScTasksByFilters a\n" +
