@@ -367,6 +367,7 @@ public class TaskSlaController {
                             taskSla[0].setStage(Util.isNull(taskSlaSolver[0].getStage()));
                             taskSla[0].setPlannedEndTime(Util.isNull(taskSlaSolver[0].getPlanned_end_time()));
                             taskSla[0].setIntegrationId(taskSlaSolver[0].getSys_id());
+                            taskSla[0].setuTriggerGroup(Util.isNull(taskSlaSolver[0].getU_trigger_group()));
                             domain[0] = getDomainByIntegrationId((JSONObject) taskSlaJson, SnTable.Domain.get(), App.Value());
                             if (domain[0] != null)
                                 taskSla[0].setDomain(domain[0]);
@@ -468,6 +469,7 @@ public class TaskSlaController {
             taskSla.setSysUpdatedOn(taskSlaRequest.getSys_updated_on());
             taskSla.setTimeLeft(taskSlaRequest.getTime_left());
             taskSla.setTimezone(taskSlaRequest.getTimezone());
+            taskSla.setuTriggerGroup(taskSlaRequest.getU_trigger_group());
             log.info("Buscando y estableciendo relacion de Dominio. sys_id Task Dominio: {}", taskSlaRequest.getSys_domain());
             if (Util.hasData(taskSlaRequest.getSys_domain())) {
                 Domain domain = domainService.findByIntegrationId(taskSlaRequest.getSys_domain());

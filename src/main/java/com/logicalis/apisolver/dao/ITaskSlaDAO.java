@@ -22,7 +22,8 @@ public interface ITaskSlaDAO extends CrudRepository<TaskSla, Long> {
             "a.business_duration AS businessDuration,\n" +
             "a.start_time AS startTime,\n" +
             "a.end_time AS endTime,\n" +
-            "f.name assignmentGroup\n" +
+            "f.name assignmentGroup,\n" +
+            "a.u_trigger_group triggerGroup\n" +
             "FROM public.task_sla a\n" +
             "LEFT OUTER JOIN cmn_schedule b ON a.schedule = b.id\n" +
             "LEFT OUTER JOIN contract_sla c ON a.sla = c.id\n" +
