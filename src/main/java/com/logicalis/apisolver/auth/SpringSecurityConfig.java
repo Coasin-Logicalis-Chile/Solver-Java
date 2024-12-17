@@ -95,7 +95,7 @@ protected void configure(HttpSecurity http) throws Exception {
             .permitAll()
             .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}")
             .permitAll()
-            .antMatchers("/oauth2/**", "/login/**").permitAll()
+            .antMatchers("/oauth2/**", "/login/**","/health").permitAll()
             .anyRequest().access("isAuthenticated() or hasAuthority('ROLE_ANONYMOUS')")
         .and()
         .oauth2Login()

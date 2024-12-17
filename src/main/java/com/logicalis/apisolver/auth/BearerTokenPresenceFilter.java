@@ -12,6 +12,15 @@ public class BearerTokenPresenceFilter extends OncePerRequestFilter {
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
+
+                String requestURI = request.getRequestURI();
+
+        // Excluir rutas específicas del filtro
+        if (requestURI.equals("/health")) {
+            filterChain.doFilter(request, response);
+            return;
+        }
+
         String authHeader = request.getHeader("Authorization");
 
         // Verifica si el encabezado Authorization está presente y contiene un token
