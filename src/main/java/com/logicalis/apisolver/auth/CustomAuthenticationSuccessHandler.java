@@ -1,6 +1,7 @@
 package com.logicalis.apisolver.auth;
 
 
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
@@ -13,6 +14,9 @@ import java.util.Map;
 
 @Component
 public class CustomAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
+
+    @Value("${app.redirect.front-url}")
+    private String baseUrl;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException {
@@ -27,6 +31,7 @@ public class CustomAuthenticationSuccessHandler implements AuthenticationSuccess
         if (email == null) {
             email = (String) claims.get("preferred_username");
         }
-        response.sendRedirect("http://localhost:4200/#/sign-in?email=" + email);
+        String redirectUrl = baseUrl + "/#/sign-in?email=" + email;
+        response.sendRedirect(redirectUrl);
     }
 }

@@ -70,11 +70,14 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         this.clientRegistrationRepository = clientRegistrationRepository;
     }
 
+    @Autowired
+    private TokenAuthenticationFilter tokenAuthenticationFilter;
+
     @Override
 protected void configure(HttpSecurity http) throws Exception {
     http
-        .addFilterBefore(new BearerTokenPresenceFilter(), UsernamePasswordAuthenticationFilter.class)
         .addFilterBefore(new DynamicRegistrationIdFilter(), OAuth2AuthorizationRequestRedirectFilter.class) // Filtro personalizado
+        .addFilterBefore(tokenAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
         .cors().configurationSource(corsConfigurationSource())
         .and()
         .csrf().disable()
@@ -96,10 +99,10 @@ protected void configure(HttpSecurity http) throws Exception {
             .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}")
             .permitAll()
             .antMatchers("/oauth2/**", "/login/**","/health").permitAll()
-            .anyRequest().access("isAuthenticated() or hasAuthority('ROLE_ANONYMOUS')")
+            .anyRequest().authenticated()
         .and()
         .oauth2Login()
-            .successHandler(successHandler); // Configura el successHandler para redirigir tras el login
+            .successHandler(successHandler);// Configura el successHandler para redirigir tras el login
 }
 
     // Configuración de CORS

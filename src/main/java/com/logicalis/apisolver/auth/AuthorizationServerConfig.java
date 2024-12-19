@@ -36,6 +36,12 @@ public class AuthorizationServerConfig extends AuthorizationServerConfigurerAdap
     @Autowired
     private TokenStore tokenStore;
 
+    @Bean
+    public TokenAuthenticationFilter tokenAuthenticationFilter(TokenStore tokenStore) {
+        return new TokenAuthenticationFilter(tokenStore);
+    }
+
+
     @Autowired
     @Qualifier("authenticationManager")
     private AuthenticationManager authenticationManager;
