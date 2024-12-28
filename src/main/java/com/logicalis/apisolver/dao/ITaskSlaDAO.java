@@ -65,6 +65,7 @@ public interface ITaskSlaDAO extends CrudRepository<TaskSla, Long> {
             "a.business_time_left AS businessTimeLeft,\n" +
             "a.business_percentage AS businessPercentage,\n" +
             "a.business_duration AS businessDuration,\n" +
+            "a.u_trigger_group AS triggerGroup,\n" +
             "a.start_time AS startTime,\n" +
             "a.end_time AS endTime\n" +
             "FROM public.task_sla a\n" +
