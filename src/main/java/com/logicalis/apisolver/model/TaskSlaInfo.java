@@ -22,4 +22,6 @@ public interface TaskSlaInfo {
     String getEndTime();
 
     String getAssignmentGroup();
+    
+    String getTriggerGroup();
 }
