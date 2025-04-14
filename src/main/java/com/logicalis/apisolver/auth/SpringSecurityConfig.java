@@ -1,11 +1,13 @@
 package com.logicalis.apisolver.auth;
 
+import java.util.Arrays;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.annotation.Order;
 import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -14,7 +16,6 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
-import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
@@ -24,10 +25,8 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import com.logicalis.apisolver.auth.DynamicRegistrationIdFilter;
 
 
-import java.util.Arrays;
 
 @EnableGlobalMethodSecurity(securedEnabled = true)
 @Configuration
@@ -92,11 +91,11 @@ protected void configure(HttpSecurity http) throws Exception {
                 "/api/v1/incidentsByFilter", "/api/v1/findPaginatedIncidentsByFilters",
                 "/api/v1/journalsByIncident", "/api/v1/countIncidentsByFilters",
                 "/api/v1/sn_catalogs", "/api/v1/findSysGroupsByFilters", 
-                "/api/v1/sn_choices_by_filter", "/api/v1/findUserGroupsByFilters", "/oauth/token")
+                "/api/v1/sn_choices_by_filter", "/api/v1/findUserGroupsByFilters", "/oauth/token","/api/v1/sysUserByEmailAndSolver","/api/v1/sysUserCode")
             .permitAll()
             .antMatchers(HttpMethod.POST, "/api/v1/log", "/api/v1/sysUserByEmailAndSolver", "/api/v1/uploadFile/{element}")
             .permitAll()
-            .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}")
+            .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}","/api/v1/sysUserCode/**","/api/v1/sysUserCodeUpdate/**")
             .permitAll()
             .antMatchers("/oauth2/**", "/login/**","/health").permitAll()
             .anyRequest().authenticated()
