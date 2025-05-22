@@ -81,13 +81,11 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     "             AND    b.sys_user = ?10\n" +
     "             and    b.company = a.company) ) \n" +
     "         AND (?11 = false OR UPPER(d.label) like '%CERRADO%')        \n" +
-"         AND (?12 = false OR ( \n" +
-"               UPPER(d.label) NOT LIKE ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%']) \n" +
-"               AND ( \n" +
-"                    ?4 = '' AND UPPER(g.label) NOT LIKE '%RESUELTO%' \n" +
-"                 OR  ?4 = 'RESUELTO' \n" +
-"               ) \n" +
-"         )) \n" +
+    "         AND (?12 = false OR ( \n" +
+    "               UPPER(d.label) NOT LIKE ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%']) \n" +
+    "               AND ( \n" +
+    "                    ?4 = '' AND UPPER(g.label) NOT LIKE '%RESUELTO%' \n" +
+    "                 OR  ?4 = 'RESUELTO'))) \n" +
     "         AND ((COALESCE(?13) IS null) OR a.assignment_group IN (?13)) \n" +
     "         AND ((COALESCE(?14) IS null) OR a.assigned_to IN (?14))  \n" +
     "         AND ((COALESCE(?15) IS null) OR UPPER(d.label) IN (?15)) \n" +
