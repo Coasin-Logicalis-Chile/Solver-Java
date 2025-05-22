@@ -64,7 +64,10 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     "              || a.integration_id ) like ?1)" +
     "         AND (?2 = 0   OR a.assigned_to = ?2) \n" +
     "         AND (?3 = 0  OR a.company = ?3)       \n" +
-    "         AND (?4 = '' OR a.state = ?4)   \n" +
+    "         AND ( ?4 = '' \n" +
+    "             OR (?4 = 'RESUELTO' AND UPPER(g.label) = 'RESUELTO') \n" +
+    "             OR (?4 <> 'RESUELTO' AND a.state = ?4) \n" +
+    "         ) \n" +
     "         AND (?5 = false OR (a.assigned_to IS null \n" +
     "                             AND UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%CANCELADO%'] )) )\n" +
     "         AND (?6 = false OR UPPER(d.label) like '%RESUELTO%')  \n" +
@@ -78,8 +81,13 @@ public interface IIncidentDAO extends PagingAndSortingRepository<Incident, Long>
     "             AND    b.sys_user = ?10\n" +
     "             and    b.company = a.company) ) \n" +
     "         AND (?11 = false OR UPPER(d.label) like '%CERRADO%')        \n" +
-    "         AND (?12  = false OR (   UPPER(d.label) NOT like ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%'] )\n" +
-    "                        AND UPPER(g.label) NOT LIKE '%RESUELTO%')) \n" +
+"         AND (?12 = false OR ( \n" +
+"               UPPER(d.label) NOT LIKE ALL (ARRAY['%CERRADO%','%RESUELTO%','%CANCELADO%']) \n" +
+"               AND ( \n" +
+"                    ?4 = '' AND UPPER(g.label) NOT LIKE '%RESUELTO%' \n" +
+"                 OR  ?4 = 'RESUELTO' \n" +
+"               ) \n" +
+"         )) \n" +
     "         AND ((COALESCE(?13) IS null) OR a.assignment_group IN (?13)) \n" +
     "         AND ((COALESCE(?14) IS null) OR a.assigned_to IN (?14))  \n" +
     "         AND ((COALESCE(?15) IS null) OR UPPER(d.label) IN (?15)) \n" +
