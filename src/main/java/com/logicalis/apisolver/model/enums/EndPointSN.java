@@ -36,15 +36,7 @@ public class EndPointSN {
 
     private RestTemplate restTemplate = new RestTemplate();
 
-    public static String DeleteAttachment() {
-        return ApiAttachment().concat("/attachment/");
-    }
-
-    public void deleteAttachmentById(String sysId) {
-        String url = DeleteAttachment() + sysId;
-        restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
-    }
-
+    
     public static String AttachmentBySysId() {
         return ApiAttachment().concat("?sys_id=");
     }
