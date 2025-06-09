@@ -1,13 +1,28 @@
 package com.logicalis.apisolver.controller;
-import com.logicalis.apisolver.model.AzureAdConfig;
-import com.logicalis.apisolver.services.IAzureAdConfigService;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-import org.springframework.beans.factory.annotation.Value;
+import java.io.IOException;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.client.RestTemplate;
+
+import com.logicalis.apisolver.model.AzureAdConfig;
+import com.logicalis.apisolver.services.IAzureAdConfigService;
+
 
 @RestController
 public class AzureAdRedirectController {
@@ -50,5 +65,33 @@ public class AzureAdRedirectController {
         // Redirigir al usuario al endpoint de autorización
         response.sendRedirect(authorizationUri);
     }
+
+    @PostMapping("/auth/login-ad")
+public ResponseEntity<?> loginAD(@RequestBody Map<String, String> body) {
+    System.out.println("ENTRO AL LOGIN DE AUTH");
+    String email = body.get("email");
+    String password = "logicalis$ad"; // idealmente desde application.properties
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+    headers.setBasicAuth("angularapp", "12345");
+
+    // Construir el cuerpo como string (igual que el frontend)
+    String form = "grant_type=password" +
+            "&username=" + URLEncoder.encode(email, StandardCharsets.UTF_8) +
+            "&password=" + URLEncoder.encode(password, StandardCharsets.UTF_8);
+
+    HttpEntity<String> request = new HttpEntity<>(form, headers);
+
+    RestTemplate restTemplate = new RestTemplate();
+    try {
+        String tokenUrl = baseUrl + "/oauth/token";
+        ResponseEntity<String> response = restTemplate.postForEntity(tokenUrl, request, String.class);
+        return ResponseEntity.ok(response.getBody());
+    } catch (HttpClientErrorException e) {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login con AD falló");
+    }
+}
+
 }
 
