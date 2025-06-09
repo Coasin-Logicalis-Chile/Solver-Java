@@ -1,5 +1,9 @@
 package com.logicalis.apisolver.model.enums;
 
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestTemplate;
+
 public class EndPointSN {
     public static String Api() {
         return App.SNInstance().concat("/api/now/table/");
@@ -18,7 +22,8 @@ public class EndPointSN {
     }
 
     public static String Attachment() {
-        return ApiAttachment().concat("?sysparm_query=table_name=sc_req_item^ORtable_name=incident^ORtable_name=sc_task^table_sys_idSTARTSWITH");
+        return ApiAttachment().concat(
+                "?sysparm_query=table_name=sc_req_item^ORtable_name=incident^ORtable_name=sc_task^table_sys_idSTARTSWITH");
     }
 
     public static String AttachmentByQuery() {
@@ -27,6 +32,17 @@ public class EndPointSN {
 
     public static String UploadAttachment() {
         return ApiAttachment().concat("/upload");
+    }
+
+    private RestTemplate restTemplate = new RestTemplate();
+
+    public static String DeleteAttachment() {
+        return ApiAttachment().concat("/attachment/");
+    }
+
+    public void deleteAttachmentById(String sysId) {
+        String url = DeleteAttachment() + sysId;
+        restTemplate.exchange(url, HttpMethod.DELETE, null, Void.class);
     }
 
     public static String AttachmentBySysId() {
@@ -100,6 +116,7 @@ public class EndPointSN {
     public static String ScTaskByQuery() {
         return Api().concat("sc_task?sysparm_query=QUERY&sysparm_limit=3000&sysparm_offset=");
     }
+
     public static String CiServiceByQuery() {
         return Api().concat("cmdb_ci_service?sysparm_query=QUERY&sysparm_limit=3000&sysparm_offset=");
     }
@@ -109,7 +126,8 @@ public class EndPointSN {
     }
 
     public static String GeneralQuery() {
-        return Api().concat("TABLE?sysparm_query=sys_created_onONLast 15 minutes@javascript:gs.beginningOfLast15Minutes()@javascript:gs.endOfLast15Minutes()^ORsys_updated_onONLast 15 minutes@javascript:gs.beginningOfLast15Minutes()@javascript:gs.endOfLast15Minutes()^company.u_solver=true&sysparm_limit=3000&sysparm_offset=");
+        return Api().concat(
+                "TABLE?sysparm_query=sys_created_onONLast 15 minutes@javascript:gs.beginningOfLast15Minutes()@javascript:gs.endOfLast15Minutes()^ORsys_updated_onONLast 15 minutes@javascript:gs.beginningOfLast15Minutes()@javascript:gs.endOfLast15Minutes()^company.u_solver=true&sysparm_limit=3000&sysparm_offset=");
     }
 
     public static String ScRequestItem() {
@@ -149,7 +167,8 @@ public class EndPointSN {
     }
 
     public static String SysUserGroup() {
-        return Api().concat("sys_user_grmember?sysparm_query=group.company.u_solver=true&sysparm_limit=3000&sysparm_offset=");
+        return Api().concat(
+                "sys_user_grmember?sysparm_query=group.company.u_solver=true&sysparm_limit=3000&sysparm_offset=");
     }
 
     public static String ScCategory() {
@@ -161,11 +180,13 @@ public class EndPointSN {
     }
 
     public static String ChoiceIncident() {
-        return Api().concat("sys_choice?sysparm_query=language=es^inactive=false^element=category^ORelement=subcategory^ORelement=u_incident_type^ORelement=state^ORelement=incident_state^ORelement=impact^ORelement=urgency^ORelement=priority^ORelement=contact_type^ORelement=close_code^ORelement=u_sbk_pendiente^sys_domain=global");//&sysparm_limit=5000&sysparm_limit=");
+        return Api().concat(
+                "sys_choice?sysparm_query=language=es^inactive=false^element=category^ORelement=subcategory^ORelement=u_incident_type^ORelement=state^ORelement=incident_state^ORelement=impact^ORelement=urgency^ORelement=priority^ORelement=contact_type^ORelement=close_code^ORelement=u_sbk_pendiente^sys_domain=global");// &sysparm_limit=5000&sysparm_limit=");
     }
 
     public static String ChoiceScrequestItem() {
-        return Api().concat("sys_choice?sysparm_query=language=es^inactive=false^element=category^ORelement=subcategory^ORelement=state^ORelement=impact^ORelement=urgency^ORelement=priority^ORelement=contact_type^ORelement=close_code^sys_domain=global");
+        return Api().concat(
+                "sys_choice?sysparm_query=language=es^inactive=false^element=category^ORelement=subcategory^ORelement=state^ORelement=impact^ORelement=urgency^ORelement=priority^ORelement=contact_type^ORelement=close_code^sys_domain=global");
     }
 
     public static String ChoiceRequest() {
@@ -173,7 +194,8 @@ public class EndPointSN {
     }
 
     public static String ChoiceTaskSla() {
-        return Api().concat("sys_choice?sysparm_query=elementSTARTSWITHstage^language=es^name=task_sla^sys_domain=global");
+        return Api()
+                .concat("sys_choice?sysparm_query=elementSTARTSWITHstage^language=es^name=task_sla^sys_domain=global");
     }
 
     public static String ChoiceTask() {
@@ -189,7 +211,8 @@ public class EndPointSN {
     }
 
     public static String Journal() {
-        return Api().concat("sys_journal_field?sysparm_query=name=incident^ORname=sc_req_item^ORname=sc_request^ORname=sc_task&sysparm_limit=3000&sysparm_offset=");
+        return Api().concat(
+                "sys_journal_field?sysparm_query=name=incident^ORname=sc_req_item^ORname=sc_request^ORname=sc_task&sysparm_limit=3000&sysparm_offset=");
     }
 
     public static String JournalByQuery() {
@@ -201,11 +224,13 @@ public class EndPointSN {
     }
 
     public static String SysAudit() {
-        return Api().concat("sys_audit?sysparm_query=tablename=incident^ORtablename=sc_task^fieldname!=work_notes^fieldname!=comments&sysparm_limit=3000&sysparm_offset=");
+        return Api().concat(
+                "sys_audit?sysparm_query=tablename=incident^ORtablename=sc_task^fieldname!=work_notes^fieldname!=comments&sysparm_limit=3000&sysparm_offset=");
     }
 
     public static String SysDocumentation() {
-        return Api().concat("sys_documentation?sysparm_query=name=incident^ORname=sc_task^ORname=sc_request^ORname=sc_req_item^ORname=task^language=es^element!=NULL&sysparm_limit=3000&sysparm_offset=");
+        return Api().concat(
+                "sys_documentation?sysparm_query=name=incident^ORname=sc_task^ORname=sc_request^ORname=sc_req_item^ORname=task^language=es^element!=NULL&sysparm_limit=3000&sysparm_offset=");
     }
 
     public static String TaskSlaByCompany() {
@@ -235,4 +260,4 @@ public class EndPointSN {
     public static String PutScTask() {
         return ApiSolver().concat("sc_task");
     }
-} 
+}
