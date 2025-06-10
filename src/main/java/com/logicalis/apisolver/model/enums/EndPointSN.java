@@ -133,6 +133,10 @@ public class EndPointSN {
     public static String ScRequestItemByCompany() {
         return Api().concat("sc_req_item?sysparm_query=company.u_solver=true&sysparm_limit=3000&sysparm_offset=");
     }
+ 
+    public static String DeleteAttachment(String sysId) {
+        return ApiSolver().concat("attachment/").concat(sysId);
+    }
 
     public static String Group() {
         return Api().concat("sys_user_group?sysparm_query=company.u_solver=true");
