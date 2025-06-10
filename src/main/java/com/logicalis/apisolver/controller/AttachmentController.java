@@ -524,6 +524,24 @@ public class AttachmentController {
         return attachments;
     }
 
+    
+    @Secured("ROLE_ADMIN")
+    @DeleteMapping("/attachmentSN/{sysId}")
+    public ResponseEntity<?> deleteFromServiceNow(@PathVariable String sysId) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String endpoint = EndPointSN.DeleteAttachment(sysId);
+            RestTemplate restTemplate = rest.restTemplateServiceNow();
+            restTemplate.delete(endpoint);
+            response.put("mensaje", "El adjunto fue eliminado correctamente desde ServiceNow.");
+            return new ResponseEntity<>(response, HttpStatus.OK);
+        } catch (Exception e) {
+            response.put("mensaje", "Error al eliminar el adjunto desde ServiceNow.");
+            response.put("error", e.getMessage());
+            return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     @GetMapping("/findBySolverByQueryCreate")
     public List<Attachment> show(String query, boolean flagQuery, boolean flagCreate) {
         log.info(App.Start());
