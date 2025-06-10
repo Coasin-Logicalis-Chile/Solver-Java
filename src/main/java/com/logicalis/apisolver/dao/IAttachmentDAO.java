@@ -1,11 +1,12 @@
 package com.logicalis.apisolver.dao;
 
-import com.logicalis.apisolver.model.Attachment;
-import com.logicalis.apisolver.model.utilities.AttachmentInfo;
+import java.util.List;
+
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 
-import java.util.List;
+import com.logicalis.apisolver.model.Attachment;
+import com.logicalis.apisolver.model.utilities.AttachmentInfo;
 
 public interface IAttachmentDAO extends CrudRepository<Attachment, Long> {
         public Attachment findTopByActive(boolean active);
@@ -54,35 +55,42 @@ public interface IAttachmentDAO extends CrudRepository<Attachment, Long> {
         List<AttachmentInfo> findAttachmentsByIncidentOrScRequestItem(String incident, String scRequestItem);
 
         @Query(value = "SELECT A.ID,\n" +
-                        "A.CONTENT_TYPE AS CONTENTTYPE,\n" +
-                        "A.ELEMENT,\n" +
-                        "A.DOWNLOAD_LINKSN AS DOWNLOADLINKSN,\n" +
-                        "A.DOWNLOAD_LINK AS DOWNLOADLINK,\n" +
-                        "A.FILE_NAME AS FILENAME,\n" +
-                        "A.INTEGRATION_ID AS INTEGRATIONID,\n" +
-                        "A.SC_TASK AS SCTASK,\n" +
-                        "A.SC_REQUEST_ITEM AS SCREQUESTITEM\n" +
-                        "FROM ATTACHMENT A\n" +
-                        "INNER JOIN SC_REQUEST_ITEM B ON A.SC_REQUEST_ITEM = B.ID\n" +
-                        "AND exists (SELECT 'x' FROM SC_TASK K WHERE k.ID = ?1 and k.SC_REQUEST_ITEM = b.id)\n" +
-                        "UNION\n" +
-                        "SELECT \n" +
-                        "A.ID,\n" +
-                        "A.CONTENT_TYPE AS CONTENTTYPE,\n" +
-                        "A.ELEMENT,\n" +
-                        "A.DOWNLOAD_LINKSN AS DOWNLOADLINKSN,\n" +
-                        "A.DOWNLOAD_LINK AS DOWNLOADLINK,\n" +
-                        "A.FILE_NAME AS FILENAME,\n" +
-                        "A.INTEGRATION_ID AS INTEGRATIONID,\n" +
-                        "A.SC_TASK AS SCTASK,\n" +
-                        "A.SC_REQUEST_ITEM AS SCREQUESTITEM\n" +
-                        "FROM ATTACHMENT A\n" +
-                        "INNER JOIN SC_TASK B ON A.SC_TASK = B.ID\n" +
-                        "INNER JOIN SC_REQUEST_ITEM C ON B.SC_REQUEST_ITEM = C.ID\n" +
-                        "WHERE A.SC_TASK = ?1", nativeQuery = true)
-        List<AttachmentInfo> findAttachmentsByScTask(Long id);
+                "A.CONTENT_TYPE AS CONTENTTYPE,\n" +
+                "A.ELEMENT,\n" +
+                "A.DOWNLOAD_LINKSN AS DOWNLOADLINKSN,\n" +
+                "A.DOWNLOAD_LINK AS DOWNLOADLINK,\n" +
+                "A.FILE_NAME AS FILENAME,\n" +
+                "A.INTEGRATION_ID AS INTEGRATIONID,\n" +
+                "A.SC_TASK AS SCTASK,\n" +
+                "A.SC_REQUEST_ITEM AS SCREQUESTITEM\n" +
+                "FROM ATTACHMENT A\n" +
+                "INNER JOIN SC_TASK B ON A.SC_TASK = B.ID\n" +
+                "WHERE A.SC_TASK = ?1\n" +
+                "\n" +
+                "UNION\n" +
+                "\n" +
+                "SELECT A.ID,\n" +
+                "A.CONTENT_TYPE AS CONTENTTYPE,\n" +
+                "A.ELEMENT,\n" +
+                "A.DOWNLOAD_LINKSN AS DOWNLOADLINKSN,\n" +
+                "A.DOWNLOAD_LINK AS DOWNLOADLINK,\n" +
+                "A.FILE_NAME AS FILENAME,\n" +
+                "A.INTEGRATION_ID AS INTEGRATIONID,\n" +
+                "A.SC_TASK AS SCTASK,\n" +
+                "A.SC_REQUEST_ITEM AS SCREQUESTITEM\n" +
+                "FROM ATTACHMENT A\n" +
+                "INNER JOIN SC_REQUEST_ITEM B ON A.SC_REQUEST_ITEM = B.ID\n" +
+                "WHERE EXISTS (SELECT 1 FROM SC_TASK K WHERE K.ID = ?1 AND K.SC_REQUEST_ITEM = B.ID)\n" +
+                "AND NOT EXISTS (\n" +
+                "    SELECT 1 FROM ATTACHMENT A2\n" +
+                "    WHERE A2.SC_TASK = ?1\n" +
+                "    AND A2.CONTENT_TYPE = A.CONTENT_TYPE\n" +
+                "    AND A2.FILE_NAME = A.FILE_NAME\n" +
+                ")", nativeQuery = true)
+         List<AttachmentInfo> findAttachmentsByScTask(Long id);
 
         public List<Attachment> findByElement(String integrationId);
 
+    
         public List<Attachment> findSolverByElement(String integrationId);
 }
