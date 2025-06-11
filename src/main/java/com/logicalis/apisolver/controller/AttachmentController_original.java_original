@@ -354,8 +354,7 @@ public class AttachmentController {
                     if (resultJson[0].get("result") != null)
                         ListSnAttachmentJson[0] = (JSONArray) parser.parse(resultJson[0].get("result").toString());
                     count[0] = 1;
-                    List<AttachmentSolver> nuevos = new ArrayList<>();
-ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
+                    ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                         tagAction[0] = App.CreateConsole();
                         try {
                             attachmentSolver[0] = mapper.readValue(snAttachmentJson.toString(), AttachmentSolver.class);
@@ -398,15 +397,13 @@ ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                                 tagAction[0] = App.UpdateConsole();
                             }
                             attachmentService.save(attachment[0]);
-                                nuevos.add(attachmentSolver[0]);
-
+                            snAttachments.add(attachmentSolver[0]);
                             Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])), Util.getFieldDisplay(domain[0]));
                             count[0] = count[0] + 1;
                         } catch (JsonProcessingException e) {
                             log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                         }
                     });
-snAttachments.addAll(nuevos);
                     apiResponse[0] = mapper.readValue(result[0], APIResponse.class);
                     status.setUri(EndPointSN.Incident());
                     status.setUserAPI(App.SNUser());
@@ -585,8 +582,7 @@ snAttachments.addAll(nuevos);
                     ListSnAttachmentJson[0].clear();
                     if (resultJson[0].get("result") != null)
                         ListSnAttachmentJson[0] = (JSONArray) parser.parse(resultJson[0].get("result").toString());
-                    List<AttachmentSolver> nuevos = new ArrayList<>();
-ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
+                    ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                         tagAction[0] = App.CreateConsole();
                         try {
                             attachmentSolver[0] = gson.fromJson(snAttachmentJson.toString(), AttachmentSolver.class);
@@ -629,8 +625,7 @@ ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                                         break;
                                 }
                                 attachmentService.save(attachment[0]);
-                                    nuevos.add(attachmentSolver[0]);
-
+                                snAttachments.add(attachmentSolver[0]);
                                 Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])), Util.getFieldDisplay(domain[0]));
                                 count[0] = count[0] + 1;
                             }
@@ -638,7 +633,6 @@ ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                             //    log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                         }
                     });
-snAttachments.addAll(nuevos);
                 }
                 //return ResponseEntity.ok().headers(headers).body(attachments);
                 apiResponse[0] = mapper.readValue(result[0], APIResponse.class);
