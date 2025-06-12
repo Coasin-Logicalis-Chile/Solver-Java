@@ -1,9 +1,8 @@
 package com.logicalis.apisolver.model.enums;
 
-import com.logicalis.apisolver.util.Util;
-import org.springframework.core.env.Environment;
-
 import java.util.Base64;
+
+import org.springframework.core.env.Environment;
 
 public class App {
     public static String SNDevelopment() {
@@ -25,7 +24,7 @@ public class App {
     }
 
     public static String SNInstance() {
-        return "https://".concat(Util.getInstanceServiceNow()).concat(".service-now.com");
+        return "https://".concat("lalogicalisdev").concat(".service-now.com");
     }
 
     public static String SNUser() {
