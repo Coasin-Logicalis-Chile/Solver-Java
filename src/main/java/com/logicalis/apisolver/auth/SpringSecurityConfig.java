@@ -93,7 +93,7 @@ protected void configure(HttpSecurity http) throws Exception {
                 "/api/v1/sn_catalogs", "/api/v1/findSysGroupsByFilters", 
                 "/api/v1/sn_choices_by_filter", "/api/v1/findUserGroupsByFilters", "/oauth/token","/api/v1/sysUserByEmailAndSolver","/api/v1/sysUserCode")
             .permitAll()
-            .antMatchers(HttpMethod.POST, "/api/v1/log", "/api/v1/sysUserByEmailAndSolver", "/api/v1/uploadFile/{element}")
+            .antMatchers(HttpMethod.POST, "/api/v1/log", "/api/v1/sysUserByEmailAndSolver", "/api/v1/uploadFile/{element}","/auth/login-ad")
             .permitAll()
             .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}","/api/v1/sysUserCode/**","/api/v1/sysUserCodeUpdate/**")
             .permitAll()

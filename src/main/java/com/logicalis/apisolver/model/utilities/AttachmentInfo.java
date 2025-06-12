@@ -7,6 +7,8 @@ public interface AttachmentInfo {
 
     String getDownloadLinkSN();
 
+    String getDownloadLink();
+
     String getFileName();
 
     String getIntegrationId();
