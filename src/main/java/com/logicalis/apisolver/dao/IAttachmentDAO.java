@@ -2,8 +2,11 @@ package com.logicalis.apisolver.dao;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
+import org.springframework.data.repository.query.Param;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.logicalis.apisolver.model.Attachment;
 import com.logicalis.apisolver.model.utilities.AttachmentInfo;
@@ -12,6 +15,11 @@ public interface IAttachmentDAO extends CrudRepository<Attachment, Long> {
         public Attachment findTopByActive(boolean active);
 
         Attachment findByIntegrationId(String integrationId);
+
+        @Transactional
+        @Modifying
+        @Query("DELETE FROM Attachment a WHERE a.id = :id")
+        void deleteByIdDirect(@Param("id") Long id);
 
         @Query(value = "SELECT id, \n" +
                         "content_type as contentType,\n" +

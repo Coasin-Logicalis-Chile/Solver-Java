@@ -6,6 +6,10 @@ import com.logicalis.apisolver.model.utilities.AttachmentInfo;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
 public interface IAttachmentService {
 
     public List<Attachment> findAll();
@@ -15,6 +19,9 @@ public interface IAttachmentService {
     public Attachment findById(Long id);
 
     public void delete(Long id);
+
+
+    public void deleteByIdDirect(Long id);
 
     public List<Attachment> findByActive(boolean active);
 

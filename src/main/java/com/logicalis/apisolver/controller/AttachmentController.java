@@ -834,5 +834,29 @@ public class AttachmentController {
         } else
             return null;
     }
+
+
+    @DeleteMapping("/deleteAttachment/{id}")
+    public ResponseEntity<?> deleteAttachment(@PathVariable String id) {
+        Map<String, Object> response = new HashMap<>();
+        try {
+            String tag = "[Attachment] ";
+            //Attachment current = attachmentService.findById(Long.parseLong(id));
+            //if (current != null) {
+                attachmentService.deleteByIdDirect(Long.parseLong(id));
+                String result [] = new String [1];
+                 result[0] = rest.deleteByEndPoint(EndPointSN.ApiDeleteAttachment().concat(id));
+                System.out.println(tag.concat("Response delete attachment: ").concat(result[0]));
+                 response.put("mensaje", true);
+           /* } else {
+                response.put("mensaje", false);
+            }*/ 
+        } catch (DataAccessException e) {
+            response.put("mensaje", "Error deleting attachment");
+            response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    }
 }
 

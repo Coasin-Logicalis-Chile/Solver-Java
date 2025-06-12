@@ -70,6 +70,28 @@ public class Rest {
         return response;
     }
 
+    public String deleteByEndPoint(final String endPoint) {
+    LogSolver.insertInitService("SERVICENOW", endPoint, "DELETE");
+
+    this.restTemplate.getInterceptors().add(
+        new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword())
+    );
+
+    ResponseEntity<String> jsonResponse = restTemplate.exchange(
+        endPoint,
+        HttpMethod.DELETE,
+        new HttpEntity<>(new HttpHeaders()),
+        String.class
+    );
+
+    String response = String.valueOf(jsonResponse.getBody());
+
+    LogSolver.insertResponse("SERVICENOW", endPoint, "DELETE", "", response, jsonResponse.getStatusCode(), "");
+    LogSolver.insertEndService("SERVICENOW", endPoint, "DELETE");
+
+    return response;
+}
+
     public String responseByEndPoint(String endPoint, JSONObject json) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);

@@ -27,6 +27,11 @@ public class AttachmentServiceImpl implements IAttachmentService {
     }
 
     @Override
+    public void deleteByIdDirect(Long id) {
+        dao.deleteByIdDirect(id); // LLama al método del repositorio
+    }
+
+    @Override
     public Attachment findById(Long id) {
         return dao.findById(id).orElse(null);
     }

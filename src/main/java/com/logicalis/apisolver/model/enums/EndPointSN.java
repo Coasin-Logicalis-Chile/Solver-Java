@@ -17,6 +17,10 @@ public class EndPointSN {
         return App.SNInstance().concat("/api/now/attachment");
     }
 
+    public static String ApiDeleteAttachment() {
+        return App.SNInstance().concat("/api/loch/solver/attachment/");
+    }
+
     public static String SrcAttachment() {
         return "/sys_attachment.do?sys_id=";
     }
