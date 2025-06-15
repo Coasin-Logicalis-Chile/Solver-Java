@@ -18,8 +18,8 @@ public interface IAttachmentDAO extends CrudRepository<Attachment, Long> {
 
         @Transactional
         @Modifying
-        @Query("DELETE FROM Attachment a WHERE a.id = :id")
-        void deleteByIdDirect(@Param("id") Long id);
+        @Query("DELETE FROM Attachment a WHERE a.integrationId = :integrationId")
+        void deleteByIntegrationId(@Param("integrationId") String integrationId);
 
         @Query(value = "SELECT id, \n" +
                         "content_type as contentType,\n" +

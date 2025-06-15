@@ -21,7 +21,7 @@ public interface IAttachmentService {
     public void delete(Long id);
 
 
-    public void deleteByIdDirect(Long id);
+    public void deleteByIntegrationId(String integration_id);
 
     public List<Attachment> findByActive(boolean active);
 

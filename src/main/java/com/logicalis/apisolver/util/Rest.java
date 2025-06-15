@@ -70,6 +70,31 @@ public class Rest {
         return response;
     }
 
+    public byte[] downloadAttachmentFromServiceNow(final String endPoint) {
+    LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
+
+    this.restTemplate.getInterceptors().add(
+        new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword())
+    );
+
+    ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
+        endPoint,
+        HttpMethod.GET,
+        null,
+        byte[].class
+    );
+
+    HttpStatus statusCode = responseEntity.getStatusCode();
+    byte[] fileBytes = responseEntity.getBody();
+
+    String responseInfo = "Archivo descargado, tamaño: " + (fileBytes != null ? fileBytes.length : 0) + " bytes";
+
+    LogSolver.insertResponse("SERVICENOW", endPoint, "GET", "", responseInfo, statusCode, "");
+    LogSolver.insertEndService("SERVICENOW", endPoint, "GET");
+
+    return fileBytes;
+}
+
     public String deleteByEndPoint(final String endPoint) {
     LogSolver.insertInitService("SERVICENOW", endPoint, "DELETE");
 
