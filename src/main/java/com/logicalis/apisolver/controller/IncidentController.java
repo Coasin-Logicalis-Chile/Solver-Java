@@ -324,6 +324,7 @@ public class IncidentController {
             SysGroup sysGroup = getSysGroupByIntegrationId(Util.parseJson(json, levelOne, Field.AssignmentGroup.get()));
             currentIncident.setAssignmentGroup(sysGroup);
             SysUser resolvedBy = getSysUserByIntegrationId(Util.parseJson(json, levelOne, Field.ResolvedBy.get()));
+            System.out.println("reason_pending: " + Util.parseJson(json, levelOne, Field.ReasonPending.get()));
             currentIncident.setResolvedBy(resolvedBy);
             currentIncident.setCloseNotes(Util.parseJson(json, levelOne, Field.CloseNotes.get()));
             currentIncident.setCloseCode(Util.parseJson(json, levelOne, Field.CloseCode.get()));
@@ -332,7 +333,8 @@ public class IncidentController {
             currentIncident.setShortDescription(Util.parseJson(json, levelOne, Field.ShortDescription.get()));
             currentIncident.setState(Util.parseJson(json, levelOne, Field.State.get()));
             currentIncident.setIncidentState(Util.parseJson(json, levelOne, Field.IncidentState.get()));
-            currentIncident.setReasonPending(Util.parseJson(json, levelOne, Field.ReasonPending.get()));
+            String reasonPending = Util.parseJson(json, levelOne, Field.ReasonPending.get());
+            currentIncident.setReasonPending(reasonPending);
             currentIncident.setImpact(Util.parseJson(json, levelOne,Field.Impact.get()));
             currentIncident.setUrgency(Util.parseJson(json, levelOne,Field.Urgency.get()));
             currentIncident.setPriority(Util.parseJson(json, levelOne, Field.Priority.get()));
@@ -369,6 +371,11 @@ public class IncidentController {
                 incident.setScRequestParent(exists.getScRequestParent());
                 incident.setMaster(exists.getMaster());
                 tagAction = App.UpdateConsole();
+                 if (incidentRequest.getReason_pending() != null) {
+                    incident.setReasonPending(incidentRequest.getReason_pending());
+                } else {
+                    incident.setReasonPending(exists.getReasonPending());
+                }
                 log.info("Estableciendo atributos al Objeto incident: {}", exists.getNumber());
             }else{
                 log.info("El Incidente no existe en la BD: {}",  incidentRequest.getNumber());
@@ -379,7 +386,7 @@ public class IncidentController {
             incident.setNumber(incidentRequest.getNumber());
             incident.setState(incidentRequest.getState());
             incident.setIncidentState(incidentRequest.getIncident_state());
-            incident.setReasonPending(incidentRequest.getReason_pending());
+            //incident.setReasonPending(incidentRequest.getReason_pending());
             incident.setSysCreatedBy(incidentRequest.getSys_created_by());
             incident.setImpact(incidentRequest.getImpact());
             incident.setActive(incidentRequest.getActive());

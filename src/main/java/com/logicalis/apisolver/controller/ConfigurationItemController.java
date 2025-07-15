@@ -255,5 +255,63 @@ public class ConfigurationItemController {
 		log.info(App.End());
 		return configurationItems;
 	}
+
+	@PutMapping("/configurationItemSN")
+	public ResponseEntity<?> update(@RequestBody ConfigurationItemSolver request) {
+		Map<String, Object> response = new HashMap<>();
+		ConfigurationItem configurationItem = new ConfigurationItem();
+		String tag = "[ConfigurationItem] ";
+		String tagAction = App.CreateConsole();
+
+		try {
+			log.info("Solicitud PUT recibida para actualizar ConfigurationItem: {}", request.getName());
+
+			ConfigurationItem exists = configurationItemService.findByIntegrationId(request.getSys_id());
+
+			if (exists != null) {
+				log.info("ConfigurationItem ya existe en la BD con ID: {}", exists.getId());
+				configurationItem.setId(exists.getId());
+				tagAction = App.UpdateConsole();
+			} else {
+				log.info("Nuevo ConfigurationItem. Será insertado.");
+			}
+
+			// Set de campos básicos
+			configurationItem.setIntegrationId(request.getSys_id());
+			configurationItem.setName(request.getName());
+			configurationItem.setDescription(request.getDescription());
+			configurationItem.setUpdated(request.getUpdated());
+			configurationItem.setCreatedBy(request.getSys_created_by());
+			configurationItem.setAssetTag(request.getAsset_tag());
+			configurationItem.setAssigned(request.getAssigned());
+			configurationItem.setCategory(request.getCategory());
+			configurationItem.setComments(request.getComments());
+			configurationItem.setCreated(request.getSys_created_on());
+			configurationItem.setHostname(request.getHostname());
+			configurationItem.setImpact(request.getImpact());
+			configurationItem.setModelNumber(request.getModel_number());
+			configurationItem.setMonitor(request.getMonitor());
+			configurationItem.setOperationalStatus(request.getOperational_status());
+			configurationItem.setSerialNumber(request.getSerial_number());
+			configurationItem.setSpecialInstruction(request.getSpecial_instruction());
+			configurationItem.setSubcategory(request.getSubcategory());
+			configurationItem.setUpdatedBy(request.getSys_updated_by());
+
+			// Guardar en BD
+			configurationItemService.save(configurationItem);
+
+			log.info("ConfigurationItem procesado correctamente: {}", configurationItem.getName());
+
+		} catch (DataAccessException e) {
+			log.error("Error al actualizar ConfigurationItem: {}", e.getMessage());
+			response.put("mensaje", Errors.dataAccessExceptionUpdate.get());
+			response.put("error", e.getMessage());
+			return new ResponseEntity<>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		response.put("mensaje", Messages.UpdateOK.get());
+		response.put("configurationItem", configurationItem);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
+	}
 }
 

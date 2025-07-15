@@ -1,10 +1,18 @@
 package com.logicalis.apisolver.model;
 
-import com.fasterxml.jackson.annotation.JsonFormat;
-
-import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+
+import javax.persistence.CascadeType;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.JoinColumn;
+import javax.persistence.OneToOne;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
 
 @Entity
 public class Incident implements Serializable {
@@ -67,6 +75,7 @@ public class Incident implements Serializable {
     private String incidentParent;
     private String scRequestParent;
     private String scRequestItemParent;
+    @Column(name = "reason_pending")
     private String reasonPending;
 
     @Column(columnDefinition = "boolean default false")

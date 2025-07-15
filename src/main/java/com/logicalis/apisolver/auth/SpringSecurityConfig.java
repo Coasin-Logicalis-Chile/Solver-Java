@@ -25,7 +25,9 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-
+import javax.servlet.*;
+import java.io.IOException;
+import javax.servlet.http.HttpServletResponse;
 
 
 @EnableGlobalMethodSecurity(securedEnabled = true)
@@ -56,6 +58,39 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers("/api-docs", "/configuration/ui",
                 "/configuration/security", "/webjars/**");
     }
+ 
+    @Bean
+    public FilterRegistrationBean<Filter> securityHeadersFilter() {
+        FilterRegistrationBean<Filter> registrationBean = new FilterRegistrationBean<>();
+
+        registrationBean.setFilter(new Filter() {
+            @Override
+            public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+                    throws IOException, ServletException {
+
+                if (response instanceof HttpServletResponse) {
+                    HttpServletResponse httpResp = (HttpServletResponse) response;
+
+                    httpResp.setHeader("Content-Security-Policy",
+                            "default-src 'self'; script-src 'self'; object-src 'none'; frame-ancestors 'none'");
+
+                    httpResp.setHeader("Strict-Transport-Security", "max-age=31536000; includeSubDomains");
+
+                    httpResp.setHeader("X-Content-Type-Options", "nosniff");
+
+                    httpResp.setHeader("X-Frame-Options", "DENY");
+
+                    httpResp.setHeader("X-XSS-Protection", "1; mode=block");
+                }
+
+                chain.doFilter(request, response);
+            }
+        });
+
+        registrationBean.addUrlPatterns("/*");
+        return registrationBean;
+}
+        
 
     @Bean
     @Override

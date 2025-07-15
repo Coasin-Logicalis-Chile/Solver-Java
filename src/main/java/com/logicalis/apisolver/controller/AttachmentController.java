@@ -306,6 +306,25 @@ public class AttachmentController {
         return new ResponseEntity<Attachment>(attachment, HttpStatus.OK);
     }
 
+@DeleteMapping("/attachment/{integration_id}")
+public ResponseEntity<?> delete(@PathVariable String integration_id) {
+    Map<String, Object> response = new HashMap<>();
+    try {
+        Attachment attachment = attachmentService.findByIntegrationId(integration_id);
+        if (attachment == null) {
+            response.put("mensaje", "El registro ".concat(integration_id.concat(" no existe en la base de datos!")));
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
+        }
+        attachmentService.deleteByIntegrationId(integration_id);
+        response.put("mensaje", "Adjunto eliminado correctamente");
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+    } catch (DataAccessException e) {
+        response.put("mensaje", "Error eliminando el adjunto");
+        response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+    }
+}
+
     @GetMapping("/findBySolver")
     public List<Attachment> show() {
         log.info(App.Start());
@@ -360,6 +379,7 @@ public class AttachmentController {
                 if (resultJson[0].get("result") != null)
                     ListSnAttachmentJson[0] = (JSONArray) parser.parse(resultJson[0].get("result").toString());
                 count[0] = 1;
+                List<AttachmentSolver> nuevos = new ArrayList<>();
                 ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                     tagAction[0] = App.CreateConsole();
                     try {
@@ -406,7 +426,7 @@ public class AttachmentController {
                             tagAction[0] = App.UpdateConsole();
                         }
                         attachmentService.save(attachment[0]);
-                        snAttachments.add(attachmentSolver[0]);
+                        nuevos.add(attachmentSolver[0]);
                         Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])),
                                 Util.getFieldDisplay(domain[0]));
                         count[0] = count[0] + 1;
@@ -414,6 +434,7 @@ public class AttachmentController {
                         log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
                     }
                 });
+                snAttachments.addAll(nuevos);
                 apiResponse[0] = mapper.readValue(result[0], APIResponse.class);
                 status.setUri(EndPointSN.Incident());
                 status.setUserAPI(App.SNUser());
@@ -581,6 +602,7 @@ public class AttachmentController {
                     ListSnAttachmentJson[0].clear();
                     if (resultJson[0].get("result") != null)
                         ListSnAttachmentJson[0] = (JSONArray) parser.parse(resultJson[0].get("result").toString());
+                    List<AttachmentSolver> nuevos = new ArrayList<>();
                     ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
                         tagAction[0] = App.CreateConsole();
                         try {
@@ -628,7 +650,7 @@ public class AttachmentController {
                                         break;
                                 }
                                 attachmentService.save(attachment[0]);
-                                snAttachments.add(attachmentSolver[0]);
+                                nuevos.add(attachmentSolver[0]);
                                 Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])),
                                         Util.getFieldDisplay(domain[0]));
                                 count[0] = count[0] + 1;
@@ -638,6 +660,7 @@ public class AttachmentController {
                             // ").concat(String.valueOf(e)));
                         }
                     });
+                    snAttachments.addAll(nuevos);
                 }
                 // return ResponseEntity.ok().headers(headers).body(attachments);
                 apiResponse[0] = mapper.readValue(result[0], APIResponse.class);

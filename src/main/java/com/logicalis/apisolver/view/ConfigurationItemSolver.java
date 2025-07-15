@@ -1,12 +1,7 @@
 package com.logicalis.apisolver.view;
 
 public class ConfigurationItemSolver {
-    private String name;
-    private String model_categories;
-    private String description;
-    private String status;
-    private String updated;
-    private String sys_created_by;
+    private boolean active;
     private String asset_tag;
     private String assigned;
     private String category;
@@ -14,20 +9,26 @@ public class ConfigurationItemSolver {
     private String correlation_id;
     private String cost_cc;
     private String sys_created_on;
-    private String domain;
+    private String sys_created_by;
+    private String description;
     private String hostname;
     private String impact;
     private String installed;
-    private String managed_domain;
+    private String sys_id;
+    private String model_categories;
     private String model_number;
     private String monitor;
+    private String name;
     private String operational_status;
     private String serial_number;
     private String special_instruction;
+    private String status;
     private String subcategory;
-    private String sys_id;
-    private String sys_updated_by;
-    private boolean active;
+    private String updated;
+    private String sys_updated_by;   
+    private String domain;
+    private String managed_domain;
+    
 
     public String getName() {
         return name;
