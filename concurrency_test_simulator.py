@@ -12,8 +12,7 @@ PROPÓSITO:
 4. Generar reportes para Logicalis
 
 Autor: Ivan Hills - Testing de Concurrencia
-Fecha: Agosto 2025
-Cliente: Logicalis
+
 """
 
 import threading
@@ -41,14 +40,14 @@ class MockInterceptor:
 class MockRestTemplate:
     """Simula RestTemplate de Spring con comportamiento thread-unsafe"""
     def __init__(self):
-        self.interceptors = []  # ❌ PROBLEMA: Lista no thread-safe
+        self.interceptors = []  # PROBLEMA: Lista no thread-safe
         self._request_count = 0
     
     def get_interceptors(self):
         return self.interceptors
     
     def add_interceptor(self, interceptor):
-        """❌ PROBLEMÁTICO: Modificación no thread-safe"""
+        """PROBLEMÁTICO: Modificación no thread-safe"""
         self.interceptors.append(interceptor)
     
     def execute_request(self, url):
@@ -56,7 +55,7 @@ class MockRestTemplate:
         self._request_count += 1
         try:
             # Simular iteración como hace Spring internamente
-            for interceptor in self.interceptors:  # ❌ Aquí ocurre ConcurrentModificationException
+            for interceptor in self.interceptors:  # Aquí ocurre ConcurrentModificationException
                 # Simular procesamiento del interceptor
                 str(interceptor)
                 time.sleep(0.001)  # Simular delay de procesamiento
@@ -93,7 +92,7 @@ class ConcurrencyTestSimulator:
                 'timestamp': datetime.now().isoformat()
             }
             self.errors.append(error_info)
-            print(f"🚨 ERROR en Hilo-{thread_id}: {error_type} - {message}")
+            print(f"ERROR en Hilo-{thread_id}: {error_type} - {message}")
     
     def log_success(self, thread_id, operation):
         """Registrar operaciones exitosas"""
@@ -102,7 +101,7 @@ class ConcurrencyTestSimulator:
     
     def simulate_original_problem(self, num_threads=10, operations_per_thread=50):
         """
-        🔴 TEST 1: REPRODUCE EL PROBLEMA ORIGINAL
+        TEST 1: REPRODUCE EL PROBLEMA ORIGINAL
         
         Simula exactamente lo que hace Rest.java:
         - RestTemplate compartido entre hilos
@@ -110,17 +109,17 @@ class ConcurrencyTestSimulator:
         - Iteración durante modificación = ConcurrentModificationException
         """
         print("\n" + "="*60)
-        print("🔴 REPRODUCIENDO PROBLEMA ORIGINAL DE CONCURRENCIA")
+        print("REPRODUCIENDO PROBLEMA ORIGINAL DE CONCURRENCIA")
         print("="*60)
         
-        # ❌ PROBLEMA: Una sola instancia compartida entre todos los hilos
+        # PROBLEMA: Una sola instancia compartida entre todos los hilos
         shared_rest_template = MockRestTemplate()
         
         def problematic_thread_worker(thread_id):
             """Simula lo que hace cada hilo en Rest.java (PROBLEMÁTICO)"""
             for operation in range(operations_per_thread):
                 try:
-                    # ❌ PROBLEMA: Esto es exactamente lo que hace Rest.java
+                    # PROBLEMA: Esto es exactamente lo que hace Rest.java
                     # Múltiples hilos modifican la misma lista de interceptors
                     interceptor = MockInterceptor(f"user_{thread_id}", "password")
                     shared_rest_template.add_interceptor(interceptor)
@@ -153,23 +152,23 @@ class ConcurrencyTestSimulator:
         
         end_time = time.time()
         
-        print(f"\n📊 RESULTADOS DEL PROBLEMA ORIGINAL:")
-        print(f"   ⏱️  Tiempo total: {end_time - start_time:.2f} segundos")
-        print(f"   🎯 Total operaciones: {num_threads * operations_per_thread}")
-        print(f"   ✅ Operaciones exitosas: {self.results['successful_operations']}")
-        print(f"   🚨 Errores de concurrencia: {self.results['ConcurrentModification_errors']}")
-        print(f"   📈 Tasa de errores: {(self.results['ConcurrentModification_errors'] / (num_threads * operations_per_thread)) * 100:.1f}%")
+        print(f"\nRESULTADOS DEL PROBLEMA ORIGINAL:")
+        print(f"  Tiempo total: {end_time - start_time:.2f} segundos")
+        print(f"  Total operaciones: {num_threads * operations_per_thread}")
+        print(f"  Operaciones exitosas: {self.results['successful_operations']}")
+        print(f"  Errores de concurrencia: {self.results['ConcurrentModification_errors']}")
+        print(f"  Tasa de errores: {(self.results['ConcurrentModification_errors'] / (num_threads * operations_per_thread)) * 100:.1f}%")
         
         if self.results['ConcurrentModification_errors'] > 0:
-            print("✅ PROBLEMA REPRODUCIDO: Se detectaron errores de concurrencia")
+            print("PROBLEMA REPRODUCIDO: Se detectaron errores de concurrencia")
             return True
         else:
-            print("⚠️  NO SE REPRODUJO EL PROBLEMA: Intentar con más hilos/operaciones")
+            print("NO SE REPRODUJO EL PROBLEMA: Intentar con más hilos/operaciones")
             return False
     
     def simulate_thread_safe_solution(self, num_threads=10, operations_per_thread=100):
         """
-        🟢 TEST 2: VALIDA LA SOLUCIÓN THREAD-SAFE
+        TEST 2: VALIDA LA SOLUCIÓN THREAD-SAFE
         
         Demuestra que la solución propuesta elimina el problema:
         - Crear RestTemplate independiente por operación
@@ -177,7 +176,7 @@ class ConcurrencyTestSimulator:
         - Thread-safe por diseño
         """
         print("\n" + "="*60)
-        print("🟢 VALIDANDO SOLUCIÓN THREAD-SAFE")
+        print("VALIDANDO SOLUCIÓN THREAD-SAFE")
         print("="*60)
         
         # Reset results for this test
@@ -221,23 +220,23 @@ class ConcurrencyTestSimulator:
         
         end_time = time.time()
         
-        print(f"\n📊 RESULTADOS DE LA SOLUCIÓN THREAD-SAFE:")
-        print(f"   ⏱️  Tiempo total: {end_time - start_time:.2f} segundos")
-        print(f"   🎯 Total operaciones: {num_threads * operations_per_thread}")
-        print(f"   ✅ Operaciones exitosas: {self.results['successful_operations']}")
-        print(f"   🚨 Errores inesperados: {self.results['UnexpectedError_errors']}")
-        print(f"   📈 Tasa de éxito: {(self.results['successful_operations'] / (num_threads * operations_per_thread)) * 100:.1f}%")
+        print(f"\nRESULTADOS DE LA SOLUCIÓN THREAD-SAFE:")
+        print(f" Tiempo total: {end_time - start_time:.2f} segundos")
+        print(f" Total operaciones: {num_threads * operations_per_thread}")
+        print(f" Operaciones exitosas: {self.results['successful_operations']}")
+        print(f" Errores inesperados: {self.results['UnexpectedError_errors']}")
+        print(f" Tasa de éxito: {(self.results['successful_operations'] / (num_threads * operations_per_thread)) * 100:.1f}%")
         
         if self.results['UnexpectedError_errors'] == 0:
-            print("🎉 SOLUCIÓN VALIDADA: Sin errores de concurrencia")
+            print("SOLUCIÓN VALIDADA: Sin errores de concurrencia")
             return True
         else:
-            print("❌ SOLUCIÓN NECESITA REVISIÓN: Se encontraron errores")
+            print("SOLUCIÓN NECESITA REVISIÓN: Se encontraron errores")
             return False
     
     def stress_test_high_concurrency(self, num_threads=50, operations_per_thread=20):
         """
-        💪 TEST 3: STRESS TEST CON ALTA CONCURRENCIA
+        TEST 3: STRESS TEST CON ALTA CONCURRENCIA
         
         Simula condiciones de producción como las observadas en los logs:
         - http-nio-6050-exec-54, exec-62, exec-51, etc.
@@ -245,7 +244,7 @@ class ConcurrencyTestSimulator:
         - Múltiples operaciones ServiceNow
         """
         print("\n" + "="*60)
-        print("💪 STRESS TEST - ALTA CONCURRENCIA (COMO PRODUCCIÓN)")
+        print("STRESS TEST - ALTA CONCURRENCIA (COMO PRODUCCIÓN)")
         print("="*60)
         
         # Reset results for stress test
@@ -289,8 +288,8 @@ class ConcurrencyTestSimulator:
                 except Exception as e:
                     self.log_error(thread_id, "StressTestError", str(e))
         
-        print(f"🔄 Iniciando STRESS TEST: {num_threads} hilos concurrentes...")
-        print(f"📋 Simulando operaciones: {', '.join(operations_types)}")
+        print(f"Iniciando STRESS TEST: {num_threads} hilos concurrentes...")
+        print(f"Simulando operaciones: {', '.join(operations_types)}")
         
         start_time = time.time()
         
@@ -303,26 +302,25 @@ class ConcurrencyTestSimulator:
         total_ops = num_threads * operations_per_thread
         success_rate = (self.results['successful_operations'] / total_ops) * 100
         
-        print(f"\n📊 RESULTADOS DEL STRESS TEST:")
-        print(f"   ⏱️  Tiempo total: {end_time - start_time:.2f} segundos")
-        print(f"   🎯 Total operaciones: {total_ops}")
-        print(f"   ✅ Operaciones exitosas: {self.results['successful_operations']}")
-        print(f"   🚨 Total errores: {sum(v for k, v in self.results.items() if 'error' in k.lower())}")
-        print(f"   📈 Tasa de éxito: {success_rate:.1f}%")
-        print(f"   ⚡ Throughput: {total_ops / (end_time - start_time):.1f} ops/seg")
+        print(f"\nRESULTADOS DEL STRESS TEST:")
+        print(f"   Tiempo total: {end_time - start_time:.2f} segundos")
+        print(f"   Total operaciones: {total_ops}")
+        print(f"   Operaciones exitosas: {self.results['successful_operations']}")
+        print(f"   Total errores: {sum(v for k, v in self.results.items() if 'error' in k.lower())}")
+        print(f"   Tasa de éxito: {success_rate:.1f}%")
+        print(f"   Throughput: {total_ops / (end_time - start_time):.1f} ops/seg")
         
         # Validar que el sistema es estable bajo alta carga
         if success_rate >= 99.0:
-            print("🏆 STRESS TEST EXITOSO: Sistema estable bajo alta concurrencia")
+            print("STRESS TEST EXITOSO: Sistema estable bajo alta concurrencia")
             return True
         else:
-            print("⚠️  STRESS TEST PARCIAL: Revisar configuración para mejorar estabilidad")
+            print("STRESS TEST PARCIAL: Revisar configuración para mejorar estabilidad")
             return False
     
     def generate_report(self):
-        """Generar reporte detallado para Logicalis"""
         print("\n" + "="*60)
-        print("📋 REPORTE DETALLADO PARA LOGICALIS")
+        print("REPORTE DETALLADO")
         print("="*60)
         
         report = {
@@ -335,21 +333,21 @@ class ConcurrencyTestSimulator:
             },
             "error_analysis": self.errors[-10:] if self.errors else [],  # Last 10 errors
             "recommendations": [
-                "✅ Implementar solución thread-safe en Rest.java",
-                "✅ Crear RestTemplate independientes por operación",
-                "✅ Eliminar modificación de instancias compartidas",
-                "✅ Aplicar patrón Factory para RestTemplate",
-                "📊 Monitorear métricas post-implementación",
-                "🔄 Replicar patrón en otras integraciones similares"
+                "Implementar solución thread-safe en Rest.java",
+                "Crear RestTemplate independientes por operación",
+                "Eliminar modificación de instancias compartidas",
+                "Aplicar patrón Factory para RestTemplate",
+                "Monitorear métricas post-implementación",
+                "Replicar patrón en otras integraciones similares"
             ]
         }
         
-        print(f"📅 Fecha del análisis: {report['timestamp']}")
-        print(f"🔍 Problema original reproducido: {'✅ SÍ' if report['test_summary']['original_problem_reproduced'] else '❌ NO'}")
-        print(f"✅ Solución validada: {'✅ SÍ' if report['test_summary']['solution_validates'] else '❌ NO'}")
-        print(f"💪 Stress test aprobado: {'✅ SÍ' if report['test_summary']['stress_test_passed'] else '❌ NO'}")
+        print(f"Fecha del análisis: {report['timestamp']}")
+        print(f"Problema original reproducido: {'SÍ' if report['test_summary']['original_problem_reproduced'] else 'NO'}")
+        print(f"Solución validada: {'SÍ' if report['test_summary']['solution_validates'] else 'NO'}")
+        print(f"Stress test aprobado: {'SÍ' if report['test_summary']['stress_test_passed'] else 'NO'}")
         
-        print(f"\n💡 RECOMENDACIONES PARA LOGICALIS:")
+        print(f"\n💡 RECOMENDACIONES:")
         for rec in report['recommendations']:
             print(f"   {rec}")
         
@@ -362,7 +360,7 @@ class ConcurrencyTestSimulator:
 
 def main():
     """Función principal - Ejecutar todos los tests"""
-    print("🚀 INICIANDO SIMULADOR DE CONCURRENCIA PARA LOGICALIS")
+    print("INICIANDO SIMULADOR DE CONCURRENCIA PARA LOGICALIS")
     print("="*60)
     print("Problema: ConcurrentModificationException en RestTemplate")
     print("Archivo afectado: Rest.java")
@@ -374,35 +372,35 @@ def main():
     
     try:
         # Test 1: Reproducir problema original
-        problem_reproduced = simulator.simulate_original_problem(num_threads=15, operations_per_thread=30)
+        problem_reproduced = simulator.simulate_original_problem(num_threads=150, operations_per_thread=100)
         
         # Test 2: Validar solución thread-safe
-        solution_works = simulator.simulate_thread_safe_solution(num_threads=15, operations_per_thread=50)
+        solution_works = simulator.simulate_thread_safe_solution(num_threads=150, operations_per_thread=100)
         
         # Test 3: Stress test con alta concurrencia
-        stress_passed = simulator.stress_test_high_concurrency(num_threads=25, operations_per_thread=15)
+        stress_passed = simulator.stress_test_high_concurrency(num_threads=250, operations_per_thread=150)
         
         # Generar reporte final
         report = simulator.generate_report()
         
         # Resumen final
-        print(f"\n🎯 RESUMEN FINAL:")
-        print(f"   🔴 Problema reproducido: {'✅' if problem_reproduced else '❌'}")
-        print(f"   🟢 Solución validada: {'✅' if solution_works else '❌'}")
-        print(f"   💪 Stress test aprobado: {'✅' if stress_passed else '❌'}")
+        print(f"\nRESUMEN FINAL:")
+        print(f"   Problema reproducido: {'SI' if problem_reproduced else 'NO'}")
+        print(f"   Solución validada: {'SI' if solution_works else 'NO'}")
+        print(f"   Stress test aprobado: {'SI' if stress_passed else 'NO'}")
         
         if problem_reproduced and solution_works and stress_passed:
-            print(f"\n🏆 CONCLUSIÓN: SOLUCIÓN LISTA PARA IMPLEMENTAR EN PRODUCCIÓN")
-            print(f"   ✅ El problema fue reproducido exitosamente")
-            print(f"   ✅ La solución thread-safe elimina los errores")
-            print(f"   ✅ El sistema es estable bajo alta carga")
+            print(f"\nCONCLUSIÓN: SOLUCIÓN LISTA PARA IMPLEMENTAR EN PRODUCCIÓN")
+            print(f"   El problema fue reproducido exitosamente")
+            print(f"   La solución thread-safe elimina los errores")
+            print(f"   El sistema es estable bajo alta carga")
             return 0
         else:
-            print(f"\n⚠️  CONCLUSIÓN: REVISAR CONFIGURACIÓN O SOLUCIÓN")
+            print(f"\n CONCLUSIÓN: REVISAR CONFIGURACIÓN O SOLUCIÓN")
             return 1
             
     except Exception as e:
-        print(f"\n❌ ERROR DURANTE TESTING: {e}")
+        print(f"\nERROR DURANTE TESTING: {e}")
         return 1
 
 if __name__ == "__main__":
