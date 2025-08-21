@@ -55,51 +55,21 @@ public class Rest {
         App.setEnvironment(environment);
         Util.setEnvironment(environment);
     }
-    /**
-     * ✅ SOLUCIÓN THREAD-SAFE: Crear RestTemplate independiente por operación
-     * 
-     * PROBLEMA ANTERIOR: Modificaba instancia compartida (thread-unsafe)
-     * SOLUCIÓN: Crear nueva instancia por operación (thread-safe)
-     * 
-     * @return RestTemplate configurado y thread-safe para ServiceNow
-     * @author Ivan Hills - Logicalis Concurrency Fix
-     */
     public RestTemplate restTemplateServiceNow() {
-        // ✅ SOLUCIÓN: Crear nueva instancia para esta operación (thread-safe)
-        RestTemplate threadSafeRestTemplate = new RestTemplate();
-        
-        // Copiar configuración de la plantilla base
-        threadSafeRestTemplate.setRequestFactory(this.restTemplate.getRequestFactory());
-        threadSafeRestTemplate.setMessageConverters(this.restTemplate.getMessageConverters());
-        threadSafeRestTemplate.setErrorHandler(this.restTemplate.getErrorHandler());
-        
-        // Agregar interceptor a la NUEVA instancia (thread-safe)
-        threadSafeRestTemplate.getInterceptors().add(
-            new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword())
-        );
-        
-        return threadSafeRestTemplate;
+        this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+        return restTemplate;
     }
 
-    /**
-     * ✅ CORREGIDO: Usar RestTemplate thread-safe
-     */
     public String responseByEndPoint(final String endPoint) {
         LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
-        
-        // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
-        RestTemplate safeRestTemplate = restTemplateServiceNow();
-        
-        ResponseEntity<String> jsonResponse = safeRestTemplate.getForEntity(endPoint, String.class);
+        this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+        ResponseEntity<String> jsonResponse = restTemplate.getForEntity(endPoint, String.class);
         String response = String.valueOf(jsonResponse.getBody());
         LogSolver.insertResponse("SERVICENOW", endPoint, "GET", "", response, jsonResponse.getStatusCode(), "");
         LogSolver.insertEndService("SERVICENOW", endPoint, "GET");
         return response;
     }
 
-    /**
-     * ✅ CORREGIDO: Usar RestTemplate thread-safe
-     */
     public String responseByEndPoint(String endPoint, JSONObject json) {
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
@@ -108,10 +78,8 @@ public class Rest {
             URI uri = new URI(endPoint);
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
             LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
-            
-            // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
-            RestTemplate safeRestTemplate = restTemplateServiceNow();
-            ResponseEntity<String> jsonResponse = safeRestTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
+            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "GET", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", endPoint, "GET");
             return String.valueOf(jsonResponse);
