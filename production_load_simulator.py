@@ -68,12 +68,12 @@ class ProductionLoadSimulator:
             
             if error and 'concurrent' in str(error).lower():
                 self.results['concurrent_errors'] += 1
-                print(f"🚨 CONCURRENT ERROR - Hilo {thread_id}: {endpoint} - {error}")
+                print(f" CONCURRENT ERROR - Hilo {thread_id}: {endpoint} - {error}")
             elif error and 'timeout' in str(error).lower():
                 self.results['timeout_errors'] += 1
-                print(f"⏰ TIMEOUT - Hilo {thread_id}: {endpoint}")
+                print(f"TIMEOUT - Hilo {thread_id}: {endpoint}")
             elif result_type == 'failed':
-                print(f"❌ ERROR - Hilo {thread_id}: {endpoint} - Status: {status_code}")
+                print(f" ERROR - Hilo {thread_id}: {endpoint} - Status: {status_code}")
     
     def create_request_worker(self, thread_id, num_requests=30):
         """Worker que simula un hilo HTTP como http-nio-6050-exec-XX"""
@@ -152,10 +152,10 @@ class ProductionLoadSimulator:
     
     def simulate_production_load(self, duration_seconds=60, concurrent_threads=15):
         """Simular carga de producción por tiempo determinado"""
-        print(f"🚀 INICIANDO SIMULACIÓN DE CARGA DE PRODUCCIÓN")
-        print(f"⏱️  Duración: {duration_seconds} segundos")
-        print(f"🔄 Hilos concurrentes: {concurrent_threads}")
-        print(f"🎯 Endpoints objetivo: {len(self.endpoints)}")
+        print(f" INICIANDO SIMULACIÓN DE CARGA DE PRODUCCIÓN")
+        print(f"  Duración: {duration_seconds} segundos")
+        print(f" Hilos concurrentes: {concurrent_threads}")
+        print(f" Endpoints objetivo: {len(self.endpoints)}")
         print("-" * 60)
         
         start_time = time.time()
@@ -176,39 +176,39 @@ class ProductionLoadSimulator:
                 completed += 1
                 try:
                     future.result()
-                    print(f"✅ Hilo {completed}/{concurrent_threads} completado")
+                    print(f" Hilo {completed}/{concurrent_threads} completado")
                 except Exception as e:
-                    print(f"❌ Error en hilo {completed}: {e}")
+                    print(f" Error en hilo {completed}: {e}")
         
         total_time = time.time() - start_time
         
         # Mostrar resultados
-        print(f"\n📊 RESULTADOS DE SIMULACIÓN DE PRODUCCIÓN:")
-        print(f"⏱️  Tiempo total: {total_time:.2f} segundos")
-        print(f"🎯 Total requests: {self.results['total_requests']}")
-        print(f"✅ Requests exitosos: {self.results['successful_requests']}")
-        print(f"❌ Requests fallidos: {self.results['failed_requests']}")
-        print(f"🚨 Errores de concurrencia: {self.results['concurrent_errors']}")
-        print(f"⏰ Timeouts: {self.results['timeout_errors']}")
+        print(f"\n RESULTADOS DE SIMULACIÓN DE PRODUCCIÓN:")
+        print(f"  Tiempo total: {total_time:.2f} segundos")
+        print(f" Total requests: {self.results['total_requests']}")
+        print(f" Requests exitosos: {self.results['successful_requests']}")
+        print(f" Requests fallidos: {self.results['failed_requests']}")
+        print(f" Errores de concurrencia: {self.results['concurrent_errors']}")
+        print(f" Timeouts: {self.results['timeout_errors']}")
         
         if self.results['total_requests'] > 0:
             success_rate = (self.results['successful_requests'] / self.results['total_requests']) * 100
-            print(f"📈 Tasa de éxito: {success_rate:.1f}%")
-            print(f"⚡ Throughput: {self.results['total_requests'] / total_time:.1f} req/sec")
+            print(f" Tasa de éxito: {success_rate:.1f}%")
+            print(f" Throughput: {self.results['total_requests'] / total_time:.1f} req/sec")
         
         # Análisis de concurrencia
         if self.results['concurrent_errors'] > 0:
-            print(f"\n🎯 ANÁLISIS DE CONCURRENCIA:")
-            print(f"   🚨 Se detectaron {self.results['concurrent_errors']} errores de concurrencia")
-            print(f"   📊 Esto representa un {(self.results['concurrent_errors'] / self.results['total_requests']) * 100:.1f}% del tráfico")
-            print(f"   💡 RECOMENDACIÓN: Implementar solución thread-safe urgente")
+            print(f"\n ANÁLISIS DE CONCURRENCIA:")
+            print(f"    Se detectaron {self.results['concurrent_errors']} errores de concurrencia")
+            print(f"    Esto representa un {(self.results['concurrent_errors'] / self.results['total_requests']) * 100:.1f}% del tráfico")
+            print(f"    RECOMENDACIÓN: Implementar solución thread-safe urgente")
         else:
-            print(f"\n✅ CONCURRENCIA: No se detectaron errores específicos de concurrencia")
-            print(f"   📝 NOTA: El servidor puede no estar corriendo o ya tiene la solución aplicada")
+            print(f"\n CONCURRENCIA: No se detectaron errores específicos de concurrencia")
+            print(f"    NOTA: El servidor puede no estar corriendo o ya tiene la solución aplicada")
     
     def generate_curl_commands(self):
         """Generar comandos curl para testing manual"""
-        print(f"\n🔧 COMANDOS CURL PARA TESTING MANUAL:")
+        print(f"\n COMANDOS CURL PARA TESTING MANUAL:")
         print("-" * 50)
         
         for i, endpoint in enumerate(self.endpoints[:3]):  # Solo mostrar algunos
@@ -229,7 +229,7 @@ class ProductionLoadSimulator:
 
 def run_concurrent_curl_test():
     """Ejecutar múltiples curl commands concurrentemente"""
-    print("🔄 EJECUTANDO TEST CONCURRENTE CON CURL...")
+    print("EJECUTANDO TEST CONCURRENTE CON CURL...")
     
     # Comandos curl que se ejecutarán concurrentemente
     curl_commands = [
@@ -245,18 +245,18 @@ def run_concurrent_curl_test():
         import subprocess
         try:
             result = subprocess.run(command, shell=True, capture_output=True, text=True, timeout=10)
-            print(f"✅ Curl-{thread_id}: Status {result.returncode}")
+            print(f" Curl-{thread_id}: Status {result.returncode}")
             if result.stderr and 'concurrent' in result.stderr.lower():
-                print(f"🚨 CONCURRENT ERROR detectado en curl-{thread_id}")
+                print(f" CONCURRENT ERROR detectado en curl-{thread_id}")
         except subprocess.TimeoutExpired:
-            print(f"⏰ Timeout en curl-{thread_id}")
+            print(f" Timeout en curl-{thread_id}")
         except Exception as e:
-            print(f"❌ Error en curl-{thread_id}: {e}")
+            print(f" Error en curl-{thread_id}: {e}")
     
     # Ejecutar múltiples curl concurrentemente
     with ThreadPoolExecutor(max_workers=10) as executor:
         for round_num in range(3):  # 3 rondas de requests
-            print(f"\n🔄 Ronda {round_num + 1}/3")
+            print(f"\n Ronda {round_num + 1}/3")
             futures = []
             for i, cmd in enumerate(curl_commands):
                 thread_id = f"{round_num}-{i}"
@@ -268,13 +268,13 @@ def run_concurrent_curl_test():
                 try:
                     future.result()
                 except Exception as e:
-                    print(f"❌ Error en curl execution: {e}")
+                    print(f" Error en curl execution: {e}")
             
             time.sleep(1)  # Pausa entre rondas
 
 def main():
     """Función principal"""
-    print("🎯 SIMULADOR DE CARGA DE PRODUCCIÓN - LOGICALIS")
+    print(" SIMULADOR DE CARGA DE PRODUCCIÓN - LOGICALIS")
     print("=" * 60)
     print("Reproduce las condiciones de carga observadas en los logs")
     print("para identificar errores de concurrencia en RestTemplate")
@@ -301,13 +301,13 @@ def main():
         run_concurrent_curl_test()
         
     else:
-        print("🚀 Ejecutando simulación básica...")
+        print(" Ejecutando simulación básica...")
         simulator.simulate_production_load(duration_seconds=30, concurrent_threads=10)
     
-    print(f"\n💡 SIGUIENTE PASO: Verificar logs de la aplicación para:")
-    print(f"   🔍 ConcurrentModificationException")
-    print(f"   🔍 Errores en BasicAuthenticationInterceptor")
-    print(f"   🔍 ArrayList$Itr.checkForComodification")
+    print(f"\n SIGUIENTE PASO: Verificar logs de la aplicación para:")
+    print(f"    ConcurrentModificationException")
+    print(f"    Errores en BasicAuthenticationInterceptor")
+    print(f"    ArrayList$Itr.checkForComodification")
     
 if __name__ == "__main__":
     main()

@@ -18,24 +18,24 @@ from concurrent.futures import ThreadPoolExecutor
 class QuickConcurrencyDemo:
     
     def __init__(self):
-        self.shared_list = []  # ❌ Simula interceptors de RestTemplate
+        self.shared_list = []  #  Simula interceptors de RestTemplate
         self.error_count = 0
         self.success_count = 0
         self.lock = threading.Lock()
     
     def demonstrate_problem(self):
-        """🔴 Demuestra el problema original"""
-        print("🔴 DEMOSTRANDO PROBLEMA DE CONCURRENCIA...")
+        """ Demuestra el problema original"""
+        print(" DEMOSTRANDO PROBLEMA DE CONCURRENCIA...")
         print("-" * 50)
         
         def problematic_worker(thread_id):
             """Simula lo que hace Rest.java (PROBLEMÁTICO)"""
             for i in range(20):
                 try:
-                    # ❌ PROBLEMA: Modificar lista compartida
+                    #  PROBLEMA: Modificar lista compartida
                     self.shared_list.append(f"interceptor_{thread_id}_{i}")
                     
-                    # ❌ PROBLEMA: Iterar mientras otros modifican
+                    #  PROBLEMA: Iterar mientras otros modifican
                     for item in self.shared_list:
                         time.sleep(0.001)  # Simular procesamiento
                     
@@ -57,17 +57,17 @@ class QuickConcurrencyDemo:
             for future in futures:
                 future.result()
         
-        print(f"✅ Operaciones exitosas: {self.success_count}")
-        print(f"🚨 Errores detectados: {self.error_count}")
+        print(f" Operaciones exitosas: {self.success_count}")
+        print(f" Errores detectados: {self.error_count}")
         
         if self.error_count > 0:
-            print("✅ PROBLEMA REPRODUCIDO: Se encontraron errores de concurrencia")
+            print(" PROBLEMA REPRODUCIDO: Se encontraron errores de concurrencia")
         else:
-            print("⚠️  Problema no reproducido, intentar con más carga")
+            print("  Problema no reproducido, intentar con más carga")
     
     def demonstrate_solution(self):
-        """🟢 Demuestra la solución thread-safe"""
-        print("\n🟢 DEMOSTRANDO SOLUCIÓN THREAD-SAFE...")
+        """ Demuestra la solución thread-safe"""
+        print("\n DEMOSTRANDO SOLUCIÓN THREAD-SAFE...")
         print("-" * 50)
         
         # Reset counters
@@ -78,11 +78,11 @@ class QuickConcurrencyDemo:
             """Implementa la solución thread-safe"""
             for i in range(30):
                 try:
-                    # ✅ SOLUCIÓN: Crear lista local (no compartida)
+                    #  SOLUCIÓN: Crear lista local (no compartida)
                     local_interceptors = []
                     local_interceptors.append(f"safe_interceptor_{thread_id}_{i}")
                     
-                    # ✅ SEGURO: Iterar sobre lista local
+                    #  SEGURO: Iterar sobre lista local
                     for item in local_interceptors:
                         time.sleep(0.001)  # Simular procesamiento
                     
@@ -100,17 +100,17 @@ class QuickConcurrencyDemo:
             for future in futures:
                 future.result()
         
-        print(f"✅ Operaciones exitosas: {self.success_count}")
-        print(f"🚨 Errores detectados: {self.error_count}")
+        print(f" Operaciones exitosas: {self.success_count}")
+        print(f" Errores detectados: {self.error_count}")
         
         if self.error_count == 0:
-            print("🎉 SOLUCIÓN VALIDADA: Sin errores de concurrencia")
+            print(" SOLUCIÓN VALIDADA: Sin errores de concurrencia")
         else:
-            print("❌ Solución necesita revisión")
+            print(" Solución necesita revisión")
 
 def main():
     """Ejecutar demostración completa"""
-    print("🚀 QUICK CONCURRENCY TEST - LOGICALIS")
+    print(" QUICK CONCURRENCY TEST - LOGICALIS")
     print("=" * 50)
     print("Simulando problema de RestTemplate en Rest.java")
     print("=" * 50)
@@ -123,11 +123,11 @@ def main():
     # Test 2: Solución thread-safe
     demo.demonstrate_solution()
     
-    print("\n🎯 RESUMEN:")
-    print("✅ Problema de concurrencia demostrado")
-    print("✅ Solución thread-safe validada")
-    print("\n💡 RECOMENDACIÓN: Aplicar patrón thread-safe en Rest.java")
-    print("📋 Ver archivo completo: concurrency_test_simulator.py")
+    print("\n RESUMEN:")
+    print(" Problema de concurrencia demostrado")
+    print(" Solución thread-safe validada")
+    print("\n RECOMENDACIÓN: Aplicar patrón thread-safe en Rest.java")
+    print(" Ver archivo completo: concurrency_test_simulator.py")
     
 if __name__ == "__main__":
     main()
