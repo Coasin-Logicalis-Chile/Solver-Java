@@ -64,12 +64,12 @@ class MockRestTemplate:
             return f"Error: {e}"
 
 class ThreadSafeRestTemplate:
-    """✅ SOLUCIÓN: Versión thread-safe del RestTemplate"""
+    """ SOLUCIÓN: Versión thread-safe del RestTemplate"""
     def __init__(self):
         self.base_config = {}
     
     def create_instance(self):
-        """✅ SOLUCIÓN: Crear nueva instancia por request"""
+        """ SOLUCIÓN: Crear nueva instancia por request"""
         template = MockRestTemplate()
         return template
 
@@ -143,7 +143,7 @@ class ConcurrencyTestSimulator:
                     self.log_error(thread_id, "ConcurrentModification", str(e))
         
         # Ejecutar múltiples hilos concurrentemente (como en producción)
-        print(f"🔄 Iniciando {num_threads} hilos con {operations_per_thread} operaciones cada uno...")
+        print(f" Iniciando {num_threads} hilos con {operations_per_thread} operaciones cada uno...")
         start_time = time.time()
         
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -183,14 +183,14 @@ class ConcurrencyTestSimulator:
         self.results.clear()
         self.errors.clear()
         
-        # ✅ SOLUCIÓN: Factory para crear instancias thread-safe
+        #  SOLUCIÓN: Factory para crear instancias thread-safe
         thread_safe_factory = ThreadSafeRestTemplate()
         
         def thread_safe_worker(thread_id):
             """Implementa la solución thread-safe propuesta"""
             for operation in range(operations_per_thread):
                 try:
-                    # ✅ SOLUCIÓN: Crear nueva instancia por operación (thread-safe)
+                    #  SOLUCIÓN: Crear nueva instancia por operación (thread-safe)
                     safe_rest_template = thread_safe_factory.create_instance()
                     
                     # Configurar interceptor en la instancia local (no compartida)
@@ -211,7 +211,7 @@ class ConcurrencyTestSimulator:
                 except Exception as e:
                     self.log_error(thread_id, "UnexpectedError", str(e))
         
-        print(f"🔄 Iniciando {num_threads} hilos con {operations_per_thread} operaciones cada uno...")
+        print(f" Iniciando {num_threads} hilos con {operations_per_thread} operaciones cada uno...")
         start_time = time.time()
         
         with ThreadPoolExecutor(max_workers=num_threads) as executor:
@@ -263,7 +263,7 @@ class ConcurrencyTestSimulator:
             """Worker que simula alta carga como en producción"""
             for operation in range(operations_per_thread):
                 try:
-                    # ✅ Usar solución thread-safe
+                    #  Usar solución thread-safe
                     safe_template = thread_safe_factory.create_instance()
                     
                     # Simular diferentes tipos de operaciones ServiceNow
@@ -347,14 +347,14 @@ class ConcurrencyTestSimulator:
         print(f"Solución validada: {'SÍ' if report['test_summary']['solution_validates'] else 'NO'}")
         print(f"Stress test aprobado: {'SÍ' if report['test_summary']['stress_test_passed'] else 'NO'}")
         
-        print(f"\n💡 RECOMENDACIONES:")
+        print(f"\n RECOMENDACIONES:")
         for rec in report['recommendations']:
             print(f"   {rec}")
         
         # Guardar reporte en archivo
         with open('logicalis_concurrency_test_report.json', 'w', encoding='utf-8') as f:
             json.dump(report, f, indent=2, ensure_ascii=False)
-        print(f"\n📄 Reporte guardado en: logicalis_concurrency_test_report.json")
+        print(f"\n Reporte guardado en: logicalis_concurrency_test_report.json")
         
         return report
 
@@ -412,20 +412,6 @@ INSTRUCCIONES DE EJECUCIÓN:
 
 1. Ejecutar todos los tests:
    python concurrency_test_simulator.py
-
-2. Solo el problema original:
-   python -c "
-   from concurrency_test_simulator import ConcurrencyTestSimulator
-   sim = ConcurrencyTestSimulator()
-   sim.simulate_original_problem(20, 50)
-   "
-
-3. Solo validar solución:
-   python -c "
-   from concurrency_test_simulator import ConcurrencyTestSimulator
-   sim = ConcurrencyTestSimulator()
-   sim.simulate_thread_safe_solution(20, 100)
-   "
 
 RESULTADO ESPERADO:
 - Test 1: Debería reproducir errores de concurrencia
