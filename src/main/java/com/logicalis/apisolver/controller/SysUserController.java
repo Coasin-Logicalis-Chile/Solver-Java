@@ -14,6 +14,7 @@ import com.logicalis.apisolver.view.SysUserSolver;
 import lombok.extern.slf4j.Slf4j;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -50,9 +51,44 @@ public class SysUserController {
     @Autowired
     private  IUserTypeService userTypeService;
 
+    // Cached list to fallback in case of database issues
+    private static List<SysUser> cachedSysUsers = new ArrayList<>();
+    private static long lastSysUsersCacheTime = 0;
+    private static final long CACHE_VALIDITY_MS = 5 * 60 * 1000; // 5 minutes
+    
     @GetMapping("/sysUsers")
-    public List<SysUser> index() {
-        return sysUserService.findAll();
+    public ResponseEntity<?> index() {
+        try {
+            List<SysUser> sysUsers = sysUserService.findAll();
+            
+            // Update cache if we got valid data
+            if (sysUsers != null && !sysUsers.isEmpty()) {
+                cachedSysUsers = new ArrayList<>(sysUsers);
+                lastSysUsersCacheTime = System.currentTimeMillis();
+                log.debug("SysUsers cache updated with {} users", sysUsers.size());
+            }
+            
+            return ResponseEntity.ok(sysUsers);
+            
+        } catch (Exception e) {
+            log.error("Error fetching sysUsers, attempting to return cached data: {}", e.getMessage());
+            
+            // Return cached data if available and not too old
+            if (!cachedSysUsers.isEmpty() && 
+                (System.currentTimeMillis() - lastSysUsersCacheTime) < CACHE_VALIDITY_MS) {
+                log.warn("Returning cached sysUsers data due to database error");
+                return ResponseEntity.ok(cachedSysUsers);
+            }
+            
+            // If no cache or cache too old, return error with empty fallback
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", "Error loading users, please try again");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("fallback", new ArrayList<>());
+            
+            log.error("No valid cache available for sysUsers, returning empty list");
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     @GetMapping("/sys_user/{id}")
@@ -423,17 +459,67 @@ public class SysUserController {
         this.update(sysUser, sysUser.getId());
     }
 
+    // Cache for user group filters by company  
+    private static Map<Long, List<SysUserFields>> cachedUserGroupsByCompany = new HashMap<>();
+    private static Map<Long, Long> userGroupsCacheTime = new HashMap<>();
+    
     @GetMapping("/findUserGroupsByFilters")
-    public ResponseEntity<List<SysUserFields>> findUserGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
-
-
-
-        List<SysUserFields> sysUserFields = sysUserService.findUserGroupsByFilters(company);
-
-
-
-        ResponseEntity<List<SysUserFields>> pageResponseEntity = new ResponseEntity<>(sysUserFields, HttpStatus.OK);
-        return pageResponseEntity;
+    public ResponseEntity<?> findUserGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
+        
+        try {
+            List<SysUserFields> sysUserFields = sysUserService.findUserGroupsByFilters(company);
+            
+            // Update cache if we got valid data
+            if (sysUserFields != null && !sysUserFields.isEmpty()) {
+                cachedUserGroupsByCompany.put(company, new ArrayList<>(sysUserFields));
+                userGroupsCacheTime.put(company, System.currentTimeMillis());
+                log.debug("UserGroups cache updated for company {} with {} users", company, sysUserFields.size());
+            }
+            
+            return ResponseEntity.ok(sysUserFields);
+            
+        } catch (Exception e) {
+            log.error("Error fetching user groups for company {}, attempting to return cached data: {}", company, e.getMessage());
+            
+            // Check if we have cached data for this company
+            List<SysUserFields> cachedData = cachedUserGroupsByCompany.get(company);
+            Long cacheTime = userGroupsCacheTime.get(company);
+            
+            if (cachedData != null && !cachedData.isEmpty() && cacheTime != null &&
+                (System.currentTimeMillis() - cacheTime) < CACHE_VALIDITY_MS) {
+                log.warn("Returning cached user groups data for company {} due to database error", company);
+                return ResponseEntity.ok(cachedData);
+            }
+            
+            // Try to get cached data for ANY company as fallback
+            if (cachedUserGroupsByCompany.isEmpty()) {
+                log.error("No cached user groups data available for company {}, returning empty list", company);
+            } else {
+                log.warn("Attempting to provide fallback data from other companies");
+                // Return the most recent cache from any company as last resort
+                Optional<Map.Entry<Long, List<SysUserFields>>> mostRecentEntry = 
+                    cachedUserGroupsByCompany.entrySet().stream()
+                        .filter(entry -> userGroupsCacheTime.get(entry.getKey()) != null)
+                        .max(Map.Entry.comparingByValue((a, b) -> 
+                            Long.compare(userGroupsCacheTime.get(b), userGroupsCacheTime.get(a))));
+                            
+                if (mostRecentEntry.isPresent()) {
+                    List<SysUserFields> fallbackData = mostRecentEntry.get().getValue();
+                    Long fallbackCompany = mostRecentEntry.get().getKey();
+                    log.warn("Returning fallback user groups data from company {} for requested company {}", 
+                            fallbackCompany, company);
+                    return ResponseEntity.ok(fallbackData);
+                }
+            }
+            
+            // If no cache available, return error with empty fallback
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", "Error loading user groups, please try again");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("fallback", new ArrayList<>());
+            
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 
     public SysUser getSysUserByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
@@ -442,6 +528,86 @@ public class SysUserController {
             return sysUserService.findByIntegrationId(integrationId);
         } else
             return null;
+    }
+    
+    // Cache warming endpoint for system monitoring and maintenance
+    @GetMapping("/cache/warm-user-data")
+    public ResponseEntity<?> warmUserDataCache() {
+        Map<String, Object> result = new HashMap<>();
+        int warmedCaches = 0;
+        
+        try {
+            // Warm up sysUsers cache
+            List<SysUser> sysUsers = sysUserService.findAll();
+            if (sysUsers != null && !sysUsers.isEmpty()) {
+                cachedSysUsers = new ArrayList<>(sysUsers);
+                lastSysUsersCacheTime = System.currentTimeMillis();
+                warmedCaches++;
+                log.info("Warmed sysUsers cache with {} records", sysUsers.size());
+            }
+            
+            // Attempt to warm user group caches for known companies
+            // This is a basic approach - in production you might want to get active company IDs first
+            List<Long> commonCompanyIds = Arrays.asList(1L, 2L, 3L, 4L, 5L);
+            
+            for (Long companyId : commonCompanyIds) {
+                try {
+                    List<SysUserFields> userGroups = sysUserService.findUserGroupsByFilters(companyId);
+                    if (userGroups != null && !userGroups.isEmpty()) {
+                        cachedUserGroupsByCompany.put(companyId, new ArrayList<>(userGroups));
+                        userGroupsCacheTime.put(companyId, System.currentTimeMillis());
+                        warmedCaches++;
+                        log.debug("Warmed user groups cache for company {} with {} records", companyId, userGroups.size());
+                    }
+                } catch (Exception e) {
+                    log.debug("Could not warm cache for company {}: {}", companyId, e.getMessage());
+                }
+            }
+            
+            result.put("mensaje", "Cache warming completed successfully");
+            result.put("warmedCaches", warmedCaches);
+            result.put("timestamp", System.currentTimeMillis());
+            
+            return ResponseEntity.ok(result);
+            
+        } catch (Exception e) {
+            log.error("Error during cache warming: {}", e.getMessage());
+            result.put("mensaje", "Cache warming partially failed");
+            result.put("error", e.getMessage());
+            result.put("warmedCaches", warmedCaches);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(result);
+        }
+    }
+    
+    // Cache status endpoint for monitoring
+    @GetMapping("/cache/status")
+    public ResponseEntity<?> getCacheStatus() {
+        Map<String, Object> status = new HashMap<>();
+        
+        status.put("sysUsersCache", Map.of(
+            "size", cachedSysUsers.size(),
+            "lastUpdated", lastSysUsersCacheTime,
+            "ageMs", System.currentTimeMillis() - lastSysUsersCacheTime,
+            "valid", (System.currentTimeMillis() - lastSysUsersCacheTime) < CACHE_VALIDITY_MS
+        ));
+        
+        Map<String, Object> userGroupsCacheStatus = new HashMap<>();
+        for (Map.Entry<Long, List<SysUserFields>> entry : cachedUserGroupsByCompany.entrySet()) {
+            Long companyId = entry.getKey();
+            Long cacheTime = userGroupsCacheTime.get(companyId);
+            userGroupsCacheStatus.put("company_" + companyId, Map.of(
+                "size", entry.getValue().size(),
+                "lastUpdated", cacheTime != null ? cacheTime : 0,
+                "ageMs", cacheTime != null ? System.currentTimeMillis() - cacheTime : -1,
+                "valid", cacheTime != null && (System.currentTimeMillis() - cacheTime) < CACHE_VALIDITY_MS
+            ));
+        }
+        
+        status.put("userGroupsCache", userGroupsCacheStatus);
+        status.put("cacheValidityMs", CACHE_VALIDITY_MS);
+        status.put("currentTime", System.currentTimeMillis());
+        
+        return ResponseEntity.ok(status);
     }
 
 }

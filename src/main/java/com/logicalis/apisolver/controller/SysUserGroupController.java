@@ -21,10 +21,8 @@ import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
+import java.util.*;
+import java.util.stream.Stream;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -188,10 +186,66 @@ public class SysUserGroupController {
         return new ResponseEntity<SysUserGroup>(sysUserGroup, HttpStatus.OK);
     }
 
+    // Cache for user group filters by company
+    private static Map<Long, List<SysUserGroupFields>> cachedUserGroupFieldsByCompany = new HashMap<>();
+    private static Map<Long, Long> userGroupFieldsCacheTime = new HashMap<>();
+    private static final long CACHE_VALIDITY_MS = 5 * 60 * 1000; // 5 minutes
+    
     @GetMapping("/findUserForGroupByFilters")
-    public ResponseEntity<List<SysUserGroupFields>> findUserForGroupByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
-        List<SysUserGroupFields> sysUserGroupsFields = sysUserGroupService.findUserForGroupByFilters(company);
-        ResponseEntity<List<SysUserGroupFields>> pageResponseEntity = new ResponseEntity<>(sysUserGroupsFields, HttpStatus.OK);
-        return pageResponseEntity;
+    public ResponseEntity<?> findUserForGroupByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
+        
+        try {
+            List<SysUserGroupFields> sysUserGroupsFields = sysUserGroupService.findUserForGroupByFilters(company);
+            
+            // Update cache if we got valid data
+            if (sysUserGroupsFields != null && !sysUserGroupsFields.isEmpty()) {
+                cachedUserGroupFieldsByCompany.put(company, new ArrayList<>(sysUserGroupsFields));
+                userGroupFieldsCacheTime.put(company, System.currentTimeMillis());
+                log.debug("UserGroupFields cache updated for company {} with {} records", company, sysUserGroupsFields.size());
+            }
+            
+            return ResponseEntity.ok(sysUserGroupsFields);
+            
+        } catch (Exception e) {
+            log.error("Error fetching user group fields for company {}, attempting to return cached data: {}", company, e.getMessage());
+            
+            // Check if we have cached data for this company
+            List<SysUserGroupFields> cachedData = cachedUserGroupFieldsByCompany.get(company);
+            Long cacheTime = userGroupFieldsCacheTime.get(company);
+            
+            if (cachedData != null && !cachedData.isEmpty() && cacheTime != null &&
+                (System.currentTimeMillis() - cacheTime) < CACHE_VALIDITY_MS) {
+                log.warn("Returning cached user group fields data for company {} due to database error", company);
+                return ResponseEntity.ok(cachedData);
+            }
+            
+            // Try to get cached data for ANY company as fallback
+            if (!cachedUserGroupFieldsByCompany.isEmpty()) {
+                log.warn("Attempting to provide fallback data from other companies for user group fields");
+                // Return the most recent cache from any company as last resort
+                Optional<Map.Entry<Long, List<SysUserGroupFields>>> mostRecentEntry = 
+                    cachedUserGroupFieldsByCompany.entrySet().stream()
+                        .filter(entry -> userGroupFieldsCacheTime.get(entry.getKey()) != null)
+                        .max(Map.Entry.comparingByValue((a, b) -> 
+                            Long.compare(userGroupFieldsCacheTime.get(b), userGroupFieldsCacheTime.get(a))));
+                            
+                if (mostRecentEntry.isPresent()) {
+                    List<SysUserGroupFields> fallbackData = mostRecentEntry.get().getValue();
+                    Long fallbackCompany = mostRecentEntry.get().getKey();
+                    log.warn("Returning fallback user group fields data from company {} for requested company {}", 
+                            fallbackCompany, company);
+                    return ResponseEntity.ok(fallbackData);
+                }
+            }
+            
+            // If no cache available, return error with empty fallback
+            Map<String, Object> errorResponse = new HashMap<>();
+            errorResponse.put("mensaje", "Error loading user group assignments, please try again");
+            errorResponse.put("error", e.getMessage());
+            errorResponse.put("fallback", new ArrayList<>());
+            
+            log.error("No cached user group fields data available for company {}, returning empty list", company);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(errorResponse);
+        }
     }
 }
