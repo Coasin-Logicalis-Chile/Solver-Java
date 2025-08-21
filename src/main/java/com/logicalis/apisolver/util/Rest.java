@@ -129,7 +129,10 @@ public class Rest {
             HttpHeaders headers = new HttpHeaders();
             String url = urlEndPoint;
             HttpMethod requestMethod = HttpMethod.POST;
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            
+            // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
+            RestTemplate safeRestTemplate = restTemplateServiceNow();
+            
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
             byte[] bytes = file.getName().getBytes(StandardCharsets.UTF_8);
@@ -155,7 +158,7 @@ public class Rest {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             LogSolver.insertInitService("SERVICENOW", url, requestMethod.toString());
-            ResponseEntity<String> response = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
+            ResponseEntity<String> response = safeRestTemplate.exchange(url, requestMethod, requestEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", url, requestMethod.toString(), requestEntity.getBody().toString(), response.getBody(), response.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", url, requestMethod.toString());
             log.info("file upload status code: " + response.getStatusCode());
@@ -173,7 +176,10 @@ public class Rest {
             HttpHeaders headers = new HttpHeaders();
             String url = urlEndPoint;
             HttpMethod requestMethod = HttpMethod.POST;
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            
+            // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
+            RestTemplate safeRestTemplate = restTemplateServiceNow();
+            
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
             //  byte[] bytes = file.getName().getBytes(StandardCharsets.UTF_8);
@@ -199,7 +205,7 @@ public class Rest {
 
             HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
             LogSolver.insertInitService("SERVICENOW", url, requestMethod.toString());
-            ResponseEntity<String> responseEntity = restTemplate.exchange(url, requestMethod, requestEntity, String.class);
+            ResponseEntity<String> responseEntity = safeRestTemplate.exchange(url, requestMethod, requestEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", url, requestMethod.toString(), requestEntity.getBody().toString(), responseEntity.getBody(), responseEntity.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", url, requestMethod.toString());
             Gson gson = new Gson();
@@ -335,10 +341,11 @@ public class Rest {
 
             HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
 
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            // ✅ CORRECCIÓN CRÍTICA: Usar RestTemplate thread-safe
+            RestTemplate safeRestTemplate = restTemplateServiceNow();
             LogSolver.insertInitService("SERVICENOW", endPoint, "POST");
 
-            ResponseEntity<String> responseEntity = restTemplate.postForEntity(uri, httpEntity, String.class);
+            ResponseEntity<String> responseEntity = safeRestTemplate.postForEntity(uri, httpEntity, String.class);
 
             log.info("httpEntity: "+httpEntity);
             log.info("httpEntity Body: "+httpEntity.getBody());
@@ -415,9 +422,11 @@ public class Rest {
             json.put("knowledge", incident.getKnowledge());
             json.put("reasonPending", incident.getReasonPending());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            
+            // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
+            RestTemplate safeRestTemplate = restTemplateServiceNow();
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
-            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            ResponseEntity<String> jsonResponse = safeRestTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
             String search = "\"result\":";
@@ -443,10 +452,11 @@ public class Rest {
             json.put("integrationId", sysUser.getIntegrationId());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
 
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
+            RestTemplate safeRestTemplate = restTemplateServiceNow();
 
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
-            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            ResponseEntity<String> jsonResponse = safeRestTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
 
             System.out.println("=========================");
             System.out.println("Posible Null: "+httpEntity.getBody().toString());
@@ -480,8 +490,10 @@ public class Rest {
             json.put("state", scRequestItem.getState());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
-            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            
+            // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
+            RestTemplate safeRestTemplate = restTemplateServiceNow();
+            ResponseEntity<String> jsonResponse = safeRestTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
         } catch (URISyntaxException e) {
@@ -514,9 +526,11 @@ public class Rest {
             json.put("closedBy", Util.isNullIntegration(scTask.getClosedBy()));
             json.put("reasonPending", scTask.getReasonPending());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
+            
+            // ✅ CORRECCIÓN: Usar RestTemplate thread-safe
+            RestTemplate safeRestTemplate = restTemplateServiceNow();
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
-            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+            ResponseEntity<String> jsonResponse = safeRestTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody().toString(), jsonResponse.getStatusCode(), headers.toString() );
             LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
             String tag = "[ScTask]";
