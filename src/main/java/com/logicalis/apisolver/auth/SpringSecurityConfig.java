@@ -82,6 +82,9 @@ protected void configure(HttpSecurity http) throws Exception {
         .and()
         .csrf().disable()
         .authorizeRequests()
+            // Allow all OPTIONS requests (CORS preflight) 
+            .antMatchers(HttpMethod.OPTIONS, "/**")
+            .permitAll()
             .antMatchers(HttpMethod.GET, 
                 "/api/v1/getUsers", "/api/v1/sn_sc_request_item", "/api/v1/sn_domains", 
                 "/api/v1/domains", "/api/v1/sn_incidents", "/api/v1/incidents", 
@@ -109,10 +112,43 @@ protected void configure(HttpSecurity http) throws Exception {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("http://localhost:8084", "http://localhost:6050", "http://localhost:4200", "*"));
-        configuration.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        
+        // Remove wildcard when using credentials - specify exact origins instead
+        configuration.setAllowedOrigins(Arrays.asList(
+            "http://localhost:3000",   // Common React dev server
+            "http://localhost:3001",   // Alternative React/Vue port
+            "http://localhost:4200",   // Angular dev server
+            "http://localhost:5173",   // Vite dev server
+            "http://localhost:8080",   // Common dev port
+            "http://localhost:8084",   // Your existing config
+            "http://localhost:6050"    // Your existing config
+        ));
+        
+        configuration.setAllowedMethods(Arrays.asList(
+            "GET", "POST", "PUT", "DELETE", "OPTIONS", "HEAD", "PATCH"
+        ));
+        
         configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Arrays.asList("Content-Type", "Authorization"));
+        
+        // Allow common headers that frontends typically send
+        configuration.setAllowedHeaders(Arrays.asList(
+            "Content-Type", 
+            "Authorization", 
+            "X-Requested-With",
+            "Accept",
+            "Origin",
+            "Access-Control-Request-Method",
+            "Access-Control-Request-Headers"
+        ));
+        
+        // Expose headers that the frontend might need to read
+        configuration.setExposedHeaders(Arrays.asList(
+            "Access-Control-Allow-Origin",
+            "Access-Control-Allow-Credentials"
+        ));
+        
+        // Increase preflight cache time (optional)
+        configuration.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", configuration);
