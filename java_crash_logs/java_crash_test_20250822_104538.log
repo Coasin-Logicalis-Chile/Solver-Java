@@ -1,0 +1,10 @@
+2025-08-22 10:45:38,117 - __main__ - WARNING -    • ConcurrentModificationException
+2025-08-22 10:45:38,117 - __main__ - WARNING -    • BasicAuthenticationInterceptor errors
+2025-08-22 10:45:38,117 - __main__ - WARNING -    • ArrayList$Itr.checkForComodification
+2025-08-22 10:45:38,118 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 10:45:38,126 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 10:50:38,928 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 10:50:38,932 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 10:50:38,932 - JavaErrorCrashTester - INFO - Total Requests: 70710
+2025-08-22 10:50:38,933 - JavaErrorCrashTester - INFO - Successful Requests: 64796
+2025-08-22 10:50:38,938 - JavaErrorCrashTester - INFO - Total Java Errors Found: 0

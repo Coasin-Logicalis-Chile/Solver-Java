@@ -1,0 +1,36 @@
+2025-08-22 11:42:42,694 - __main__ - INFO - INICIO TEST DE CRASH JAVA logging en: java_crash_logs\java_crash_localhost_20250822_114242.log
+2025-08-22 11:42:42,694 - __main__ - WARNING - OBJETIVO: ConcurrentModificationException, BasicAuthenticationInterceptor, ArrayList$Itr
+2025-08-22 11:42:42,694 - __main__ - WARNING - OBJETIVOS ERRORES JAVA ESPECIFICOS:
+2025-08-22 11:42:42,695 - __main__ - WARNING -    - ConcurrentModificationException
+2025-08-22 11:42:42,695 - __main__ - WARNING -    - BasicAuthenticationInterceptor errors
+2025-08-22 11:42:42,695 - __main__ - WARNING -    - ArrayList$Itr.checkForComodification
+2025-08-22 11:42:42,696 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 11:42:42,696 - JavaErrorCrashTester - INFO - TEST DE CRASH JAVA: JAVA_CHAOS
+2025-08-22 11:42:42,697 - JavaErrorCrashTester - INFO - OBJETIVO: ConcurrentModificationException, BasicAuthenticationInterceptor, ArrayList$Itr
+2025-08-22 11:42:42,697 - JavaErrorCrashTester - INFO - INTENSIDAD: HIGH
+2025-08-22 11:42:42,697 - JavaErrorCrashTester - INFO - OBJETIVO: http://localhost:6051
+2025-08-22 11:42:42,698 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 11:42:42,698 - JavaErrorCrashTester - INFO - INICIANDO JAVA CHAOS ATTACK
+2025-08-22 11:42:42,698 - JavaErrorCrashTester - INFO -    Lanzando concurrent_modification
+2025-08-22 11:42:42,698 - JavaErrorCrashTester - INFO -    Lanzando auth_interceptor
+2025-08-22 11:42:42,699 - JavaErrorCrashTester - INFO -    Lanzando iterator_corruption
+2025-08-22 11:42:42,699 - JavaErrorCrashTester - INFO -    Lanzando servicenow_overload
+2025-08-22 11:42:42,699 - JavaErrorCrashTester - INFO -    Lanzando authentication_storm
+2025-08-22 11:42:42,699 - JavaErrorCrashTester - INFO -    Lanzando collection_race
+2025-08-22 11:42:42,699 - JavaErrorCrashTester - INFO - INICIANDO ATAQUE CONCURRENT MODIFICATION
+2025-08-22 11:42:42,700 - JavaErrorCrashTester - INFO - INICIANDO ATAQUE AUTH INTERCEPTOR
+2025-08-22 11:42:42,700 - JavaErrorCrashTester - INFO - INICIANDO ATAQUE ITERATOR CORRUPTION
+2025-08-22 11:42:42,701 - JavaErrorCrashTester - INFO - INICIANDO ATAQUE SERVICENOW OVERLOAD
+2025-08-22 11:42:42,701 - JavaErrorCrashTester - INFO - INICIANDO AUTHENTICATION STORM
+2025-08-22 11:42:42,702 - JavaErrorCrashTester - INFO - INICIANDO COLLECTION RACE ATTACK
+2025-08-22 11:42:45,534 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 11:42:45,535 - JavaErrorCrashTester - INFO - RESULTADOS TEST DE CRASH JAVA
+2025-08-22 11:42:45,535 - JavaErrorCrashTester - INFO - ================================================================================
+2025-08-22 11:42:45,535 - JavaErrorCrashTester - INFO - Total Requests: 12840
+2025-08-22 11:42:45,535 - JavaErrorCrashTester - INFO - Requests Exitosos: 0
+2025-08-22 11:42:45,535 - JavaErrorCrashTester - INFO - ConcurrentModificationException: 0
+2025-08-22 11:42:45,536 - JavaErrorCrashTester - INFO - BasicAuthenticationInterceptor errors: 0
+2025-08-22 11:42:45,536 - JavaErrorCrashTester - INFO - ArrayList$Itr errors: 0
+2025-08-22 11:42:45,537 - JavaErrorCrashTester - INFO - Total Errores Java Encontrados: 0
+2025-08-22 11:42:45,537 - JavaErrorCrashTester - WARNING - No se encontraron errores Java objetivo
+2025-08-22 11:42:45,537 - __main__ - WARNING - No se encontraron errores Java objetivo
