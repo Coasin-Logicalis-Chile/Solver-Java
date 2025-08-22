@@ -145,7 +145,8 @@ public class IncidentController {
         Page<IncidentFields> pageResult = incidentService.findPaginatedIncidentsByFilters(pageRequest, filter.toUpperCase(), assignedTo, company, state, openUnassigned, solved, incidentParent, scRequestParent, scRequestItemParent, assignedToGroup, closed, open, sysGroups, sysUsers, states, priorities, createdOnFrom, createdOnTo);
         ResponseEntity<Page<IncidentFields>> pageResponseEntity = new ResponseEntity<>(pageResult, HttpStatus.OK);
 
-        List<IncidentFields> contenido = pageResponseEntity.getBody().getContent();
+        // Fix ConcurrentModificationException: Create defensive copy for safe iteration
+        List<IncidentFields> contenido = new ArrayList<>(pageResponseEntity.getBody().getContent());
         log.debug("=============== Contenido ===============");
         for (IncidentFields elemento : contenido) {
             log.debug("sysInfo: "+ elemento.getNumber()+", "+elemento.getShort_description()+", "+elemento.getAssigned_to()+", "+elemento.getCategory()+", "+elemento.getId()+", "+elemento.getState()+","+elemento.getCreated_on()+", "+elemento.getUpdated_on());

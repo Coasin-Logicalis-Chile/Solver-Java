@@ -31,3 +31,14 @@ build/
 
 ### VS Code ###
 .vscode/
+
+### Local Documentation Files ###
+*.md
+
+### Analysis and Testing Files ###
+*error_evidence*.json
+*analisis*.log
+*validacion*.json
+*_crash_*.py
+*analizador*.py
+*validar*.py
