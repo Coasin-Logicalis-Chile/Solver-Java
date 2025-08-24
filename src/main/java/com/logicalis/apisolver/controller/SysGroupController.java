@@ -15,6 +15,9 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -22,6 +25,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
@@ -151,6 +155,15 @@ public class SysGroupController {
 
     @GetMapping("/findSysGroupsByFilters")
     public ResponseEntity<List<SysGroupFields>> findSysGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+
+            if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
+                company = companyIdFromToken;
+            }
+        }
         List<SysGroupFields> sysGroups = sysGroupService.findSysGroupsByFilters(company);
         ResponseEntity<List<SysGroupFields>> pageResponseEntity = new ResponseEntity<>(sysGroups, HttpStatus.OK);
         return pageResponseEntity;
@@ -159,6 +172,16 @@ public class SysGroupController {
     @GetMapping("/mySysGroups")
     public ResponseEntity<List<SysGroupFields>> findSysGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company,
                                                                        @NotNull @RequestParam(value = "sysUser", required = true, defaultValue = "0") Long sysUser) {
+
+                                                                                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof Jwt) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+
+        if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
+            company = companyIdFromToken;
+        }
+}
         List<SysGroupFields> sysGroups = sysGroupService.findSysGroupsByFilters(company, sysUser);
         ResponseEntity<List<SysGroupFields>> pageResponseEntity = new ResponseEntity<>(sysGroups, HttpStatus.OK);
         return pageResponseEntity;

@@ -24,7 +24,7 @@ public class App {
     }
 
     public static String SNInstance() {
-        return "https://".concat("lalogicalisdev").concat(".service-now.com");
+        return "https://".concat("lalogicalis").concat(".service-now.com");
     }
 
     public static String SNUser() {

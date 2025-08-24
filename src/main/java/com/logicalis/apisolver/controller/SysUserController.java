@@ -18,16 +18,15 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
-
-import com.logicalis.apisolver.model.UserType;
-import com.logicalis.apisolver.services.IUserTypeService;
 
 import javax.validation.constraints.NotNull;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
-import java.util.Date;
 import java.util.*;
 
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
@@ -382,6 +381,15 @@ public class SysUserController {
     @GetMapping("/sysUsersByMySysGroups")
     public ResponseEntity<List<SysUserFields>> findSysUsersByMySysGroups(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company,
                                                                          @NotNull @RequestParam(value = "sysUser", required = true, defaultValue = "0") Long sysUser) {
+                                                                                    Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+
+            if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
+                company = companyIdFromToken;
+            }
+        }
         List<SysUserFields> sysUsers = sysUserService.findSysUsersByMySysGroups(company, sysUser);
         ResponseEntity<List<SysUserFields>> pageResponseEntity = new ResponseEntity<>(sysUsers, HttpStatus.OK);
         return pageResponseEntity;
@@ -426,7 +434,15 @@ public class SysUserController {
     @GetMapping("/findUserGroupsByFilters")
     public ResponseEntity<List<SysUserFields>> findUserGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof Jwt) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
 
+        if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
+            company = companyIdFromToken;
+        }
+}
 
         List<SysUserFields> sysUserFields = sysUserService.findUserGroupsByFilters(company);
 

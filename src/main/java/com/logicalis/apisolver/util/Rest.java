@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.env.Environment;
 import org.springframework.http.*;
-import org.springframework.http.client.support.BasicAuthenticationInterceptor;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
@@ -56,13 +55,11 @@ public class Rest {
         Util.setEnvironment(environment);
     }
     public RestTemplate restTemplateServiceNow() {
-        this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
         return restTemplate;
     }
 
     public String responseByEndPoint(final String endPoint) {
         LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
-        this.restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
         ResponseEntity<String> jsonResponse = restTemplate.getForEntity(endPoint, String.class);
         String response = String.valueOf(jsonResponse.getBody());
         LogSolver.insertResponse("SERVICENOW", endPoint, "GET", "", response, jsonResponse.getStatusCode(), "");
@@ -72,10 +69,6 @@ public class Rest {
 
     public byte[] downloadAttachmentFromServiceNow(final String endPoint) {
     LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
-
-    this.restTemplate.getInterceptors().add(
-        new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword())
-    );
 
     ResponseEntity<byte[]> responseEntity = restTemplate.exchange(
         endPoint,
@@ -97,10 +90,6 @@ public class Rest {
 
     public String deleteByEndPoint(final String endPoint) {
     LogSolver.insertInitService("SERVICENOW", endPoint, "DELETE");
-
-    this.restTemplate.getInterceptors().add(
-        new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword())
-    );
 
     ResponseEntity<String> jsonResponse = restTemplate.exchange(
         endPoint,
@@ -125,7 +114,6 @@ public class Rest {
             URI uri = new URI(endPoint);
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
             LogSolver.insertInitService("SERVICENOW", endPoint, "GET");
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.GET, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "GET", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", endPoint, "GET");
@@ -144,7 +132,6 @@ public class Rest {
             HttpHeaders headers = new HttpHeaders();
             String url = urlEndPoint;
             HttpMethod requestMethod = HttpMethod.POST;
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
             byte[] bytes = file.getName().getBytes(StandardCharsets.UTF_8);
@@ -188,7 +175,6 @@ public class Rest {
             HttpHeaders headers = new HttpHeaders();
             String url = urlEndPoint;
             HttpMethod requestMethod = HttpMethod.POST;
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             headers.setContentType(MediaType.MULTIPART_FORM_DATA);
             MultiValueMap<String, String> fileMap = new LinkedMultiValueMap<>();
             //  byte[] bytes = file.getName().getBytes(StandardCharsets.UTF_8);
@@ -349,8 +335,6 @@ public class Rest {
             URI uri = new URI(endPoint);
 
             HttpEntity<JournalRequest> httpEntity = new HttpEntity<>(journalRequest, headers);
-
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             LogSolver.insertInitService("SERVICENOW", endPoint, "POST");
 
             ResponseEntity<String> responseEntity = restTemplate.postForEntity(uri, httpEntity, String.class);
@@ -430,7 +414,6 @@ public class Rest {
             json.put("knowledge", incident.getKnowledge());
             json.put("reasonPending", incident.getReasonPending());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
             ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
@@ -457,8 +440,6 @@ public class Rest {
             json.put("code", sysUser.getCode());
             json.put("integrationId", sysUser.getIntegrationId());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
 
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
             ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
@@ -495,7 +476,6 @@ public class Rest {
             json.put("state", scRequestItem.getState());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
             LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
@@ -529,7 +509,6 @@ public class Rest {
             json.put("closedBy", Util.isNullIntegration(scTask.getClosedBy()));
             json.put("reasonPending", scTask.getReasonPending());
             HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
-            restTemplate.getInterceptors().add(new BasicAuthenticationInterceptor(App.SNUser(), App.SNPassword()));
             LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
             ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
             LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody().toString(), jsonResponse.getStatusCode(), headers.toString() );

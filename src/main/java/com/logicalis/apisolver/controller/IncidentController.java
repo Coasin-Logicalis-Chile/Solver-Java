@@ -32,6 +32,11 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.constraints.NotNull;
 import java.util.*;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+
+
 @CrossOrigin(origins = {"${app.api.settings.cross-origin.urls}", "*"})
 @RestController
 @RequestMapping("/api/v1")
@@ -125,6 +130,17 @@ public class IncidentController {
 
 
         log.info("========================== Find Paginated Incidents By Filters Info ==========================");
+                                                                                
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof Jwt) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+
+        if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
+            company = companyIdFromToken;
+        }
+}
 
         Sort sort;
         if(direction.toUpperCase().equals("DESC")){ sort = Sort.by(field).descending();
@@ -177,6 +193,17 @@ public class IncidentController {
                                                                                    @NotNull @RequestParam(value = "createdOnTo", required = true, defaultValue = "") String createdOnTo,
                                                                                    String field,
                                                                                    String direction) {
+                                                                                    
+
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof Jwt) {
+        Jwt jwt = (Jwt) authentication.getPrincipal();
+        Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+
+        if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
+            company = companyIdFromToken;
+        }
+}
 
 
         Sort sort = direction.toUpperCase().equals("DESC") ? Sort.by(field).descending() : Sort.by(field).ascending();

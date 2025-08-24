@@ -126,11 +126,11 @@ protected void configure(HttpSecurity http) throws Exception {
                 "/api/v1/incidentsByFilter", "/api/v1/findPaginatedIncidentsByFilters",
                 "/api/v1/journalsByIncident", "/api/v1/countIncidentsByFilters",
                 "/api/v1/sn_catalogs", "/api/v1/findSysGroupsByFilters", 
-                "/api/v1/sn_choices_by_filter", "/api/v1/findUserGroupsByFilters", "/oauth/token","/api/v1/sysUserByEmailAndSolver","/api/v1/sysUserCode")
+                "/api/v1/sn_choices_by_filter", "/api/v1/findUserGroupsByFilters", "/oauth/token","/api/v1/sysUserByEmailAndSolver","/api/v1/sysUserCode","/api/v1/sysUserByEmailAndSolverAndCode")
             .permitAll()
             .antMatchers(HttpMethod.POST, "/api/v1/log", "/api/v1/sysUserByEmailAndSolver", "/api/v1/uploadFile/{element}","/auth/login-ad")
             .permitAll()
-            .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}","/api/v1/sysUserCode/**","/api/v1/sysUserCodeUpdate/**")
+            .antMatchers(HttpMethod.PUT, "/api/v1/resetPassword", "/api/v1/sysUser/{id}","/api/v1/sysUserCode/**","/api/v1/sysUserCodeUpdate/**","/api/v1/resetPassword/{id}")
             .permitAll()
             .antMatchers("/oauth2/**", "/login/**","/health").permitAll()
             .anyRequest().authenticated()

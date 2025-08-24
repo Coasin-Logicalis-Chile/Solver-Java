@@ -26,6 +26,9 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.annotation.Secured;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.constraints.NotNull;
@@ -770,6 +773,16 @@ public class ScTaskController {
                                                                             String direction) {
 
         log.info("========================== Find Paginated Request By Filters Info ==========================");
+
+                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication.getPrincipal() instanceof Jwt) {
+            Jwt jwt = (Jwt) authentication.getPrincipal();
+            Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+
+            if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
+                company = companyIdFromToken;
+            }
+        }
 
         //Sort sort = direction.toUpperCase().equals("DESC") ? Sort.by(field).descending() : Sort.by(field).ascending();
         Sort sort;

@@ -790,78 +790,101 @@ public ResponseEntity<?> delete(@PathVariable String integration_id) {
     }
 
     @PostMapping("/uploadFile/{element}")
-    public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @PathVariable String element) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            String type = element.split(",")[1];
-            element = element.split(",")[0];
-            String tag = "[Attachment] ";
-            String tagAction = App.CreateConsole();
+public ResponseEntity<?> uploadFile(@RequestParam("file") MultipartFile file, @PathVariable String element) {
+    Map<String, Object> response = new HashMap<>();
 
-            if (!file.isEmpty() && element != null) {
+    // Lista de extensiones NO PERMITIDAS
+    List<String> forbiddenExtensions = Arrays.asList(
+        "msi", "com", "jsp", "php", "asp", "aspx",
+        "cgi", "pl", "py", "rb", "vbs", "ps1",
+        "pif", "gadget", "msp", "hta","js"
+    );
 
-                Attachment current = new Attachment();
-                Attachment attachment;
+    try {
+        String originalFileName = file.getOriginalFilename();
+        if (originalFileName == null || originalFileName.isEmpty()) {
+            response.put("mensaje", "Nombre de archivo inválido.");
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.BAD_REQUEST);
+        }
 
-                String filename = file.getOriginalFilename();
+        String extension = FilenameUtils.getExtension(originalFileName).toLowerCase();
 
-                current.setExtension(".".concat(FilenameUtils.getExtension(filename)));
-                current.setFileName(filename);
-                current.setElement(element);
-                current.setOrigin(type);
+        // Validación: Bloqueo de extensiones peligrosas
+        System.out.println("Extensión del archivo: " + extension);
+        if (forbiddenExtensions.contains(extension)) {
+            response.put("mensaje", "Tipo de archivo no permitido por razones de seguridad.");
+            response.put("detalle", "Extensión bloqueada: ." + extension);
+            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.UNSUPPORTED_MEDIA_TYPE);
+        }
 
-                attachmentService.save(current);
+        String type = element.split(",")[1];
+        element = element.split(",")[0];
+        String tag = "[Attachment] ";
+        String tagAction = App.CreateConsole();
 
-                log.info("Archivo guardado en la base de datos: {}", current.getFileName());
-                Util.printData(tag, tagAction.concat("BD"), Util.getFieldDisplay(current), current.getElement());
+        if (!file.isEmpty() && element != null) {
 
-                attachment = rest.sendFileToServiceNow(element, file, type, file.getOriginalFilename());
-                if (!Objects.isNull(attachment)) {
-                    Util.printData(tag, tagAction.concat("(ServiceNow)"), Util.getFieldDisplay(current),
-                            current.getElement());
-                }
+            Attachment current = new Attachment();
+            Attachment attachment;
 
-                attachment.setId(current.getId());
-                attachment.setExtension(current.getExtension());
-                attachment.setFileName(current.getFileName());
-                attachment.setElement(current.getElement());
-                attachment.setOrigin(current.getOrigin());
+            current.setExtension("." + extension);
+            current.setFileName(originalFileName);
+            current.setElement(element);
+            current.setOrigin(type);
 
-                Domain domain = domainService.findByIntegrationId(attachment.getDomain().getIntegrationId());
-                attachment.setDomain(domain);
+            attachmentService.save(current);
 
-                String pathDirectory = rest.generatePathDirectory(attachment,
-                        environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
+            log.info("Archivo guardado en la base de datos: {}", current.getFileName());
+            Util.printData(tag, tagAction.concat("BD"), Util.getFieldDisplay(current), current.getElement());
 
-                InputStream initialStream = file.getInputStream();
-                byte[] buffer = new byte[initialStream.available()];
-                int count = initialStream.read(buffer);
-                if (count > 0) {
-                    File targetFile = new File(pathDirectory);
-                    try (OutputStream outStream = new FileOutputStream(targetFile)) {
-                        outStream.write(buffer);
-                        outStream.close();
-                        Util.printData(tag, tagAction.concat("(SO)"), Util.getFieldDisplay(current),
-                                current.getElement());
-                        attachment.setDownloadLink(pathDirectory);
-                    }
-                }
-
-                tagAction = App.UpdateConsole();
-                attachmentService.save(attachment);
-
-                Util.printData(tag, tagAction.concat("(BD)"), Util.getFieldDisplay(attachment),
-                        attachment.getElement());
+            attachment = rest.sendFileToServiceNow(element, file, type, originalFileName);
+            if (attachment != null) {
+                Util.printData(tag, tagAction.concat("(ServiceNow)"), Util.getFieldDisplay(current),
+                        current.getElement());
             }
 
-        } catch (DataAccessException | IOException e) {
-            response.put("mensaje", "Error upload attachment");
-            response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+            attachment.setId(current.getId());
+            attachment.setExtension(current.getExtension());
+            attachment.setFileName(current.getFileName());
+            attachment.setElement(current.getElement());
+            attachment.setOrigin(current.getOrigin());
+
+            Domain domain = domainService.findByIntegrationId(attachment.getDomain().getIntegrationId());
+            attachment.setDomain(domain);
+
+            String pathDirectory = rest.generatePathDirectory(attachment,
+                    environment.getProperty("setting.attachments.dir").replaceAll("//", File.separator));
+
+            InputStream initialStream = file.getInputStream();
+            byte[] buffer = new byte[initialStream.available()];
+            int count = initialStream.read(buffer);
+            if (count > 0) {
+                File targetFile = new File(pathDirectory);
+                try (OutputStream outStream = new FileOutputStream(targetFile)) {
+                    outStream.write(buffer);
+                    outStream.close();
+                    Util.printData(tag, tagAction.concat("(SO)"), Util.getFieldDisplay(current),
+                            current.getElement());
+                    attachment.setDownloadLink(pathDirectory);
+                }
+            }
+
+            tagAction = App.UpdateConsole();
+            attachmentService.save(attachment);
+
+            Util.printData(tag, tagAction.concat("(BD)"), Util.getFieldDisplay(attachment),
+                    attachment.getElement());
         }
-        response.put("mensaje", "Upload attachment");
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+
+    } catch (DataAccessException | IOException e) {
+        response.put("mensaje", "Error upload attachment");
+        response.put("error", e.getMessage().concat(": ").concat(e.getMessage()));
+        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
     }
+
+    response.put("mensaje", "Upload attachment");
+    return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
+}
 
     public static byte[] compressBytes(byte[] data) {
         Deflater deflater = new Deflater();
