@@ -22,11 +22,6 @@ public class ScCategoryController {
 	@Autowired
 	private IScCategoryService scCategoryService;
 	
-	@GetMapping("/scCategorys")
-	public List<ScCategory> index() {
-		return scCategoryService.findAll();
-	}
-	
 	@GetMapping("/scCategory/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		ScCategory scCategory = null;
@@ -84,21 +79,6 @@ public class ScCategoryController {
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("scCategory", scCategoryUpdated);
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-	}
-
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/scCategory/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			scCategoryService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 
 	@GetMapping("/scCategory/{integration_id}")

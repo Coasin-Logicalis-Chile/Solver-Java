@@ -44,11 +44,6 @@ public class CmnScheduleController {
     @Autowired
     private Rest rest;
 
-    @GetMapping("/cmnSchedules")
-    public List<CmnSchedule> index() {
-        return cmnScheduleService.findAll();
-    }
-
     @GetMapping("/cmnSchedule/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         CmnSchedule cmnSchedule = null;
@@ -109,21 +104,6 @@ public class CmnScheduleController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/cmnSchedule/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            cmnScheduleService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-    }
-
     @GetMapping("/cmnSchedule/{integrationId}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {
         CmnSchedule cmnSchedule = null;
@@ -143,87 +123,7 @@ public class CmnScheduleController {
         return new ResponseEntity<CmnSchedule>(cmnSchedule, HttpStatus.OK);
     }
 
-    @GetMapping("/cmnSchedulesSN")
-    public List<CmnScheduleSolver> show() {
-        log.info(App.Start());
-        APIResponse apiResponse = null;
-        List<CmnScheduleSolver> snCmnSchedulesSolver = new ArrayList<>();
-        long startTime = 0;
-        long endTime = 0;
-        String tag = "[CmnSchedule] ";
-        try {
-            startTime = System.currentTimeMillis();
-            String result = rest.responseByEndPoint(EndPointSN.CmnSchedule());
-            endTime = (System.currentTimeMillis() - startTime);
-            ObjectMapper mapper = new ObjectMapper();
-            mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            JSONParser parser = new JSONParser();
-            JSONObject resultJson = (JSONObject) parser.parse(result);
-            JSONArray ListCmnScheduleJson = new JSONArray();
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            final CmnSchedule[] cmnSchedule = {new CmnSchedule()};
-            final Domain[] domain = new Domain[1];
-            final CmnSchedule[] exists = new CmnSchedule[1];
-            final String[] tagAction = new String[1];
-            final CmnScheduleSolver[] cmnScheduleSolver = {new CmnScheduleSolver()};
-            APIExecutionStatus status = new APIExecutionStatus();
-            if (resultJson.get("result") != null)
-                ListCmnScheduleJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-            final int[] count = {1};
-            ListCmnScheduleJson.forEach(cmnScheduleJson -> {
-                try {
-                    cmnScheduleSolver[0] = objectMapper.readValue(cmnScheduleJson.toString(), CmnScheduleSolver.class);
-                    snCmnSchedulesSolver.add(cmnScheduleSolver[0]);
-                    cmnSchedule[0] = new CmnSchedule();
-                    cmnSchedule[0].setParent(cmnScheduleSolver[0].getParent());
-                    cmnSchedule[0].setDocument(cmnScheduleSolver[0].getDocument());
-                    cmnSchedule[0].setDescription(cmnScheduleSolver[0].getDescription());
-                    cmnSchedule[0].setSysUpdatedOn(cmnScheduleSolver[0].getSys_updated_on());
-                    cmnSchedule[0].setType(cmnScheduleSolver[0].getType());
-                    cmnSchedule[0].setDocumentKey(cmnScheduleSolver[0].getDocument_key());
-                    cmnSchedule[0].setSysUpdatedBy(cmnScheduleSolver[0].getSys_updated_by());
-                    cmnSchedule[0].setSysCreatedOn(cmnScheduleSolver[0].getSys_created_on());
-                    cmnSchedule[0].setSysName(cmnScheduleSolver[0].getSys_name());
-                    cmnSchedule[0].setSysCreatedBy(cmnScheduleSolver[0].getSys_created_by());
-                    cmnSchedule[0].setLabel(cmnScheduleSolver[0].getLabel());
-                    cmnSchedule[0].setCalendarName(cmnScheduleSolver[0].getCalendar_name());
-                    cmnSchedule[0].setTimeZone(cmnScheduleSolver[0].getTime_zone());
-                    cmnSchedule[0].setSysUpdateName(cmnScheduleSolver[0].getSys_update_name());
-                    cmnSchedule[0].setName(cmnScheduleSolver[0].getName());
-                    cmnSchedule[0].setIntegrationId(cmnScheduleSolver[0].getSys_id());
-                    domain[0] = getDomainByIntegrationId((JSONObject) cmnScheduleJson, SnTable.Domain.get(), App.Value());
-                    if (domain[0] != null)
-                        cmnSchedule[0].setDomain(domain[0]);
-                    exists[0] = cmnScheduleService.findByIntegrationId(cmnSchedule[0].getIntegrationId());
-                    tagAction[0] = App.CreateConsole();
-                    if (exists[0] != null) {
-                        cmnSchedule[0].setId(exists[0].getId());
-                        tagAction[0] = App.UpdateConsole();
-                    }
-                    Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(cmnSchedule[0])), Util.getFieldDisplay(cmnSchedule[0].getDomain()));
-                    cmnScheduleService.save(cmnSchedule[0]);
-                    count[0] = count[0] + 1;
-                } catch (JsonProcessingException e) {
-                    log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-                }
-            });
-            apiResponse = mapper.readValue(result, APIResponse.class);
-            status.setUri(EndPointSN.Catalog());
-            status.setUserAPI(App.SNUser());
-            status.setPasswordAPI(App.SNPassword());
-            status.setError(apiResponse.getError());
-            status.setMessage(apiResponse.getMessage());
-            status.setExecutionTime(endTime);
-            statusService.save(status);
-        } catch (Exception e) {
-            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
-        }
-        log.info(App.End());
-        return snCmnSchedulesSolver;
-    }
-
-    public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
+        public Domain getDomainByIntegrationId(JSONObject jsonObject, String levelOne, String levelTwo) {
         String integrationId = Util.getIdByJson(jsonObject, levelOne, levelTwo);
         if (Util.hasData(integrationId)) {
             return domainService.findByIntegrationId(integrationId);

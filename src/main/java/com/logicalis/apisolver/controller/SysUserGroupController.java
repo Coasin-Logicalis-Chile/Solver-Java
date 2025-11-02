@@ -38,11 +38,6 @@ public class SysUserGroupController {
     @Autowired
     private ISysGroupService sysGroupService;
 
-    @GetMapping("/sysUserGroups")
-    public List<SysUserGroup> index() {
-        return sysUserGroupService.findAll();
-    }
-
     @GetMapping("/sysUserGroup/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         SysUserGroup sysUserGroup = null;
@@ -153,21 +148,6 @@ public class SysUserGroupController {
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysUserGroup", sysUserGroupUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/sysUserGroup/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            sysUserGroupService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @GetMapping("/sysUserGroup/{integrationId}")

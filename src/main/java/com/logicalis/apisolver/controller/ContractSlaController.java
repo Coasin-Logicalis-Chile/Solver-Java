@@ -41,11 +41,6 @@ public class ContractSlaController {
     @Autowired
     private Rest rest;
 
-    @GetMapping("/contractSlas")
-    public List<ContractSla> index() {
-        return contractSlaService.findAll();
-    }
-
     @GetMapping("/contractSla/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         ContractSla contractSla = null;
@@ -104,21 +99,6 @@ public class ContractSlaController {
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("contractSla", contractSlaUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/contractSla/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            contractSlaService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @GetMapping("/contractSla/{integrationId}")

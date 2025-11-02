@@ -58,11 +58,6 @@ public class ScRequestController {
     @Autowired
     private Rest rest;
 
-    @GetMapping("/scRequests")
-    public List<ScRequest> index() {
-        return scRequestService.findAll();
-    }
-
     @GetMapping("/scRequest/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         ScRequest scRequest = null;
@@ -119,21 +114,6 @@ public class ScRequestController {
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("scRequest", scRequestUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/scRequest/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            scRequestService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @GetMapping("/scRequest/{integration_id}")
@@ -250,131 +230,6 @@ public class ScRequestController {
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("scRequest", scRequest);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-    }
-
-    @GetMapping("/scRequestBySolver")
-    public List<ScRequest> findByCompany() {
-        log.info(App.Start());
-        APIResponse apiResponse = null;
-        List<ScRequest> scRequests = new ArrayList<>();
-        String[] sparmOffSets = Util.offSets99000();
-        long startTime = 0;
-        long endTime = 0;
-        String tag = "[ScRequest] ";
-        String result;
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JSONParser parser = new JSONParser();
-        JSONObject resultJson = new JSONObject();
-        JSONArray ListSnScRequestJson = new JSONArray();
-        final Domain[] domain = new Domain[1];
-        final ScRequestSolver[] scRequestSolver = {new ScRequestSolver()};
-        final Company[] company = new Company[1];
-        final SysUser[] requestedFor = new SysUser[1];
-        final SysUser[] openedBy = new SysUser[1];
-        final SysUser[] taskFor = new SysUser[1];
-        final SysUser[] assignedTo = new SysUser[1];
-        final Location[] location = new Location[1];
-        final SysGroup[] sysGroup = new SysGroup[1];
-        final ScRequest[] exists = new ScRequest[1];
-        final String[] tagAction = new String[1];
-        APIExecutionStatus status = new APIExecutionStatus();
-        final ScRequest[] scRequest = {new ScRequest()};
-        try {
-            startTime = System.currentTimeMillis();
-            final int[] count = {1};
-            for (String sparmOffSet : sparmOffSets) {
-                result = rest.responseByEndPoint(EndPointSN.ScRequestByCompany().concat(sparmOffSet));
-                log.info(tag.concat("(".concat(EndPointSN.ScRequestByCompany().concat(sparmOffSet)).concat(")")));
-                resultJson = (JSONObject) parser.parse(result);
-                ListSnScRequestJson.clear();
-                if (resultJson.get("result") != null)
-                    ListSnScRequestJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-                ListSnScRequestJson.stream().forEach(snScRequestJson -> {
-                    try {
-                        scRequestSolver[0] = mapper.readValue(snScRequestJson.toString(), ScRequestSolver.class);
-                        scRequest[0] = new ScRequest();
-                        scRequest[0].setSysUpdatedOn(scRequestSolver[0].getSys_updated_on());
-                        scRequest[0].setNumber(scRequestSolver[0].getNumber());
-                        scRequest[0].setState(scRequestSolver[0].getState());
-                        scRequest[0].setSysCreatedBy(scRequestSolver[0].getSys_created_by());
-                        scRequest[0].setEscalation(scRequestSolver[0].getEscalation());
-                        scRequest[0].setExpectedStart(scRequestSolver[0].getExpected_start());
-                        scRequest[0].setStage(scRequestSolver[0].getStage());
-                        scRequest[0].setActive(scRequestSolver[0].getActive());
-                        scRequest[0].setShortDescription(scRequestSolver[0].getShort_description());
-                        scRequest[0].setCorrelationDisplay(scRequestSolver[0].getCorrelation_display());
-                        scRequest[0].setCorrelationId(scRequestSolver[0].getCorrelation_id());
-                        scRequest[0].setSysUpdatedBy(scRequestSolver[0].getSys_updated_by());
-                        scRequest[0].setSysCreatedOn(scRequestSolver[0].getSys_created_on());
-                        scRequest[0].setOpenedAt(scRequestSolver[0].getOpened_at());
-                        scRequest[0].setDescription(scRequestSolver[0].getDescription());
-                        scRequest[0].setIntegrationId(scRequestSolver[0].getSys_id());
-                        scRequest[0].setDueDate(scRequestSolver[0].getDue_date());
-                        scRequest[0].setContactType(scRequestSolver[0].getContact_type());
-                        scRequest[0].setApproval(scRequestSolver[0].getApproval());
-
-                        domain[0] = getDomainByIntegrationId((JSONObject) snScRequestJson, SnTable.Domain.get(), App.Value());
-                        if (domain[0] != null)
-                            scRequest[0].setDomain(domain[0]);
-
-                        company[0] = getCompanyByIntegrationId((JSONObject) snScRequestJson, SnTable.Company.get(), App.Value());
-                        if (company[0] != null)
-                            scRequest[0].setCompany(company[0]);
-
-                        requestedFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "requested_for", App.Value());
-                        if (requestedFor[0] != null)
-                            scRequest[0].setRequestedFor(requestedFor[0]);
-
-                        openedBy[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "opened_by", App.Value());
-                        if (openedBy[0] != null)
-                            scRequest[0].setOpenedBy(openedBy[0]);
-
-                        assignedTo[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "assigned_to", App.Value());
-                        if (assignedTo[0] != null)
-                            scRequest[0].setAssignedTo(assignedTo[0]);
-
-                        taskFor[0] = getSysUserByIntegrationId((JSONObject) snScRequestJson, "task_for", App.Value());
-                        if (taskFor[0] != null)
-                            scRequest[0].setTaskFor(taskFor[0]);
-
-                        location[0] = getLocationByIntegrationId((JSONObject) snScRequestJson, "location", App.Value());
-                        if (location[0] != null)
-                            scRequest[0].setLocation(location[0]);
-
-                        sysGroup[0] = getSysGroupByIntegrationId((JSONObject) snScRequestJson, "assignment_group", App.Value());
-                        if (sysGroup[0] != null)
-                            scRequest[0].setAssignmentGroup(sysGroup[0]);
-
-                        exists[0] = scRequestService.findByIntegrationId(scRequest[0].getIntegrationId());
-                        tagAction[0] = App.CreateConsole();
-                        if (exists[0] != null) {
-                            scRequest[0].setId(exists[0].getId());
-                            tagAction[0] = App.UpdateConsole();
-                        }
-
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scRequest[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
-                        scRequests.add(scRequestService.save(scRequest[0]));
-                        count[0] = count[0] + 1;
-                    } catch (Exception e) {
-                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-                    }
-                });
-                apiResponse = mapper.readValue(result, APIResponse.class);
-                status.setUri(EndPointSN.Location());
-                status.setUserAPI(App.SNUser());
-                status.setPasswordAPI(App.SNPassword());
-                status.setError(apiResponse.getError());
-                status.setMessage(apiResponse.getMessage());
-                endTime = (System.currentTimeMillis() - startTime);
-                status.setExecutionTime(endTime);
-                statusService.save(status);
-            }
-        } catch (Exception e) {
-            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
-        }
-        log.info(App.End());
-        return scRequests;
     }
 
     @GetMapping("/scRequestBySolverQueryCreate")

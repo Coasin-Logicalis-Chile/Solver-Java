@@ -37,11 +37,6 @@ public class SysGroupController {
     @Autowired
     private ICompanyService companyService;
 
-    @GetMapping("/sysGroups")
-    public List<SysGroup> index() {
-        return sysGroupService.findAll();
-    }
-
     @GetMapping("/sysGroupByByActiveAndName/{name}")
     public ResponseEntity<?> findByActiveAndName(@PathVariable String name) {
         SysGroup sysGroup = null;
@@ -137,33 +132,52 @@ public class SysGroupController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/sysGroup/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            sysGroupService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-    }
-
-
     @GetMapping("/findSysGroupsByFilters")
     public ResponseEntity<List<SysGroupFields>> findSysGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+           // ================== LECTURA DE CLAIMS DESDE AUTH.DETAILS ==================
+Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
-                company = companyIdFromToken;
-            }
+@SuppressWarnings("unchecked")
+Map<String, Object> claims = (auth != null && auth.getDetails() instanceof Map)
+        ? (Map<String, Object>) auth.getDetails()
+        : java.util.Collections.emptyMap();
+
+Long companyIdFromToken = null;
+Object companyObj = claims.get("company");
+
+if (companyObj != null) {
+    // Caso A: viene como POJO Company (lo que muestra tu depurador)
+    try {
+        // Si tienes la clase a mano, mejor casteo directo:
+        // companyIdFromToken = ((Company) companyObj).getId();
+        // Si no, usa reflexión para no acoplarte:
+        java.lang.reflect.Method m = companyObj.getClass().getMethod("getId");
+        Object idObj = m.invoke(companyObj);
+        if (idObj != null) {
+            companyIdFromToken = Long.valueOf(idObj.toString());
         }
+    } catch (NoSuchMethodException ignored) {
+        // Caso B: a veces podría venir como Map (JSON)
+        if (companyObj instanceof Map) {
+            Object id = ((Map<?, ?>) companyObj).get("id");
+            if (id != null) {
+                try { companyIdFromToken = Long.valueOf(id.toString()); } catch (NumberFormatException ignored2) {}
+            }
+        } else {
+            try { companyIdFromToken = Long.valueOf(companyObj.toString()); } catch (NumberFormatException ignored3) {}
+        }
+    } catch (Exception e) {
+        log.warn("No se pudo obtener company.id del token", e);
+    }
+}
+
+// ================== VALIDACIÓN ==================
+if (companyIdFromToken == null) {
+    throw new org.springframework.security.access.AccessDeniedException("El token no contiene company.id");
+}
+if (!companyIdFromToken.equals(company)) {
+    company = companyIdFromToken;
+}
         List<SysGroupFields> sysGroups = sysGroupService.findSysGroupsByFilters(company);
         ResponseEntity<List<SysGroupFields>> pageResponseEntity = new ResponseEntity<>(sysGroups, HttpStatus.OK);
         return pageResponseEntity;
@@ -173,14 +187,49 @@ public class SysGroupController {
     public ResponseEntity<List<SysGroupFields>> findSysGroupsByFilters(@NotNull @RequestParam(value = "company", required = true, defaultValue = "0") Long company,
                                                                        @NotNull @RequestParam(value = "sysUser", required = true, defaultValue = "0") Long sysUser) {
 
-                                                                                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof Jwt) {
-        Jwt jwt = (Jwt) authentication.getPrincipal();
-        Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+                                                                                   // ================== LECTURA DE CLAIMS DESDE AUTH.DETAILS ==================
+Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-        if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
-            company = companyIdFromToken;
+@SuppressWarnings("unchecked")
+Map<String, Object> claims = (auth != null && auth.getDetails() instanceof Map)
+        ? (Map<String, Object>) auth.getDetails()
+        : java.util.Collections.emptyMap();
+
+Long companyIdFromToken = null;
+Object companyObj = claims.get("company");
+
+if (companyObj != null) {
+    // Caso A: viene como POJO Company (lo que muestra tu depurador)
+    try {
+        // Si tienes la clase a mano, mejor casteo directo:
+        // companyIdFromToken = ((Company) companyObj).getId();
+        // Si no, usa reflexión para no acoplarte:
+        java.lang.reflect.Method m = companyObj.getClass().getMethod("getId");
+        Object idObj = m.invoke(companyObj);
+        if (idObj != null) {
+            companyIdFromToken = Long.valueOf(idObj.toString());
         }
+    } catch (NoSuchMethodException ignored) {
+        // Caso B: a veces podría venir como Map (JSON)
+        if (companyObj instanceof Map) {
+            Object id = ((Map<?, ?>) companyObj).get("id");
+            if (id != null) {
+                try { companyIdFromToken = Long.valueOf(id.toString()); } catch (NumberFormatException ignored2) {}
+            }
+        } else {
+            try { companyIdFromToken = Long.valueOf(companyObj.toString()); } catch (NumberFormatException ignored3) {}
+        }
+    } catch (Exception e) {
+        log.warn("No se pudo obtener company.id del token", e);
+    }
+}
+
+// ================== VALIDACIÓN ==================
+if (companyIdFromToken == null) {
+    throw new org.springframework.security.access.AccessDeniedException("El token no contiene company.id");
+}
+if (!companyIdFromToken.equals(company)) {
+    company = companyIdFromToken;
 }
         List<SysGroupFields> sysGroups = sysGroupService.findSysGroupsByFilters(company, sysUser);
         ResponseEntity<List<SysGroupFields>> pageResponseEntity = new ResponseEntity<>(sysGroups, HttpStatus.OK);

@@ -56,11 +56,6 @@ public class SysAuditController {
     @Autowired
     private Rest rest;
 
-    @GetMapping("/sysAudits")
-    public List<SysAudit> index() {
-        return sysAuditService.findAll();
-    }
-
     @GetMapping("/sysAudit/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         SysAudit sysAudit = null;
@@ -117,21 +112,6 @@ public class SysAuditController {
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("sysAudit", sysAuditUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/sysAudit/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            sysAuditService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @GetMapping("/sysAudit/{integrationId}")

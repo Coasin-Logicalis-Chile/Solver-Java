@@ -22,11 +22,6 @@ public class TypeBusinessRuleController {
 	@Autowired
 	private ITypeBusinessRuleService typeBusinessRuleService;
 	
-	@GetMapping("/typeBusinessRules")
-	public List<TypeBusinessRule> index() {
-		return typeBusinessRuleService.findAll();
-	}
-	
 	@GetMapping("/typeBusinessRule/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		TypeBusinessRule typeBusinessRule = null;
@@ -86,19 +81,5 @@ public class TypeBusinessRuleController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/typeBusinessRule/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			typeBusinessRuleService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-	}
 }
 

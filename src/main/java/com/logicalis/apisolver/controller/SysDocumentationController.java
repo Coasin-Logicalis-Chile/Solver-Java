@@ -42,11 +42,6 @@ public class SysDocumentationController {
     @Autowired
     private Rest rest;
 
-    @GetMapping("/sysDocumentations")
-    public List<SysDocumentation> index() {
-        return sysDocumentationService.findAll();
-    }
-
     @GetMapping("/sysDocumentation/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         SysDocumentation sysDocumentation = null;
@@ -105,22 +100,6 @@ public class SysDocumentationController {
         response.put("sysDocumentation", sysDocumentationUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/sysDocumentation/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            sysDocumentationService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-    }
-
 
     @GetMapping("/byIntegrationId/{integrationId}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integrationId) {

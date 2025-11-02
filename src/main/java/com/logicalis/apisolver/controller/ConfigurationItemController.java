@@ -44,10 +44,6 @@ public class ConfigurationItemController {
 	@Autowired
 	private Rest rest;
 	
-	@GetMapping("/configuration_items")
-	public List<ConfigurationItem> index() {
-		return configurationItemService.findAll();
-	}
 
 	@GetMapping("/configurationItem/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
@@ -125,22 +121,6 @@ public class ConfigurationItemController {
 		response.put("configurationItem", configurationItemUpdated);
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
-
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/configurationItem/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			configurationItemService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-	}
-
 
 	@GetMapping("/configurationItemBySolverAndQuery")
 	public List<ConfigurationItem> show(String query, boolean flag) {

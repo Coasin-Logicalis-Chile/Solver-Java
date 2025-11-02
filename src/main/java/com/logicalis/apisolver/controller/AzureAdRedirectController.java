@@ -70,14 +70,14 @@ public class AzureAdRedirectController {
 public ResponseEntity<?> loginAD(@RequestBody Map<String, String> body) {
     System.out.println("ENTRO AL LOGIN DE AUTH");
     String email = body.get("email");
-    String password = "logicalis$ad"; // idealmente desde application.properties
+    String password = "logicalis$ad"; // hay que pasarlo a application.properties
 
     HttpHeaders headers = new HttpHeaders();
     headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
     headers.setBasicAuth("angularapp", "12345");
 
      try {
-    // Construir el cuerpo como string (igual que el frontend)
+
     String form = "grant_type=password" +
             "&username=" + URLEncoder.encode(email, "UTF-8") +
             "&password=" + URLEncoder.encode(password, "UTF-8");
@@ -91,7 +91,6 @@ public ResponseEntity<?> loginAD(@RequestBody Map<String, String> body) {
         return ResponseEntity.ok(response.getBody());
 
       } catch (UnsupportedEncodingException e) {
-        // Esto no debería pasar, ya que "UTF-8" siempre está presente
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error de codificación");
     } catch (HttpClientErrorException e) {
         return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Login con AD falló");

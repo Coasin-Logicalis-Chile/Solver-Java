@@ -22,11 +22,6 @@ public class RolController {
 	@Autowired
 	private IRolService rolService;
 	
-	@GetMapping("/rols")
-	public List<Rol> index() {
-		return rolService.findAll();
-	}
-	
 	@GetMapping("/rol/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		Rol rol = null;
@@ -86,19 +81,5 @@ public class RolController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/rol/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			rolService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-	}
 }
 

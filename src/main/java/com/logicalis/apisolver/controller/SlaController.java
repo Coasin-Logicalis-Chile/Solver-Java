@@ -23,11 +23,6 @@ public class SlaController {
 	@Autowired
 	private ISlaService slaService;
 	
-	@GetMapping("/slas")
-	public List<Sla> index() {
-		return slaService.findAll();
-	}
-	
 	@GetMapping("/sla/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		Sla sla = null;
@@ -86,19 +81,5 @@ public class SlaController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/sla/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			slaService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-	}
 }
 

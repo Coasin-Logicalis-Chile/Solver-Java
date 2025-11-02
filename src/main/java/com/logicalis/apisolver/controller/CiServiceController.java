@@ -43,10 +43,6 @@ public class CiServiceController {
     @Autowired
     private Rest rest;
 
-    @GetMapping("/ci_services")
-    public List<CiService> index() {
-        return ciServiceService.findAll();
-    }
 
     @GetMapping("/ciService/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
@@ -125,21 +121,6 @@ public class CiServiceController {
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("ciService", ciServiceUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/ciService/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            ciServiceService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @GetMapping("/ciServiceBySolverAndQuery")

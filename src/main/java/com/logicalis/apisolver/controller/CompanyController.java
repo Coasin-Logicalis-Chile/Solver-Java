@@ -24,12 +24,6 @@ public class CompanyController {
 	@Autowired
 	private ICompanyService companyService;
 	
-	@GetMapping("/companies")
-	public List<Company> index() {
-		log.info("Solicitud GET recibida en /companies");
-		return companyService.findAll();
-	}
-	
 	@GetMapping("/company/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		Company company = null;
@@ -89,20 +83,6 @@ public class CompanyController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/company/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			companyService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-	}
 	@GetMapping("/company/{integration_id}")
 	public ResponseEntity<?> show(@PathVariable String integration_id) {
 		Company company = null;

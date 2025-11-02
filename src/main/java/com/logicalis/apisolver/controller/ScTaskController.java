@@ -71,11 +71,6 @@ public class ScTaskController {
     @Autowired
     ModelMapper modelMapper;
 
-    @GetMapping("/scTasks")
-    public List<ScTask> index() {
-        return scTaskService.findAll();
-    }
-
     @GetMapping("/scTask/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         ScTask scTask = null;
@@ -161,21 +156,6 @@ public class ScTaskController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/scTask/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            scTaskService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-    }
-
     @GetMapping("/scTaskIntegration/{integration_id}")
     public ResponseEntity<?> findByIntegrationId(@PathVariable String integration_id) {
         ScTask scTask = null;
@@ -192,194 +172,6 @@ public class ScTaskController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<ScTask>(scTask, HttpStatus.OK);
-    }
-
-    @GetMapping("/scTaskBySolver")
-    public List<ScTask> findByCompany() {
-        log.info(App.Start());
-        APIResponse apiResponse = null;
-        List<ScTask> scTasks = new ArrayList<>();
-        String[] sparmOffSets = Util.offSets99000();
-        long startTime = 0;
-        long endTime = 0;
-        String tag = "[ScTask] ";
-        final ScTaskRequest[] scTaskSolver = {new ScTaskRequest()};
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JSONParser parser = new JSONParser();
-        JSONObject resultJson = new JSONObject();
-        JSONArray ListScTaskJson = new JSONArray();
-        final ScTask[] scTask = {new ScTask()};
-        final Domain[] domain = new Domain[1];
-        final Company[] company = new Company[1];
-        final SysUser[] closedBy = new SysUser[1];
-        final SysUser[] requestedfor = new SysUser[1];
-        final SysUser[] scalingAssignedTo = new SysUser[1];
-        final Location[] location = new Location[1];
-        final SysUser[] assignedTo = new SysUser[1];
-        final SysUser[] openedBy = new SysUser[1];
-        String result;
-        final CiService[] businessService = new CiService[1];
-        final ConfigurationItem[] configurationItem = new ConfigurationItem[1];
-        final SysGroup[] sysGroup = new SysGroup[1];
-        final SysGroup[] scalingAssignmentGroup = new SysGroup[1];
-        final ScRequest[] scRequest = new ScRequest[1];
-        final ScRequestItem[] scRequestItem = new ScRequestItem[1];
-        final ScTask[] exists = new ScTask[1];
-        final String[] tagAction = new String[1];
-        APIExecutionStatus status = new APIExecutionStatus();
-        try {
-            startTime = System.currentTimeMillis();
-            final int[] count = {1};
-            for (String sparmOffSet : sparmOffSets) {
-                result = rest.responseByEndPoint(EndPointSN.ScTaskByCompany().concat(sparmOffSet));
-                log.info(tag.concat("(".concat(EndPointSN.ScTaskByCompany().concat(sparmOffSet)).concat(")")));
-                resultJson = (JSONObject) parser.parse(result);
-                ListScTaskJson.clear();
-                if (resultJson.get("result") != null)
-                    ListScTaskJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-                ListScTaskJson.stream().forEach(scTaskJson -> {
-                    try {
-                        scTaskSolver[0] = mapper.readValue(scTaskJson.toString(), ScTaskRequest.class);
-                        scTask[0] = new ScTask();
-                        scTask[0].setActionStatus(Util.isNull(scTaskSolver[0].getAction_status()));
-                        scTask[0].setActive(scTaskSolver[0].getActive());
-                        scTask[0].setActivityDue(Util.isNull(scTaskSolver[0].getActivity_due()));
-                        scTask[0].setAdditionalAssigneeList(Util.isNull(scTaskSolver[0].getAdditional_assignee_list()));
-                        scTask[0].setApproval(Util.isNull(scTaskSolver[0].getApproval()));
-                        scTask[0].setApprovalHistory(Util.isNull(scTaskSolver[0].getApproval_history()));
-                        scTask[0].setApprovalSet(Util.isNull(scTaskSolver[0].getApproval_set()));
-                        scTask[0].setBusinessDuration(Util.isNull(scTaskSolver[0].getBusiness_duration()));
-                        scTask[0].setCalendarDuration(Util.isNull(scTaskSolver[0].getCalendar_duration()));
-                        scTask[0].setCalendarStc(Util.isNull(scTaskSolver[0].getCalendar_stc()));
-                        scTask[0].setCloseNotes(Util.isNull(scTaskSolver[0].getClose_notes()));
-                        scTask[0].setClosedAt(Util.isNull(scTaskSolver[0].getClosed_at()));
-                        scTask[0].setComments(Util.isNull(scTaskSolver[0].getComments()));
-                        scTask[0].setCommentsAndWorkNotes(Util.isNull(scTaskSolver[0].getComments_and_work_notes()));
-                        scTask[0].setContactType(Util.isNull(scTaskSolver[0].getContact_type()));
-                        scTask[0].setCorrelationDisplay(Util.isNull(scTaskSolver[0].getCorrelation_display()));
-                        scTask[0].setCorrelationId(Util.isNull(scTaskSolver[0].getCorrelation_id()));
-                        scTask[0].setDeliveryPlan(Util.isNull(scTaskSolver[0].getDelivery_plan()));
-                        scTask[0].setDeliveryTask(Util.isNull(scTaskSolver[0].getDelivery_task()));
-                        scTask[0].setDescription(Util.isNull(scTaskSolver[0].getDescription()));
-                        scTask[0].setDueDate(Util.isNull(scTaskSolver[0].getDue_date()));
-                        scTask[0].setEscalation(Util.isNull(scTaskSolver[0].getEscalation()));
-                        scTask[0].setExpectedStart(Util.isNull(scTaskSolver[0].getExpected_start()));
-                        scTask[0].setFollowUp(Util.isNull(scTaskSolver[0].getFollow_up()));
-                        scTask[0].setGroupList(Util.isNull(scTaskSolver[0].getGroup_list()));
-                        scTask[0].setImpact(Util.isNull(scTaskSolver[0].getImpact()));
-                        scTask[0].setKnowledge(Util.isNull(scTaskSolver[0].getKnowledge()));
-                        scTask[0].setMadeSla(Util.isNull(scTaskSolver[0].getMade_sla()));
-                        scTask[0].setNeedsAttention(Util.isNull(scTaskSolver[0].getNeeds_attention()));
-                        scTask[0].setNumber(Util.isNull(scTaskSolver[0].getNumber()));
-                        scTask[0].setOpenedAt(Util.isNull(scTaskSolver[0].getOpened_at()));
-                        scTask[0].setPriority(Util.isNull(scTaskSolver[0].getPriority()));
-                        scTask[0].setReassignmentCount(Util.isNull(scTaskSolver[0].getReassignment_count()));
-                        scTask[0].setRouteReason(Util.isNull(scTaskSolver[0].getRoute_reason()));
-                        scTask[0].setServiceOffering(Util.isNull(scTaskSolver[0].getService_offering()));
-                        scTask[0].setShortDescription(Util.isNull(scTaskSolver[0].getShort_description()));
-                        scTask[0].setSkills(Util.isNull(scTaskSolver[0].getSkills()));
-                        scTask[0].setSlaDue(Util.isNull(scTaskSolver[0].getSla_due()));
-                        scTask[0].setState(Util.isNull(scTaskSolver[0].getState()));
-                        scTask[0].setSysClassName(Util.isNull(scTaskSolver[0].getSys_class_name()));
-                        scTask[0].setSysCreatedBy(Util.isNull(scTaskSolver[0].getSys_created_by()));
-                        scTask[0].setSysCreatedOn(Util.isNull(scTaskSolver[0].getSys_created_on()));
-                        scTask[0].setCreatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_created_on())));
-                        scTask[0].setIntegrationId(Util.isNull(scTaskSolver[0].getSys_id()));
-                        scTask[0].setSysModCount(Util.isNull(scTaskSolver[0].getSys_mod_count()));
-                        scTask[0].setSysUpdatedBy(Util.isNull(scTaskSolver[0].getSys_updated_by()));
-                        scTask[0].setSysUpdatedOn(Util.isNull(scTaskSolver[0].getSys_updated_on()));
-                        scTask[0].setUpdatedOn(Util.getLocalDateTime(Util.isNull(scTaskSolver[0].getSys_updated_on())));
-                        scTask[0].setTaskEffectiveNumber(Util.isNull(scTaskSolver[0].getTask_effective_number()));
-                        scTask[0].setTimeWorked(Util.isNull(scTaskSolver[0].getTime_worked()));
-                        scTask[0].setUniversalRequest(Util.isNull(scTaskSolver[0].getUniversal_request()));
-                        scTask[0].setUponApproval(Util.isNull(scTaskSolver[0].getUpon_approval()));
-                        scTask[0].setUponReject(Util.isNull(scTaskSolver[0].getUpon_reject()));
-                        scTask[0].setUrgency(Util.isNull(scTaskSolver[0].getUrgency()));
-                        scTask[0].setUserInput(Util.isNull(scTaskSolver[0].getUser_input()));
-                        scTask[0].setWorkEnd(Util.isNull(scTaskSolver[0].getWork_end()));
-                        scTask[0].setWorkStart(Util.isNull(scTaskSolver[0].getWork_start()));
-                        scTask[0].setScaling(scTaskSolver[0].getU_pending_other_group());
-
-                        domain[0] = getDomainByIntegrationId((JSONObject) scTaskJson, SnTable.Domain.get(), App.Value());
-                        if (domain[0] != null)
-                            scTask[0].setDomain(domain[0]);
-                        company[0] = getCompanyByIntegrationId((JSONObject) scTaskJson, SnTable.Company.get(), App.Value());
-                        if (company[0] != null)
-                            scTask[0].setCompany(company[0]);
-                        closedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "closed_by", App.Value());
-                        if (closedBy[0] != null)
-                            scTask[0].setClosedBy(closedBy[0]);
-                        requestedfor[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "requested_for", App.Value());
-                        if (requestedfor[0] != null)
-                            scTask[0].setRequestedFor(requestedfor[0]);
-                        scalingAssignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_scaling_assigned_to", App.Value());
-                        if (scalingAssignedTo[0] != null)
-                            scTask[0].setScalingAssignedTo(scalingAssignedTo[0]);
-                        location[0] = getLocationByIntegrationId((JSONObject) scTaskJson, "location", App.Value());
-                        if (location[0] != null)
-                            scTask[0].setLocation(location[0]);
-                        assignedTo[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "u_solver_assigned_to", App.Value());
-                        if (assignedTo[0] != null)
-                            scTask[0].setAssignedTo(assignedTo[0]);
-                        openedBy[0] = getSysUserByIntegrationId((JSONObject) scTaskJson, "opened_by", App.Value());
-                        if (openedBy[0] != null)
-                            scTask[0].setOpenedBy(openedBy[0]);
-
-                        businessService[0] = getCiServiceByIntegrationId((JSONObject) scTaskJson, "business_service", App.Value());
-                        if (businessService[0] != null)
-                            scTask[0].setBusinessService(businessService[0]);
-
-                        configurationItem[0] = getConfigurationItemByIntegrationId((JSONObject) scTaskJson, "cmdb_ci", App.Value());
-                        if (configurationItem[0] != null)
-                            scTask[0].setConfigurationItem(configurationItem[0]);
-                        sysGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "assignment_group", App.Value());
-                        if (sysGroup[0] != null)
-                            scTask[0].setAssignmentGroup(sysGroup[0]);
-                        scalingAssignmentGroup[0] = getSysGroupByIntegrationId((JSONObject) scTaskJson, "u_scaling_group", App.Value());
-                        if (scalingAssignmentGroup[0] != null)
-                            scTask[0].setScalingAssignmentGroup(scalingAssignmentGroup[0]);
-
-                        scRequest[0] = getScRequestByIntegrationId((JSONObject) scTaskJson, "request", App.Value());
-                        if (scRequest[0] != null)
-                            scTask[0].setScRequest(scRequest[0]);
-
-                        scRequestItem[0] = getScRequestItemByIntegrationId((JSONObject) scTaskJson, "request_item", App.Value());
-                        if (scRequestItem[0] != null) {
-                            scTask[0].setScRequestItem(scRequestItem[0]);
-                            if (scRequestItem[0].getRequestedFor() != null)
-                                scTask[0].setRequestedFor(scRequestItem[0].getRequestedFor());
-                            if (scRequestItem[0].getTaskFor() != null)
-                                scTask[0].setTaskFor(scRequestItem[0].getTaskFor());
-                        }
-                        exists[0] = scTaskService.findByIntegrationId(scTask[0].getIntegrationId());
-                        tagAction[0] = App.CreateConsole();
-                        if (exists[0] != null) {
-                            scTask[0].setId(exists[0].getId());
-                            tagAction[0] = App.UpdateConsole();
-                        }
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(scTask[0])), Util.getFieldDisplay(company[0]), Util.getFieldDisplay(domain[0]));
-                        scTasks.add(scTaskService.save(scTask[0]));
-                        count[0] = count[0] + 1;
-                    } catch (Exception e) {
-                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-                    }
-                });
-                apiResponse = mapper.readValue(result, APIResponse.class);
-                status.setUri(EndPointSN.Location());
-                status.setUserAPI(App.SNUser());
-                status.setPasswordAPI(App.SNPassword());
-                status.setError(apiResponse.getError());
-                status.setMessage(apiResponse.getMessage());
-                endTime = (System.currentTimeMillis() - startTime);
-                status.setExecutionTime(endTime);
-                statusService.save(status);
-            }
-        } catch (Exception e) {
-            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
-        }
-        log.info(App.End());
-        return scTasks;
     }
 
     @GetMapping("/scTaskBySolverAndQuery")
@@ -774,15 +566,50 @@ public class ScTaskController {
 
         log.info("========================== Find Paginated Request By Filters Info ==========================");
 
-                Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        if (authentication.getPrincipal() instanceof Jwt) {
-            Jwt jwt = (Jwt) authentication.getPrincipal();
-            Long companyIdFromToken = jwt.getClaim("company") != null ? ((Map<String, Object>) jwt.getClaim("company")).get("id") != null ? Long.valueOf(((Map<String, Object>) jwt.getClaim("company")).get("id").toString()) : null : null;
+           // ================== LECTURA DE CLAIMS DESDE AUTH.DETAILS ==================
+Authentication auth = SecurityContextHolder.getContext().getAuthentication();
 
-            if (companyIdFromToken == null || !companyIdFromToken.equals(company)) {
-                company = companyIdFromToken;
-            }
+@SuppressWarnings("unchecked")
+Map<String, Object> claims = (auth != null && auth.getDetails() instanceof Map)
+        ? (Map<String, Object>) auth.getDetails()
+        : java.util.Collections.emptyMap();
+
+Long companyIdFromToken = null;
+Object companyObj = claims.get("company");
+
+if (companyObj != null) {
+    // Caso A: viene como POJO Company (lo que muestra tu depurador)
+    try {
+        // Si tienes la clase a mano, mejor casteo directo:
+        // companyIdFromToken = ((Company) companyObj).getId();
+        // Si no, usa reflexión para no acoplarte:
+        java.lang.reflect.Method m = companyObj.getClass().getMethod("getId");
+        Object idObj = m.invoke(companyObj);
+        if (idObj != null) {
+            companyIdFromToken = Long.valueOf(idObj.toString());
         }
+    } catch (NoSuchMethodException ignored) {
+        // Caso B: a veces podría venir como Map (JSON)
+        if (companyObj instanceof Map) {
+            Object id = ((Map<?, ?>) companyObj).get("id");
+            if (id != null) {
+                try { companyIdFromToken = Long.valueOf(id.toString()); } catch (NumberFormatException ignored2) {}
+            }
+        } else {
+            try { companyIdFromToken = Long.valueOf(companyObj.toString()); } catch (NumberFormatException ignored3) {}
+        }
+    } catch (Exception e) {
+        log.warn("No se pudo obtener company.id del token", e);
+    }
+}
+
+// ================== VALIDACIÓN ==================
+if (companyIdFromToken == null) {
+    throw new org.springframework.security.access.AccessDeniedException("El token no contiene company.id");
+}
+if (!companyIdFromToken.equals(company)) {
+    company = companyIdFromToken;
+}
 
         //Sort sort = direction.toUpperCase().equals("DESC") ? Sort.by(field).descending() : Sort.by(field).ascending();
         Sort sort;

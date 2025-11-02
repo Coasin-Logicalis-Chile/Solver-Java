@@ -22,11 +22,6 @@ public class LocationController {
 	@Autowired
 	private ILocationService locationService;
 	
-	@GetMapping("/locations")
-	public List<Location> index() {
-		return locationService.findAll();
-	}
-	
 	@GetMapping("/location/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		Location location = null;
@@ -91,22 +86,6 @@ public class LocationController {
 		response.put("location", locationUpdated);
 
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-	}
-
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/location/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-
-		Map<String, Object> response = new HashMap<>();
-		try {
-			locationService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 
 	@GetMapping("/location/{integration_id}")

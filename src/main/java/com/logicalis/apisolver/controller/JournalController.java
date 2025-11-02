@@ -111,11 +111,6 @@ public class JournalController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @GetMapping("/journals")
-    public List<Journal> index() {
-        return journalService.findAll();
-    }
-
     @GetMapping("/journalsInfoByIncident/{id}")
     public List<Journal> findInfoByIncident(@PathVariable Long id) {
         List<Journal> journals = journalService.findByIncident(incidentService.findById(id));
@@ -365,21 +360,6 @@ public class JournalController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/journal/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            journalService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-    }
-
     @GetMapping("/journal/{integration_id}")
     public ResponseEntity<?> show(@PathVariable String integration_id) {
         Journal journal = null;
@@ -396,121 +376,6 @@ public class JournalController {
             return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
         }
         return new ResponseEntity<Journal>(journal, HttpStatus.OK);
-    }
-
-    @GetMapping("/journalsBySolver")
-    public List<JournalRequest> show() {
-        log.info(App.Start());
-        APIResponse apiResponse = null;
-        List<JournalRequest> journalRequests = new ArrayList<>();
-        String[] sparmOffSets = Util.offSets1500000();
-        long startTime = 0;
-        long endTime = 0;
-        String tag = "[Journal] ";
-        try {
-            startTime = System.currentTimeMillis();
-            final int[] count = {1};
-            String result;
-            ObjectMapper objectMapper = new ObjectMapper();
-            objectMapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-            final Journal[] journal = {new Journal()};
-            final Journal[] exists = new Journal[1];
-            final ScRequest[] scRequest = new ScRequest[1];
-            final Incident[] incident = new Incident[1];
-            JSONParser parser = new JSONParser();
-            JSONObject resultJson = new JSONObject();
-            JSONArray ListSnJournalJson = new JSONArray();
-            final JournalRequest[] journalRequest = {new JournalRequest()};
-            final String[] element = new String[1];
-            final String[] company = new String[1];
-            final ScRequestItem[] scRequestItem = new ScRequestItem[1];
-            final String[] tagAction = new String[1];
-            final boolean[] flag = new boolean[1];
-            final SysUser[] openedBy = new SysUser[1];
-            APIExecutionStatus status = new APIExecutionStatus();
-            for (String sparmOffSet : sparmOffSets) {
-                result = rest.responseByEndPoint(EndPointSN.Journal().concat(sparmOffSet));
-                log.info(tag.concat("(".concat(EndPointSN.Journal().concat(sparmOffSet)).concat(")")));
-                resultJson = (JSONObject) parser.parse(result);
-                ListSnJournalJson.clear();
-                if (resultJson.get("result") != null)
-                    ListSnJournalJson = (JSONArray) parser.parse(resultJson.get("result").toString());
-
-                ListSnJournalJson.stream().forEach(snJournalJson -> {
-                    flag[0] = false;
-                    try {
-                        journalRequest[0] = objectMapper.readValue(snJournalJson.toString(), JournalRequest.class);
-                        journal[0] = new Journal();
-                        element[0] = "";
-                        company[0] = "";
-                        if (journalRequest[0].getName().equals(SnTable.Incident.get())) {
-                            incident[0] = incidentService.findByIntegrationId(journalRequest[0].getElement_id());
-                            if (incident[0] != null) {
-                                journal[0].setIncident(incident[0]);
-                                flag[0] = incident[0].getCompany().getSolver();
-                                company[0] = Util.getFieldDisplay(incident[0].getCompany());
-                                element[0] = Util.getFieldDisplay(incident[0]);
-                            }
-                        } else if (journalRequest[0].getName().equals(SnTable.ScRequestItem.get())) {
-                            scRequestItem[0] = scRequestItemService.findByIntegrationId(journalRequest[0].getElement_id());
-                            if (scRequestItem[0] != null) {
-                                journal[0].setScRequestItem(scRequestItem[0]);
-                                flag[0] = scRequestItem[0].getCompany().getSolver();
-                                company[0] = Util.getFieldDisplay(scRequestItem[0].getCompany());
-                                element[0] = Util.getFieldDisplay(scRequestItem[0]);
-                            }
-                        } else if (journalRequest[0].getName().equals(SnTable.ScRequest.get())) {
-                            scRequest[0] = scRequestService.findByIntegrationId(journalRequest[0].getElement_id());
-                            if (scRequest[0] != null) {
-                                journal[0].setScRequest(scRequest[0]);
-                                flag[0] = scRequest[0].getCompany().getSolver();
-                                company[0] = Util.getFieldDisplay(scRequest[0].getCompany());
-                                element[0] = Util.getFieldDisplay(scRequest[0]);
-                            }
-                        }
-
-                        if (flag[0]) {
-                            journalRequests.add(journalRequest[0]);
-                            journal[0].setOrigin(journalRequest[0].getElement());
-                            journal[0].setElement(journalRequest[0].getElement_id());
-                            journal[0].setValue(Util.reeplaceImg(journalRequest[0].getValue().trim()));
-                            journal[0].setCreatedOn(journalRequest[0].getSys_created_on());
-                            journal[0].setIntegrationId(journalRequest[0].getSys_id());
-                            journal[0].setActive(true);
-                            if (Util.hasData(journalRequest[0].getSys_created_by())) {
-                                openedBy[0] = sysUserService.findByUserName(journalRequest[0].getSys_created_by());
-                                if (openedBy[0] != null)
-                                    journal[0].setCreateBy(openedBy[0]);
-                            }
-                            tagAction[0] = App.CreateConsole();
-                            exists[0] = journalService.findByIntegrationId(journal[0].getIntegrationId());
-                            if (exists[0] != null) {
-                                journal[0].setId(exists[0].getId());
-                                tagAction[0] = App.UpdateConsole();
-                            }
-                            Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(journal[0])), element[0], company[0]);
-                            journalService.save(journal[0]);
-                            count[0] = count[0] + 1;
-                        }
-                    } catch (Exception e) {
-                        log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-                    }
-                });
-                apiResponse = objectMapper.readValue(result, APIResponse.class);
-                status.setUri(EndPointSN.Location());
-                status.setUserAPI(App.SNUser());
-                status.setPasswordAPI(App.SNPassword());
-                status.setError(apiResponse.getError());
-                status.setMessage(apiResponse.getMessage());
-                endTime = (System.currentTimeMillis() - startTime);
-                status.setExecutionTime(endTime);
-                statusService.save(status);
-            }
-        } catch (Exception e) {
-            log.error(tag.concat("Exception (II) : ").concat(String.valueOf(e)));
-        }
-        log.info(App.End());
-        return journalRequests;
     }
 
     @GetMapping("/journalsBySolverByQuery")

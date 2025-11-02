@@ -60,10 +60,6 @@ public class AttachmentController {
     @Autowired
     private Rest rest;
 
-    @GetMapping("/attachments")
-    public List<Attachment> index() {
-        return attachmentService.findAll();
-    }
 
     @GetMapping("/attachmentsByIncident/{id}")
     public List<AttachmentInfo> findAttachmentsByIncident(@PathVariable Long id) {
@@ -272,22 +268,6 @@ public class AttachmentController {
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
     }
 
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/attachment/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-
-        Map<String, Object> response = new HashMap<>();
-        try {
-            attachmentService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-    }
-
     @GetMapping("/attachment/{integration_id}")
     public ResponseEntity<?> show(@PathVariable String integration_id) {
         Attachment attachment = null;
@@ -306,152 +286,7 @@ public class AttachmentController {
         return new ResponseEntity<Attachment>(attachment, HttpStatus.OK);
     }
 
-@DeleteMapping("/attachment/{integration_id}")
-public ResponseEntity<?> delete(@PathVariable String integration_id) {
-    Map<String, Object> response = new HashMap<>();
-    try {
-        Attachment attachment = attachmentService.findByIntegrationId(integration_id);
-        if (attachment == null) {
-            response.put("mensaje", "El registro ".concat(integration_id.concat(" no existe en la base de datos!")));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.NOT_FOUND);
-        }
-        attachmentService.deleteByIntegrationId(integration_id);
-        response.put("mensaje", "Adjunto eliminado correctamente");
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-    } catch (DataAccessException e) {
-        response.put("mensaje", "Error eliminando el adjunto");
-        response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-}
-
-    @GetMapping("/findBySolver")
-    public List<Attachment> show() {
-        log.info(App.Start());
-        final APIResponse[] apiResponse = { null };
-        List<AttachmentSolver> snAttachments = new ArrayList<>();
-        List<Attachment> attachments = new ArrayList<>();
-        final long[] startTime = { 0 };
-        final long[] endTime = { 0 };
-        String tag = "[Attachment] ";
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachments");
-        // final long MAXREGISTERS = incidentService.count();
-        /*
-         * List<Incident> listInsident = new ArrayList<Incident>();
-         * final Integer PAGESIZE = 3000;
-         * for(int j = 0; j < MAXREGISTERS;j+=PAGESIZE) {
-         * //Pageable paging = PageRequest.of(i, pageSize,
-         * Sort.Direction.valueOf("getIntegrationId"));
-         * Pageable paging = PageRequest.of(j, PAGESIZE);
-         * Page<Incident> pagedResult = incidentService.findAll(paging);
-         * if (pagedResult.hasContent()) {
-         * listInsident = pagedResult.getContent();
-         * } else {
-         * listInsident = null;
-         * }
-         * listInsident = incidentService.findAll();
-         * listInsident.forEach(i -> {
-         */
-        ObjectMapper mapper = new ObjectMapper();
-        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
-        JSONParser parser = new JSONParser();
-        final JSONArray[] ListSnAttachmentJson = { new JSONArray() };
-        final int[] count = { 0 };
-        final Attachment[] attachment = { new Attachment() };
-        final Attachment[] exists = { new Attachment() };
-        final String[] result = new String[1];
-        final AttachmentSolver[] attachmentSolver = new AttachmentSolver[1];
-        final String[] tagAction = new String[1];
-        final Domain[] domain = new Domain[1];
-        final JSONObject[] resultJson = new JSONObject[1];
-        final ScRequestItem[] scRequestItem = new ScRequestItem[1];
-        final ScTask[] scTask = new ScTask[1];
-        APIExecutionStatus status = new APIExecutionStatus();
-        final Incident[] incident = new Incident[1];
-        incidentService.findAll().forEach(i -> {
-            try {
-                startTime[0] = System.currentTimeMillis();
-                result[0] = rest.responseByEndPoint(EndPointSN.Attachment().concat(i.getIntegrationId()));
-                endTime[0] = (System.currentTimeMillis() - startTime[0]);
-                resultJson[0] = (JSONObject) parser.parse(result[0]);
-                ListSnAttachmentJson[0].clear();
-                if (resultJson[0].get("result") != null)
-                    ListSnAttachmentJson[0] = (JSONArray) parser.parse(resultJson[0].get("result").toString());
-                count[0] = 1;
-                List<AttachmentSolver> nuevos = new ArrayList<>();
-                ListSnAttachmentJson[0].forEach(snAttachmentJson -> {
-                    tagAction[0] = App.CreateConsole();
-                    try {
-                        attachmentSolver[0] = mapper.readValue(snAttachmentJson.toString(), AttachmentSolver.class);
-                        attachment[0] = new Attachment();
-                        attachment[0].setActive(attachmentSolver[0].getActive());
-                        attachment[0].setIntegrationId(attachmentSolver[0].getSys_id());
-                        attachment[0].setDownloadLinkSN(attachmentSolver[0].getDownload_link());
-                        attachment[0].setExtension(".".concat(attachmentSolver[0].getFile_name()
-                                .substring(Math.max(0, attachmentSolver[0].getFile_name().length() - 5))
-                                .split("\\s*[.]+")[1]));
-                        attachment[0].setFileName(attachmentSolver[0].getFile_name());
-                        attachment[0].setElement(attachmentSolver[0].getTable_sys_id());
-                        attachment[0].setOrigin(attachmentSolver[0].getTable_name());
-                        attachment[0].setContentType(attachmentSolver[0].getContent_type());
-                        attachment[0].setSysCreatedBy(attachmentSolver[0].getSys_created_by());
-                        attachment[0].setSysCreatedOn(attachmentSolver[0].getSys_created_on());
-                        attachment[0].setSysUpdatedBy(attachmentSolver[0].getSys_updated_by());
-                        attachment[0].setSysUpdatedOn(attachmentSolver[0].getSys_updated_on());
-                        domain[0] = getDomainByIntegrationId((JSONObject) snAttachmentJson, SnTable.Domain.get(),
-                                App.Value());
-                        if (domain[0] != null)
-                            attachment[0].setDomain(domain[0]);
-                        switch (attachment[0].getOrigin()) {
-                            case "incident":
-                                incident[0] = incidentService.findByIntegrationId(attachment[0].getElement());
-                                if (incident[0] != null)
-                                    attachment[0].setIncident(incident[0]);
-                                break;
-                            case "sc_req_item":
-                                scRequestItem[0] = scRequestItemService.findByIntegrationId(attachment[0].getElement());
-                                if (scRequestItem[0] != null)
-                                    attachment[0].setScRequestItem(scRequestItem[0]);
-                                break;
-                            case "sc_task":
-                                scTask[0] = scTaskService.findByIntegrationId(attachment[0].getElement());
-                                if (scTask[0] != null)
-                                    attachment[0].setScTask(scTask[0]);
-                                break;
-                        }
-                        exists[0] = attachmentService.findByIntegrationId(attachment[0].getIntegrationId());
-                        if (exists[0] != null) {
-                            attachment[0].setId(exists[0].getId());
-                            tagAction[0] = App.UpdateConsole();
-                        }
-                        attachmentService.save(attachment[0]);
-                        nuevos.add(attachmentSolver[0]);
-                        Util.printData(tag, count[0], tagAction[0].concat(Util.getFieldDisplay(attachment[0])),
-                                Util.getFieldDisplay(domain[0]));
-                        count[0] = count[0] + 1;
-                    } catch (JsonProcessingException e) {
-                        log.error(tag.concat("JsonProcessingException (I) : ").concat(String.valueOf(e)));
-                    }
-                });
-                snAttachments.addAll(nuevos);
-                apiResponse[0] = mapper.readValue(result[0], APIResponse.class);
-                status.setUri(EndPointSN.Incident());
-                status.setUserAPI(App.SNUser());
-                status.setPasswordAPI(App.SNPassword());
-                status.setError(apiResponse[0].getError());
-                status.setMessage(apiResponse[0].getMessage());
-                status.setExecutionTime(endTime[0]);
-                statusService.save(status);
-            } catch (Exception e) {
-                log.error(tag.concat("Exception (I) : ").concat(String.valueOf(e)));
-            }
-        });
-        // }
-        return attachments;
-    }
-
-    @GetMapping("/findBySolverByQuery")
+        @GetMapping("/findBySolverByQuery")
     public List<Attachment> show(String query, boolean flagQuery) {
 
         log.info(App.Start());

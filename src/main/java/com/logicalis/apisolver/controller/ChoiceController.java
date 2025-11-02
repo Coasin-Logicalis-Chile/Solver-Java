@@ -21,11 +21,6 @@ public class ChoiceController {
     @Autowired
     private IChoiceService choiceService;
 
-    @GetMapping("/choices")
-    public List<Choice> index() {
-        return choiceService.findAll();
-    }
-
     @GetMapping("/choice/{id}")
     public ResponseEntity<?> show(@PathVariable Long id) {
         Choice choice = null;
@@ -105,21 +100,6 @@ public class ChoiceController {
         response.put("mensaje", Messages.UpdateOK.get());
         response.put("choice", choiceUpdated);
         return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-    }
-
-    @Secured("ROLE_ADMIN")
-    @DeleteMapping("/choice/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id) {
-        Map<String, Object> response = new HashMap<>();
-        try {
-            choiceService.delete(id);
-        } catch (DataAccessException e) {
-            response.put("mensaje", Errors.dataAccessExceptionDelete.get());
-            response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-            return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        response.put("mensaje", Messages.DeleteOK.get());
-        return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
     }
 
     @GetMapping("/choicesByIncident")

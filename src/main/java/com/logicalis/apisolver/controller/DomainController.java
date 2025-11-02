@@ -22,10 +22,7 @@ import java.util.Map;
 public class DomainController {
 	@Autowired
 	private IDomainService domainService;
-	@GetMapping("/domains")
-	public List<Domain> index() {
-		return domainService.findAll();
-	}
+
 	@GetMapping("/domain/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		Domain domain = null;
@@ -82,21 +79,6 @@ public class DomainController {
 		response.put("mensaje", Messages.UpdateOK.get());
 		response.put("domain", domainUpdated);
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
-	}
-
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/domain/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			domainService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
 	}
 
 	@GetMapping("/domain/{integration_id}")

@@ -430,35 +430,33 @@ public class Rest {
         return incident;
     }
 
-    public SysUser putSysUser(String endPoint, SysUser sysUser) {
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
-        try {
-            endPoint = !Objects.isNull(endPoint)? endPoint: "";
-            URI uri = new URI(endPoint);
-            JSONObject json = new JSONObject();
-            json.put("code", sysUser.getCode());
-            json.put("integrationId", sysUser.getIntegrationId());
-            HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
+    public void putSysUser(String endPoint, SysUser sysUser) {
+    HttpHeaders headers = new HttpHeaders();
+    headers.setContentType(MediaType.APPLICATION_JSON);
+    try {
+        endPoint = (endPoint != null) ? endPoint : "";
+        URI uri = new URI(endPoint);
+        JSONObject json = new JSONObject();
+        json.put("code", sysUser.getCode());
+        json.put("integrationId", sysUser.getIntegrationId());
+        HttpEntity<JSONObject> httpEntity = new HttpEntity<>(json, headers);
 
-            LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
-            ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
+        LogSolver.insertInitService("SERVICENOW", endPoint, "PUT");
+        ResponseEntity<String> jsonResponse = restTemplate.exchange(uri, HttpMethod.PUT, httpEntity, String.class);
 
-            System.out.println("=========================");
-            System.out.println("Posible Null: "+httpEntity.getBody().toString());
-            System.out.println("=========================");
+        LogSolver.insertResponse(
+            "SERVICENOW", endPoint, "PUT",
+            httpEntity.getBody().toString(),
+            jsonResponse.getBody(),
+            jsonResponse.getStatusCode(),
+            headers.toString()
+        );
+        LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
 
-            LogSolver.insertResponse("SERVICENOW", endPoint, "PUT", httpEntity.getBody().toString(), jsonResponse.getBody(), jsonResponse.getStatusCode(), headers.toString());
-            LogSolver.insertEndService("SERVICENOW", endPoint, "PUT");
-            String search = "\"result\":";
-            if (jsonResponse.toString().contains(search)) {
-                String responseSplit = jsonResponse.toString();
-            }
-        } catch (URISyntaxException e) {
-            log.error("Context", e);
-        }
-        return sysUser;
+    } catch (URISyntaxException e) {
+        log.error("Error en putSysUser", e);
     }
+}
 
     public ScRequestItem putScRequestItem(String endPoint, ScRequestItem scRequestItem) {
         HttpHeaders headers = new HttpHeaders();

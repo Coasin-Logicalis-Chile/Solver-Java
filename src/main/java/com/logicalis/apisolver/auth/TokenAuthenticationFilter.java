@@ -12,6 +12,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.Map;
 
 public class TokenAuthenticationFilter extends OncePerRequestFilter {
 
@@ -31,14 +32,15 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
             OAuth2AccessToken token = tokenStore.readAccessToken(tokenValue);
 
             if (token != null && !token.isExpired()) {
-                // Obtiene el usuario desde la información adicional del token
                 String username = (String) token.getAdditionalInformation().get("user_name");
 
-                // Crea una autenticación válida
-                UsernamePasswordAuthenticationToken authentication =
-                        new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+                @SuppressWarnings("unchecked")
+                Map<String, Object> claims = token.getAdditionalInformation(); // aquí suele venir "company"
 
-                // Establece la autenticación en el contexto de seguridad
+                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
+                        null, Collections.emptyList());
+                authentication.setDetails(claims); // <-- guarda claims aquí
+
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             }
         }
@@ -47,4 +49,3 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 }
-

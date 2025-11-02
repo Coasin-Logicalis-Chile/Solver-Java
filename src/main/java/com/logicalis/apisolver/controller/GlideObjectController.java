@@ -22,11 +22,6 @@ public class GlideObjectController {
 	@Autowired
 	private IGlideObjectService glideObjectService;
 	
-	@GetMapping("/glideObjects")
-	public List<GlideObject> index() {
-		return glideObjectService.findAll();
-	}
-	
 	@GetMapping("/glideObject/{id}")
 	public ResponseEntity<?> show(@PathVariable Long id) {
 		GlideObject glideObject = null;
@@ -85,19 +80,5 @@ public class GlideObjectController {
 		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.CREATED);
 	}
 
-	@Secured("ROLE_ADMIN")
-	@DeleteMapping("/glideObject/{id}")
-	public ResponseEntity<?> delete(@PathVariable Long id) {
-		Map<String, Object> response = new HashMap<>();
-		try {
-			glideObjectService.delete(id);
-		} catch (DataAccessException e) {
-			response.put("mensaje",Errors.dataAccessExceptionDelete.get());
-			response.put("error", e.getMessage().concat(": ").concat(e.getMostSpecificCause().getMessage()));
-			return new ResponseEntity<Map<String, Object>>(response, HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-		response.put("mensaje", Messages.DeleteOK.get());
-		return new ResponseEntity<Map<String, Object>>(response, HttpStatus.OK);
-	}
 }
 
