@@ -23,29 +23,51 @@ public class TokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
-            throws ServletException, IOException {
-        String header = request.getHeader("Authorization");
+protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain)
+        throws ServletException, IOException {
 
-        if (header != null && header.startsWith("Bearer ")) {
-            String tokenValue = header.substring(7); // Extrae el token del encabezado
-            OAuth2AccessToken token = tokenStore.readAccessToken(tokenValue);
+    String header = request.getHeader("Authorization");
 
-            if (token != null && !token.isExpired()) {
-                String username = (String) token.getAdditionalInformation().get("user_name");
+    if (header != null && header.startsWith("Bearer ")) {
+        String tokenValue = header.substring(7).trim();
 
-                @SuppressWarnings("unchecked")
-                Map<String, Object> claims = token.getAdditionalInformation(); // aquí suele venir "company"
+        OAuth2AccessToken token = tokenStore.readAccessToken(tokenValue);
 
-                UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(username,
-                        null, Collections.emptyList());
-                authentication.setDetails(claims); // <-- guarda claims aquí
+        // Si no existe o está expirado => 401 y cortar la cadena
+        if (token == null || token.isExpired()) {
+            // Limpia el contexto por si acaso
+            SecurityContextHolder.clearContext();
 
-                SecurityContextHolder.getContext().setAuthentication(authentication);
+            // (Opcional) eliminar del store
+            if (token != null) {
+                try { tokenStore.removeAccessToken(token); } catch (Exception ignored) {}
             }
+
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            // También puedes escribir un JSON de error si quieres
+            response.setContentType("application/json");
+            response.getWriter().write("{\"error\":\"invalid_or_expired_token\"}");
+            return; // *** clave: NO seguir la cadena ***
         }
 
-        // Continúa con la cadena de filtros
-        chain.doFilter(request, response);
+        // Token válido -> autenticar
+        String username = (String) token.getAdditionalInformation().get("user_name");
+        @SuppressWarnings("unchecked")
+        Map<String, Object> claims = token.getAdditionalInformation();
+
+        UsernamePasswordAuthenticationToken authentication =
+                new UsernamePasswordAuthenticationToken(username, null, Collections.emptyList());
+        authentication.setDetails(claims);
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+    } else {
+        // Sin Authorization header -> 401 directamente si tu API es estricta
+        // Puedes dejar pasar y que lo maneje la config HTTP; o responder 401 aquí:
+        // response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+        // return;
     }
+
+    chain.doFilter(request, response);
+}
+
 }
